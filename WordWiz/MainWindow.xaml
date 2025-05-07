@@ -9,7 +9,15 @@
     mc:Ignorable="d"
     Title="WordWiz">
 
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="Base"/>
+        <!-- <MicaBackdrop Kind="Base"/> 使用Base的Mica材质-->
+        <!-- <MicaBackdrop Kind="BaseAlt"/> 使用BaseAlt的Mica材质-->
+        <!-- <DesktopAcrylicBackdrop/> 使用亚克力材质 -->
+    </Window.SystemBackdrop>
+
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
+        <HyperlinkButton Content="Microsoft home page" NavigateUri="http://www.microsoft.com" />
     </StackPanel>
 </Window>

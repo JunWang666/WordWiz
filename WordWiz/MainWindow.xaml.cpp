@@ -4,6 +4,11 @@
 #include "MainWindow.g.cpp"
 #endif
 
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+#include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
+#include <winrt/Windows.Foundation.h>
+// 用于实现背景切换
+
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 
