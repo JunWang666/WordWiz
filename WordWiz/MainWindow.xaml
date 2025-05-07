@@ -15,9 +15,46 @@
         <!-- <MicaBackdrop Kind="BaseAlt"/> 使用BaseAlt的Mica材质-->
         <!-- <DesktopAcrylicBackdrop/> 使用亚克力材质 -->
     </Window.SystemBackdrop>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-        <HyperlinkButton Content="Microsoft home page" NavigateUri="http://www.microsoft.com" />
-    </StackPanel>
+        <Grid Grid.Row="0" 
+              x:Name="AppTitleBar" 
+              Background="Transparent" 
+              x:FieldModifier="public" 
+              Visibility="Visible"
+              Height="48"
+              Margin="48,0,0,0"
+              VerticalAlignment="Top"
+              Padding="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="MyWindowIcon" 
+                Source="window_icon.png" 
+                Grid.Column="0" 
+                HorizontalAlignment="Left" 
+                x:FieldModifier="public" 
+                Width="20" Height="20" Margin="12,0"
+                   />
+            <TextBlock  
+               Text="WordWiz by SWJTU"  
+               Grid.Column="0"  
+               Style="{StaticResource CaptionTextBlockStyle}"  
+               Margin="44,17,0,0"  
+               FontSize="13"  
+               FontWeight="Normal"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
+                <HyperlinkButton Content="Microsoft home page" NavigateUri="http://www.microsoft.com" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+    
 </Window>
