@@ -33,10 +33,12 @@ namespace winrt::WordWiz::implementation
             // 检查系统是否支持标题栏自定义 (通常在 Win11 上支持)
             if (AppWindowTitleBar::IsCustomizationSupported())
             {
+                auto titleBar = appWindow.TitleBar();
                 // 扩展内容到标题栏区域
-                appWindow.TitleBar().ExtendsContentIntoTitleBar(true);
+                titleBar.ExtendsContentIntoTitleBar(true);
 				// 设置标题栏
                 this->SetTitleBar(AppTitleBar());
+                titleBar.ButtonBackgroundColor(Windows::UI::Colors::Transparent());
             }
             else
             {
@@ -62,9 +64,36 @@ namespace winrt::WordWiz::implementation
         throw hresult_not_implemented();
     }
 
-    void MainWindow::myButton_Click(IInspectable const&, RoutedEventArgs const&)
+    void MainWindow::NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView currentNavigationView, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs args)
     {
-        myButton().Content(box_value(L"Clicked"));
+        if (args.IsSettingsSelected())
+        {
+            // 如果需要，导航到设置页面
+            // contentFrame().Navigate(xaml_typename<WordWiz::SettingsPage>());
+        }
+        else
+        {
+            auto selectedItem = args.SelectedItem().as<NavigationViewItem>();
+            if (selectedItem)
+            {
+                winrt::hstring tag = unbox_value<hstring>(selectedItem.Tag());
+
+                if (tag == L"HomePageNavigation")
+                {
+                    contentFrame().Navigate(xaml_typename<WordWiz::HomePage>());
+                }
+
+                // 更新标题
+                if (currentNavigationView.PaneDisplayMode() == NavigationViewPaneDisplayMode::Top)
+                {
+                    currentNavigationView.Header(box_value(selectedItem.Content()));
+                }
+                else
+                {
+                    currentNavigationView.Header(nullptr);
+                }
+            }
+        }
     }
 
     winrt::AppWindow MainWindow::GetAppWindowForCurrentWindow()

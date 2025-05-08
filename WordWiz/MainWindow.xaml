@@ -10,7 +10,7 @@
     Title="WordWiz">
 
     <Window.SystemBackdrop>
-        <MicaBackdrop Kind="Base"/>
+        <MicaBackdrop Kind="BaseAlt"/>
         <!-- <MicaBackdrop Kind="Base"/> 使用Base的Mica材质-->
         <!-- <MicaBackdrop Kind="BaseAlt"/> 使用BaseAlt的Mica材质-->
         <!-- <DesktopAcrylicBackdrop/> 使用亚克力材质 -->
@@ -33,6 +33,11 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            
             <Image x:Name="MyWindowIcon" 
                 Source="window_icon.png" 
                 Grid.Column="0" 
@@ -49,12 +54,53 @@
                FontWeight="Normal"/>
         </Grid>
 
-        <Grid Grid.Row="1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-                <HyperlinkButton Content="Microsoft home page" NavigateUri="http://www.microsoft.com" />
-            </StackPanel>
-        </Grid>
+        <NavigationView x:Name="nvSample"
+            Grid.Row="1"
+            IsSettingsVisible="True"
+            IsBackButtonVisible="Visible"
+            IsBackEnabled="False"
+            SelectionChanged="NavigationView_SelectionChanged"
+            Header="Header"
+            AlwaysShowHeader="False"
+            PaneTitle="Pane Title"
+            PaneDisplayMode="Left"
+            ExpandedModeThresholdWidth="500"
+            SelectionFollowsFocus="Enabled"
+            IsTabStop="False">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="HomePage" Tag="HomePageNavigation" x:Name="HomePageItem">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Play" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemHeader Content="Actions"/>
+                <NavigationViewItem Content="Menu Item2" Tag="SamplePage2" x:Name="SamplePage2Item" SelectsOnInvoked="True">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Save" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Menu Item3" Tag="SamplePage3" x:Name="SamplePage3Item">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Refresh" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.PaneCustomContent>
+                <HyperlinkButton x:Name="PaneHyperlink" Content="More info" Margin="12,0" Visibility="Collapsed" />
+            </NavigationView.PaneCustomContent>
+
+            <NavigationView.PaneFooter>
+                <StackPanel x:Name="FooterStackPanel" Orientation="Vertical" Visibility="Visible">
+                    <NavigationViewItem Icon="Download" AutomationProperties.Name="download" />
+                    <NavigationViewItem Icon="Favorite" AutomationProperties.Name="favorite" />
+                </StackPanel>
+            </NavigationView.PaneFooter>
+
+            <Frame x:Name="contentFrame" />
+        </NavigationView>
+
     </Grid>
     
 </Window>
