@@ -54,17 +54,18 @@
                FontWeight="Normal"/>
         </Grid>
 
-        <NavigationView x:Name="nvSample"
+        <NavigationView x:Name="SideNavigation"
             Grid.Row="1"
             IsSettingsVisible="True"
-            IsBackButtonVisible="Visible"
+            IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
             SelectionChanged="NavigationView_SelectionChanged"
             Header="Header"
             AlwaysShowHeader="False"
-            PaneTitle="Pane Title"
+            PaneTitle=""
             PaneDisplayMode="Left"
             ExpandedModeThresholdWidth="500"
+            OpenPaneLength="250"
             SelectionFollowsFocus="Enabled"
             IsTabStop="False">
 
