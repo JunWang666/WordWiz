@@ -15,7 +15,8 @@
         <!-- <MicaBackdrop Kind="BaseAlt"/> 使用BaseAlt的Mica材质-->
         <!-- <DesktopAcrylicBackdrop/> 使用亚克力材质 -->
     </Window.SystemBackdrop>
-    <Grid>
+
+    <Grid Loaded="OnWindowLoaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -63,8 +64,7 @@
             Header="Header"
             AlwaysShowHeader="False"
             PaneTitle=""
-            PaneDisplayMode="Left"
-            ExpandedModeThresholdWidth="500"
+            PaneDisplayMode ="Auto"
             OpenPaneLength="250"
             SelectionFollowsFocus="Enabled"
             IsTabStop="False">

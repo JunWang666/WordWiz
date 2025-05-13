@@ -9,14 +9,14 @@ namespace winrt::WordWiz::implementation
     public:
         MainWindow();
 
-        winrt::AppWindow MyAppWindow();
-
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
         void NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs);
 
         void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
+
+        void OnWindowLoaded(winrt::Windows::Foundation::IInspectable const& sender,winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
 
     private:
         winrt::AppWindow GetAppWindowForCurrentWindow();
