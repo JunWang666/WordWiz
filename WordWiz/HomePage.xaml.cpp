@@ -3,6 +3,7 @@
 #if __has_include("HomePage.g.cpp")
 #include "HomePage.g.cpp"
 #endif
+#include<NavigationService.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -24,6 +25,10 @@ namespace winrt::WordWiz::implementation
 
     void HomePage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
-        myButton().Content(box_value(L"Clicked"));
+        // 传递 WinRT 类型参数（hstring）
+        WordWizServices::NavigationService::NavigateTo(
+            L"WordSearchResultPage",
+            winrt::box_value(L"文档ID") // 使用 hstring
+        );
     }
 }

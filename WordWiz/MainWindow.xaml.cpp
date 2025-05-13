@@ -13,6 +13,7 @@
 #include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
 #include <winrt/Windows.Foundation.h>
 // 用于实现背景切换
+#include <NavigationService.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -47,11 +48,8 @@ namespace winrt::WordWiz::implementation
                 AppTitleBar().Visibility(Visibility::Collapsed);
             }
         }
-    }
 
-    winrt::AppWindow MainWindow::MyAppWindow()
-    {
-        return m_mainAppWindow;
+        
     }
 
     int32_t MainWindow::MyProperty()
@@ -96,6 +94,11 @@ namespace winrt::WordWiz::implementation
         }
     }
 
+    void MainWindow::myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args)
+    {
+		
+    }
+
     winrt::AppWindow MainWindow::GetAppWindowForCurrentWindow()
     {
         // Get access to IWindowNative
@@ -115,4 +118,25 @@ namespace winrt::WordWiz::implementation
 
         return appWindow;
     }
+}
+
+void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
+    winrt::Windows::Foundation::IInspectable const& sender,
+    winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+{
+    // 在这里执行窗口加载后的逻辑
+    // 此时视觉树应该已完全构建，可以安全访问 Frame
+    try
+    {
+        WordWizServices::NavigationService::Initialize(contentFrame());
+    }
+    catch (winrt::hresult_error const& ex)
+    {
+        // 处理错误 - 可能是 ContentFrame 属性名不正确
+        OutputDebugString((L"Frame access error: " + ex.message() + L"\n").c_str());
+    }
+
+    //注册页面
+    WordWizServices::NavigationService::RegisterPage<WordWiz::WordSearchResultPage>(L"WordSearchResultPage");
+	WordWizServices::NavigationService::RegisterPage<WordWiz::HomePage>(L"HomePage");
 }

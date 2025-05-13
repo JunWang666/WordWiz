@@ -15,7 +15,8 @@
         <!-- <MicaBackdrop Kind="BaseAlt"/> 使用BaseAlt的Mica材质-->
         <!-- <DesktopAcrylicBackdrop/> 使用亚克力材质 -->
     </Window.SystemBackdrop>
-    <Grid>
+
+    <Grid Loaded="OnWindowLoaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -54,17 +55,17 @@
                FontWeight="Normal"/>
         </Grid>
 
-        <NavigationView x:Name="nvSample"
+        <NavigationView x:Name="SideNavigation"
             Grid.Row="1"
             IsSettingsVisible="True"
-            IsBackButtonVisible="Visible"
+            IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
             SelectionChanged="NavigationView_SelectionChanged"
             Header="Header"
             AlwaysShowHeader="False"
-            PaneTitle="Pane Title"
-            PaneDisplayMode="Left"
-            ExpandedModeThresholdWidth="500"
+            PaneTitle=""
+            PaneDisplayMode ="Auto"
+            OpenPaneLength="250"
             SelectionFollowsFocus="Enabled"
             IsTabStop="False">
 
