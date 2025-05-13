@@ -128,7 +128,8 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
     // 此时视觉树应该已完全构建，可以安全访问 Frame
     try
     {
-        WordWizServices::NavigationService::Initialize(contentFrame());
+        // 初始化NavigationService，传递contentFrame和NavigationView
+        WordWizServices::NavigationService::Initialize(contentFrame(), SideNavigationView());
     }
     catch (winrt::hresult_error const& ex)
     {

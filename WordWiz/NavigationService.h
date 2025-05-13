@@ -20,12 +20,16 @@ namespace WordWizServices
         winrt::Windows::Foundation::IInspectable Parameter;
     };
 
-    // 导航服务类 - 用于管理应用内页面导航
+    // 导航服务类 - 用于管理应用的页面导航
     class NavigationService
     {
     public:
         // 初始化导航服务
         static void Initialize(winrt::Microsoft::UI::Xaml::Controls::Frame frame);
+        
+        // 扩展初始化方法，包含NavigationView
+        static void Initialize(winrt::Microsoft::UI::Xaml::Controls::Frame frame, 
+                             winrt::Microsoft::UI::Xaml::Controls::NavigationView navView);
 
         // 判断导航服务是否已初始化
         static bool IsInitialized();
@@ -96,6 +100,9 @@ namespace WordWizServices
         // 清除导航事件监听
         static void ClearNavigationListeners();
 
+        // 清除NavigationView的选中状态
+        static void ClearNavigationViewSelection();
+
     private:
         // 更新当前页面名称
         static void UpdateCurrentPageName();
@@ -106,6 +113,7 @@ namespace WordWizServices
 
         // 静态成员变量
         inline static winrt::Microsoft::UI::Xaml::Controls::Frame m_frame{ nullptr };
+        inline static winrt::Microsoft::UI::Xaml::Controls::NavigationView m_navigationView{ nullptr };
         inline static std::map<std::wstring, winrt::Windows::UI::Xaml::Interop::TypeName> m_pageTypes{};
         inline static std::wstring m_currentPageName{};
         inline static std::vector<std::function<void(NavigationEventArgs)>> m_navigationListeners{};

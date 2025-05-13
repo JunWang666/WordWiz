@@ -10,6 +10,14 @@ namespace WordWizServices
         m_frame = frame;
     }
 
+    // 扩展的初始化方法，包含NavigationView
+    void NavigationService::Initialize(winrt::Microsoft::UI::Xaml::Controls::Frame frame, 
+                                       winrt::Microsoft::UI::Xaml::Controls::NavigationView navView)
+    {
+        m_frame = frame;
+        m_navigationView = navView;
+    }
+
     // 判断导航服务是否已初始化
     bool NavigationService::IsInitialized()
     {
@@ -123,6 +131,15 @@ namespace WordWizServices
         m_navigationListeners.clear();
     }
 
+    // 清除NavigationView的选中状态
+    void NavigationService::ClearNavigationViewSelection()
+    {
+        if (m_navigationView)
+        {
+            m_navigationView.SelectedItem(nullptr);
+        }
+    }
+
     // 更新当前页面名称
     void NavigationService::UpdateCurrentPageName()
     {
@@ -147,6 +164,9 @@ namespace WordWizServices
     void NavigationService::OnNavigated(const std::wstring& sourcePage, const std::wstring& targetPage,
         winrt::Windows::Foundation::IInspectable parameter)
     {
+        // 清除NavigationView的选中状态
+        ClearNavigationViewSelection();
+
         NavigationEventArgs args;
         args.SourcePageName = sourcePage;
         args.TargetPageName = targetPage;

@@ -55,7 +55,7 @@
                FontWeight="Normal"/>
         </Grid>
 
-        <NavigationView x:Name="SideNavigation"
+        <NavigationView x:Name="SideNavigationView"
             Grid.Row="1"
             IsSettingsVisible="True"
             IsBackButtonVisible="Collapsed"
