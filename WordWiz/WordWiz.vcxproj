@@ -125,10 +125,6 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="WordItem.h" />
-    <ClInclude Include="WordSearchResultItem.xaml.h">
-      <DependentUpon>WordSearchResultItem.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
     <ClInclude Include="WordSearchResultList.xaml.h">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -145,9 +141,6 @@
     </Page>
     <Page Include="MainWindow.xaml" />
     <Page Include="WordDetails.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="WordSearchResultItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="WordSearchResultList.xaml">
@@ -179,10 +172,6 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
-    <ClCompile Include="WordSearchResultItem.xaml.cpp">
-      <DependentUpon>WordSearchResultItem.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -206,10 +195,6 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="WordItem.idl" />
-    <Midl Include="WordSearchResultItem.idl">
-      <DependentUpon>WordSearchResultItem.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Midl>
     <Midl Include="WordSearchResultList.idl">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>

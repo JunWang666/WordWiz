@@ -14,9 +14,6 @@
     <Page Include="WordSearchResultList.xaml">
       <Filter>views</Filter>
     </Page>
-    <Page Include="WordSearchResultItem.xaml">
-      <Filter>views</Filter>
-    </Page>
     <Page Include="WordDetails.xaml">
       <Filter>views</Filter>
     </Page>

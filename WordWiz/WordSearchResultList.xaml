@@ -7,42 +7,51 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*,Auto" Padding="10" RowSpacing="10">
-        <TextBox x:Name="WordInputTextBox" Header="Word:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0"/>
-        <TextBox x:Name="ExplanationInputTextBox" Header="Explanation:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0" AcceptsReturn="True" Height="80"/>
-
-        <Button x:Name="AddItemButton" Content="Add Word" Click="AddItemButton_Click" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Center"/>
+    <Grid Padding="10" RowSpacing="10">
 
         <ListView x:Name="ResultsListView"
                   Grid.Row="2" Grid.ColumnSpan="2"
                   ItemsSource="{x:Bind Items, Mode=OneWay}"
-                  SelectionMode="Extended"
-                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                  BorderThickness="1">
+                  SelectionMode="Single"
+                  BorderBrush="Transparent"
+                  BorderThickness="0"
+                  ShowsScrollingPlaceholders="True"
+                  HorizontalAlignment="Left"
+                >
+            
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:WordItem">
-                    <local:WordSearchResultItem WordDisplay="{x:Bind Word, Mode=OneWay}"
-                                                ExplanationDisplay="{x:Bind Explanation, Mode=OneWay}"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="1"
+                                    Text="{x:Bind Word}"
+                                    x:Phase="1"
+                                    Style="{ThemeResource BaseTextBlockStyle}"
+                                    Margin="12,6,0,0"
+                                    FontWeight="Bold"
+                                    FontSize="15"
+                                   MaxLines="1"/>
+                        <TextBlock  Grid.Column="1"
+                                    Grid.Row="1"
+                                    Text="{x:Bind Explanation}"
+                                    x:Phase="2"
+                                    Style="{ThemeResource BodyTextBlockStyle}"
+                                    Margin="12,0,0,6"
+                                    FontWeight="Light"
+                                    FontSize="10"
+                                    MaxLines="1"/>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Padding" Value="0"/>
-                </Style>
-            </ListView.ItemContainerStyle>
+
         </ListView>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0" Spacing="10">
-            <Button Content="Remove Selected" Click="RemoveSelectedItemsButton_Click"/>
-            <Button Content="Clear List" Click="ClearListButton_Click"/>
-            <TextBlock Text="Selection Mode:" VerticalAlignment="Center" Margin="20,0,0,0"/>
-            <ComboBox x:Name="SelectionModeComboBox" SelectionChanged="SelectionModeComboBox_SelectionChanged" Width="150">
-                <ComboBoxItem Content="Single" Tag="Single" IsSelected="True"/>
-                <ComboBoxItem Content="Multiple" Tag="Multiple"/>
-                <ComboBoxItem Content="Extended" Tag="Extended"/>
-                <ComboBoxItem Content="None" Tag="None"/>
-            </ComboBox>
-        </StackPanel>
     </Grid>
 </UserControl>
