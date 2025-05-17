@@ -1,0 +1,9 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass WordSearchResultList : Microsoft.UI.Xaml.Controls.UserControl
+    {
+        WordSearchResultList();
+        Int32 MyProperty;
+    }
+}

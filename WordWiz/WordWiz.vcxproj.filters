@@ -8,6 +8,18 @@
     <Page Include="HomePage.xaml">
       <Filter>pages</Filter>
     </Page>
+    <Page Include="WordSearchResultPage.xaml">
+      <Filter>pages</Filter>
+    </Page>
+    <Page Include="WordSearchResultList.xaml">
+      <Filter>views</Filter>
+    </Page>
+    <Page Include="WordSearchResultItem.xaml">
+      <Filter>views</Filter>
+    </Page>
+    <Page Include="WordDetails.xaml">
+      <Filter>views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
@@ -15,15 +27,24 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="NavigationService.cpp">
+      <Filter>services</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
+      <Filter>services</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="NavigationService.h">
+      <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>services</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\StoreLogo.png">
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\Square150x150Logo.scale-200.png">
@@ -41,6 +62,12 @@
     <Image Include="Assets\LockScreenLogo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Logo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -48,6 +75,12 @@
     </Filter>
     <Filter Include="pages">
       <UniqueIdentifier>{797693e3-f0dd-4311-a88f-50048b319eb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="services">
+      <UniqueIdentifier>{c80df87f-c760-48c3-b2b8-a5354fd82a27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views">
+      <UniqueIdentifier>{9a366363-aa9e-49af-b94c-c9c9f0e6d671}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

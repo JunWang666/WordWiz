@@ -1,0 +1,9 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass WordDetails : Microsoft.UI.Xaml.Controls.UserControl
+    {
+        WordDetails();
+        Int32 MyProperty;
+    }
+}

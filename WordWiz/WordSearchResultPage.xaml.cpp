@@ -4,6 +4,7 @@
 #include "WordSearchResultPage.g.cpp"
 #endif
 #include <NavigationService.h>
+#include "WordSearchResultItem.xaml.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -15,7 +16,8 @@ namespace winrt::WordWiz::implementation
 {
     WordSearchResultPage::WordSearchResultPage()
     {
-		
+        InitializeComponent();
+
     }
     int32_t WordSearchResultPage::MyProperty()
     {
@@ -25,11 +27,6 @@ namespace winrt::WordWiz::implementation
     void WordSearchResultPage::MyProperty(int32_t /* value */)
     {
         throw hresult_not_implemented();
-    }
-
-    void WordSearchResultPage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
-    {
-        myButton().Content(box_value(L"Clicked"));
     }
 
     void WordSearchResultPage::OnNavigatedTo(Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e)
@@ -42,7 +39,6 @@ namespace winrt::WordWiz::implementation
             {
                 // 使用 unbox_value 正确解包参数
                 winrt::hstring str = winrt::unbox_value<winrt::hstring>(param);
-                myButton().Content(winrt::box_value(str));
             }
             catch (winrt::hresult_error const& ex)
             {

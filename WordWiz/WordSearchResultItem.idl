@@ -1,0 +1,10 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass WordSearchResultItem : Microsoft.UI.Xaml.Controls.UserControl
+    {
+        WordSearchResultItem();
+        String Word;            // 将 Word 声明为属性
+        String Explanation;     // 将 Explanation 声明为属性
+    }
+}

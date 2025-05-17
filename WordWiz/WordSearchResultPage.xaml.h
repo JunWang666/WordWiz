@@ -1,5 +1,5 @@
 #pragma once
-
+#include "WordSearchResultItem.xaml.h"
 #include "WordSearchResultPage.g.h"
 
 namespace winrt::WordWiz::implementation
@@ -11,9 +11,6 @@ namespace winrt::WordWiz::implementation
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
-        void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
-
-        // Ìí¼Ó OnNavigatedTo ÉùÃ÷
         void OnNavigatedTo(Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
     };
 }

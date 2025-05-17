@@ -53,12 +53,12 @@ namespace WordWizServices
             return result;
         }
 
-        WordWizServices::LogMessage(L"Page not registered: " + std::wstring(pageName));
+        WordWizServices::Log::LogMessage(L"Page not registered: " + std::wstring(pageName));
 
         // 打印当前注册的页面类型
         for (const auto& pair : m_pageTypes)
         {
-            WordWizServices::LogMessage(L"Registered page: " + pair.first);
+            WordWizServices::Log::LogMessage(L"Registered page: " + pair.first);
         }
 
         return false;
