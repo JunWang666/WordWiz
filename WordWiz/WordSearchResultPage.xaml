@@ -13,7 +13,9 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        <local:WordSearchResultList Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-        <local:WordDetails Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <local:WordSearchResultList Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    CurrentDetailItem="{x:Bind PageLevelSelectedItem, Mode=TwoWay}"/>
+        <local:WordDetails Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                           ItemToDisplay="{x:Bind PageLevelSelectedItem, Mode=OneWay}"/>
     </Grid>
 </Page>

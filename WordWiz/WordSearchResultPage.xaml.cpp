@@ -1,50 +1,33 @@
+// ResultPage.xaml.cpp
 #include "pch.h"
 #include "WordSearchResultPage.xaml.h"
-#if __has_include("WordSearchResultPage.g.cpp")
-#include "WordSearchResultPage.g.cpp"
-#endif
-#include <NavigationService.h>
-#include "WordSearchResultItem.xaml.h"
+#include "WordSearchResultPage.g.cpp" // MIDL 生成
+#include "WordItem.h"       // for xaml_typename
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
-namespace winrt::WordWiz::implementation
+namespace winrt::WordWiz::implementation // 确保命名空间正确
 {
+    Microsoft::UI::Xaml::DependencyProperty WordSearchResultPage::m_pageLevelSelectedItemProperty =
+        Microsoft::UI::Xaml::DependencyProperty::Register(
+            L"PageLevelSelectedItem",
+            xaml_typename<WordWiz::WordItem>(),
+            xaml_typename<WordWiz::WordSearchResultPage>(),
+            Microsoft::UI::Xaml::PropertyMetadata{ nullptr }
+        );
+
     WordSearchResultPage::WordSearchResultPage()
     {
-        InitializeComponent();
-
-    }
-    int32_t WordSearchResultPage::MyProperty()
-    {
-        throw hresult_not_implemented();
     }
 
-    void WordSearchResultPage::MyProperty(int32_t /* value */)
+    WordWiz::WordItem WordSearchResultPage::PageLevelSelectedItem()
     {
-        throw hresult_not_implemented();
+        return GetValue(m_pageLevelSelectedItemProperty).try_as<WordWiz::WordItem>();
     }
 
-    void WordSearchResultPage::OnNavigatedTo(Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e)
+    void WordSearchResultPage::PageLevelSelectedItem(WordWiz::WordItem const& value)
     {
-        // 获取传递的参数并设置按钮内容
-        auto param = e.Parameter();
-        if (param)
-        {
-            try
-            {
-                // 使用 unbox_value 正确解包参数
-                winrt::hstring str = winrt::unbox_value<winrt::hstring>(param);
-            }
-            catch (winrt::hresult_error const& ex)
-            {
-                // 参数类型不是预期的 hstring
-                // 可以在这里添加错误处理或日志记录
-            }
-        }
+        SetValue(m_pageLevelSelectedItemProperty, value);
     }
 }

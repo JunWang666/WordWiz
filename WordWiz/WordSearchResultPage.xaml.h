@@ -1,20 +1,22 @@
+// ResultPage.xaml.h
 #pragma once
-#include "WordSearchResultItem.xaml.h"
-#include "WordSearchResultPage.g.h"
+#include "WordSearchResultPage.g.h" // MIDL 生成
+#include "WordItem.h"     // WordItem 类型
 
-namespace winrt::WordWiz::implementation
+namespace winrt::WordWiz::implementation // 确保命名空间正确
 {
     struct WordSearchResultPage : WordSearchResultPageT<WordSearchResultPage>
     {
         WordSearchResultPage();
 
-        int32_t MyProperty();
-        void MyProperty(int32_t value);
+        WordWiz::WordItem PageLevelSelectedItem();
+        void PageLevelSelectedItem(WordWiz::WordItem const& value);
+        static Microsoft::UI::Xaml::DependencyProperty PageLevelSelectedItemProperty() { return m_pageLevelSelectedItemProperty; }
 
-        void OnNavigatedTo(Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
+    private:
+        static Microsoft::UI::Xaml::DependencyProperty m_pageLevelSelectedItemProperty;
     };
 }
-
 namespace winrt::WordWiz::factory_implementation
 {
     struct WordSearchResultPage : WordSearchResultPageT<WordSearchResultPage, implementation::WordSearchResultPage>

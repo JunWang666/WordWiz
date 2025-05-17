@@ -17,8 +17,9 @@
                   BorderThickness="0"
                   ShowsScrollingPlaceholders="True"
                   HorizontalAlignment="Left"
+                  SelectionChanged="ResultsListView_SelectionChanged"
                 >
-            
+
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:WordItem">
                     <Grid>

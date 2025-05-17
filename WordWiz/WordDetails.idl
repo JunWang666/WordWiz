@@ -1,9 +1,15 @@
+// WordDetails.idl
+import "WordItem.idl"; // 确保 WordItem.idl 可被找到
+
 namespace WordWiz
 {
     [default_interface]
     runtimeclass WordDetails : Microsoft.UI.Xaml.Controls.UserControl
     {
         WordDetails();
-        Int32 MyProperty;
-    }
+
+    // 依赖属性，用于接收要显示的 WordItem
+    WordWiz.WordItem ItemToDisplay;
+    static Microsoft.UI.Xaml.DependencyProperty ItemToDisplayProperty{ get; };
+}
 }
