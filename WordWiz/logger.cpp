@@ -19,4 +19,12 @@ namespace WordWizServices::Log
        std::wstring wideMessage(message.begin(), message.end());
        OutputDebugStringW((wideMessage + L"\n").c_str());
    }
+
+   void LogMessage(const winrt::hstring message)
+   {
+       std::clog << message.c_str() << std::endl;
+
+       std::wstring wideMessage(message.begin(), message.end());
+       OutputDebugStringW((wideMessage + L"\n").c_str());
+   }
 }

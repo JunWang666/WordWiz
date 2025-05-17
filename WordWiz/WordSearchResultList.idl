@@ -1,9 +1,12 @@
+// WordSearchResultList.idl
+import "WordItem.idl"; // Import WordItem definition
+
 namespace WordWiz
 {
     [default_interface]
     runtimeclass WordSearchResultList : Microsoft.UI.Xaml.Controls.UserControl
     {
         WordSearchResultList();
-        Int32 MyProperty;
+        Windows.Foundation.Collections.IObservableVector<WordWiz.WordItem> Items { get; };
     }
 }

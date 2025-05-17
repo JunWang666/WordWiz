@@ -23,6 +23,9 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
+    <Midl Include="WordItem.idl">
+      <Filter>dataModels\WordItem</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -33,6 +36,9 @@
     <ClCompile Include="logger.cpp">
       <Filter>services</Filter>
     </ClCompile>
+    <ClCompile Include="WordItem.cpp">
+      <Filter>dataModels\WordItem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -41,6 +47,9 @@
     </ClInclude>
     <ClInclude Include="logger.h">
       <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="WordItem.h">
+      <Filter>dataModels\WordItem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +90,12 @@
     </Filter>
     <Filter Include="views">
       <UniqueIdentifier>{9a366363-aa9e-49af-b94c-c9c9f0e6d671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dataModels">
+      <UniqueIdentifier>{071e3260-1179-4121-9701-6442780627dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dataModels\WordItem">
+      <UniqueIdentifier>{6aab73bc-d2fc-43c0-abf9-868b51ce1257}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

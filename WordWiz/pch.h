@@ -29,6 +29,9 @@
 
 #include <Microsoft.UI.Xaml.Window.h>
 
+#include<logger.h>
+#include<NavigationService.h>
+
 
 namespace winrt
 {

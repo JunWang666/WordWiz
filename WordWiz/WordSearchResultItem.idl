@@ -1,10 +1,15 @@
+// WordSearchResultItem.idl
 namespace WordWiz
 {
     [default_interface]
     runtimeclass WordSearchResultItem : Microsoft.UI.Xaml.Controls.UserControl
     {
         WordSearchResultItem();
-        String Word;            // 将 Word 声明为属性
-        String Explanation;     // 将 Explanation 声明为属性
-    }
+
+    // Dependency Properties to display word and explanation
+    String WordDisplay;
+    String ExplanationDisplay;
+    // Event for item click, if needed
+    // event Microsoft.UI.Xaml.RoutedEventHandler ItemClicked;
+}
 }
