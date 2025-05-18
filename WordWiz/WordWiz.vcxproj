@@ -125,6 +125,7 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="WordItem.h" />
+    <ClInclude Include="WordSearch.h" />
     <ClInclude Include="WordSearchResultList.xaml.h">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -172,6 +173,7 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
+    <ClCompile Include="WordSearch.cpp" />
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -195,6 +197,7 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="WordItem.idl" />
+    <Midl Include="WordSearch.idl" />
     <Midl Include="WordSearchResultList.idl">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -210,6 +213,9 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Assets\ArtWorks\c68572fb477372ac6163295b7a0a7bb73493090700560683.jpg" />
+    <Image Include="Assets\ArtWorks\d4c31bd0260dac01a76f46ec17883b02_3912538206445877688.png" />
+    <Image Include="Assets\ArtWorks\df6b6a852f2d0e5ee1e264236e82b9d2_385285744710158316.jpg" />
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
     <Image Include="Assets\SplashScreen.scale-200.png" />
     <Image Include="Assets\Square150x150Logo.scale-200.png" />
