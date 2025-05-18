@@ -83,6 +83,15 @@
     <Image Include="StoreLogo.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\ArtWorks\df6b6a852f2d0e5ee1e264236e82b9d2_385285744710158316.jpg">
+      <Filter>Assets\ArtWorks</Filter>
+    </Image>
+    <Image Include="Assets\ArtWorks\c68572fb477372ac6163295b7a0a7bb73493090700560683.jpg">
+      <Filter>Assets\ArtWorks</Filter>
+    </Image>
+    <Image Include="Assets\ArtWorks\d4c31bd0260dac01a76f46ec17883b02_3912538206445877688.png">
+      <Filter>Assets\ArtWorks</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -108,6 +117,9 @@
     </Filter>
     <Filter Include="modules\WordSearch">
       <UniqueIdentifier>{83af1190-eb87-420b-8bf1-abacb12b9465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\ArtWorks">
+      <UniqueIdentifier>{d7340e83-b95b-4731-aca2-4203d13579b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

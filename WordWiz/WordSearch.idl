@@ -8,5 +8,9 @@ namespace WordWiz
     {
         WordSearch();
         Windows.Foundation.Collections.IVector<WordWiz.WordItem> Search(String query);
+
+        Windows.Foundation.Collections.IVector<String> GetAvailableDictionaries(String word);
+        String GetDictionaryHtmlContent(String word, String dictionaryName);
+    
     }
 }
