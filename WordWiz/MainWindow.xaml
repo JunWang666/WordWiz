@@ -61,6 +61,7 @@
             IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
             SelectionChanged="NavigationView_SelectionChanged"
+            ItemInvoked="NavigationView_ItemInvoked"
             Header="Header"
             AlwaysShowHeader="False"
             PaneTitle=""
@@ -70,13 +71,13 @@
             IsTabStop="False">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="HomePage" Tag="HomePageNavigation" x:Name="HomePageItem">
+                <NavigationViewItem Content="HomePage" Tag="WordWiz.HomePage" x:Name="HomePageItem">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Play" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemHeader Content="Actions"/>
-                <NavigationViewItem Content="Menu Item2" Tag="SamplePage2" x:Name="SamplePage2Item" SelectsOnInvoked="True">
+                <NavigationViewItem Content="Search" Tag="WordWiz.WordSearchResultPage" x:Name="WordSearchResultPageItem" SelectsOnInvoked="True">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Save" />
                     </NavigationViewItem.Icon>

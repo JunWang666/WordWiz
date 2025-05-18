@@ -24,6 +24,8 @@ using namespace Microsoft::UI::Xaml::Controls;
 
 namespace winrt::WordWiz::implementation
 {
+    winrt::Microsoft::UI::Xaml::Controls::Frame MainWindow::mainFrame{ nullptr };
+
     MainWindow::MainWindow()
     {
         // 获取 AppWindow 对象
@@ -62,36 +64,77 @@ namespace winrt::WordWiz::implementation
         throw hresult_not_implemented();
     }
 
-    void MainWindow::NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView currentNavigationView, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs args)
+    void MainWindow::NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView sender, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs args)
     {
         if (args.IsSettingsSelected())
         {
-            // 如果需要，导航到设置页面
-            // contentFrame().Navigate(xaml_typename<WordWiz::SettingsPage>());
+            // 如果需要，更新标题为 "设置"
+            sender.Header(winrt::box_value(L"设置")); // 示例
         }
         else
         {
-            auto selectedItem = args.SelectedItem().as<NavigationViewItem>();
+            auto selectedItem = args.SelectedItem().try_as<winrt::Microsoft::UI::Xaml::Controls::NavigationViewItem>();
             if (selectedItem)
             {
-                winrt::hstring tag = unbox_value<hstring>(selectedItem.Tag());
-
-                if (tag == L"HomePageNavigation")
-                {
-                    contentFrame().Navigate(xaml_typename<WordWiz::HomePage>());
-                }
-
                 // 更新标题
-                if (currentNavigationView.PaneDisplayMode() == NavigationViewPaneDisplayMode::Top)
+                if (sender.PaneDisplayMode() == winrt::Microsoft::UI::Xaml::Controls::NavigationViewPaneDisplayMode::Top)
                 {
-                    currentNavigationView.Header(box_value(selectedItem.Content()));
+                    sender.Header(selectedItem.Content());
                 }
                 else
                 {
-                    currentNavigationView.Header(nullptr);
+                    sender.Header(nullptr);
                 }
             }
         }
+    }
+
+    void MainWindow::NavigationView_ItemInvoked(winrt::Microsoft::UI::Xaml::Controls::NavigationView const& sender, winrt::Microsoft::UI::Xaml::Controls::NavigationViewItemInvokedEventArgs const& args)
+    {
+        winrt::hstring tag_to_navigate;
+
+        if (args.IsSettingsInvoked())
+        {
+            // 处理设置项的调用
+        }
+        else
+        {
+            // 处理普通菜单项的调用
+            // args.InvokedItemContainer() 返回被调用的 NavigationViewItem
+            auto invokedItem = args.InvokedItemContainer().try_as<winrt::Microsoft::UI::Xaml::Controls::NavigationViewItem>();
+            if (invokedItem)
+            {
+                // Tag 可能是 IInspectable，需要先判断类型
+                auto tagInspectable = invokedItem.Tag();
+                if (auto ref = tagInspectable.try_as<winrt::Windows::Foundation::IReference<winrt::hstring>>())
+                {
+                    tag_to_navigate = ref.Value();
+                }
+                else if (auto str = tagInspectable.try_as<winrt::hstring>())
+                {
+                    tag_to_navigate = str.value();
+                }
+                // 你可以根据需要继续 else if 判断其他类型
+            }
+        }
+
+        if (!tag_to_navigate.empty())
+        {
+            if (mainFrame) // 确保你的 Frame 实例有效
+            {
+                WordWizServices::NavigationService::NavigateFromTag(
+                    mainFrame,
+                    tag_to_navigate,
+                    nullptr, // 导航参数 (如果需要的话)
+                    args.RecommendedNavigationTransitionInfo()
+                );
+            }
+            else
+            {
+                WordWizServices::Log::LogMessage(L"NavigationView_ItemInvoked: m_contentFrame is null! Cannot navigate.");
+            }
+        }
+        // else: tag 无效或为空，可以忽略或记录日志
     }
 
     void MainWindow::myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args)
@@ -118,6 +161,12 @@ namespace winrt::WordWiz::implementation
 
         return appWindow;
     }
+
+    winrt::Microsoft::UI::Xaml::Controls::Frame MainWindow::GetMainFrame()
+    {
+        return mainFrame;
+    }
+
 }
 
 void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
@@ -128,16 +177,19 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
     // 此时视觉树应该已完全构建，可以安全访问 Frame
     try
     {
+        mainFrame = contentFrame();
         // 初始化NavigationService，传递contentFrame和NavigationView
         WordWizServices::NavigationService::Initialize(contentFrame(), SideNavigationView());
     }
     catch (winrt::hresult_error const& ex)
     {
         // 处理错误 - 可能是 ContentFrame 属性名不正确
-        OutputDebugString((L"Frame access error: " + ex.message() + L"\n").c_str());
+		WordWizServices::Log::LogMessage(L"NavigationService initialization failed: " + std::to_wstring(ex.code()) + L" - " + ex.message());
     }
 
     //注册页面
-    WordWizServices::NavigationService::RegisterPage<WordWiz::WordSearchResultPage>(L"WordSearchResultPage");
-	WordWizServices::NavigationService::RegisterPage<WordWiz::HomePage>(L"HomePage");
+    WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::HomePage>();
+    WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::WordSearchResultPage>();
+
+    WordWizServices::NavigationService::NavigateTo<WordWiz::HomePage>(MainWindow::GetMainFrame());
 }

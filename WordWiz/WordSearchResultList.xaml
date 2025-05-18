@@ -8,9 +8,19 @@
     mc:Ignorable="d">
 
     <Grid Padding="10" RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="SearchTextBox"
+                 Grid.Row="0"
+                 PlaceholderText="输入关键词搜索..."
+                 TextChanged="SearchTextBox_TextChanged"
+                 Margin="0,0,0,10"/>
 
         <ListView x:Name="ResultsListView"
-                  Grid.Row="2" Grid.ColumnSpan="2"
+                  Grid.Row="1" Grid.ColumnSpan="2"
                   ItemsSource="{x:Bind Items, Mode=OneWay}"
                   SelectionMode="Single"
                   BorderBrush="Transparent"

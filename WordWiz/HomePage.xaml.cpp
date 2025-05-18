@@ -5,6 +5,7 @@
 #endif
 #include<NavigationService.h>
 
+
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 
@@ -25,10 +26,19 @@ namespace winrt::WordWiz::implementation
 
     void HomePage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
-        // 传递 WinRT 类型参数（hstring）
-        WordWizServices::NavigationService::NavigateTo(
-            L"WordSearchResultPage",
-            winrt::box_value(L"文档ID") // 使用 hstring
-        );
+        winrt::Microsoft::UI::Xaml::Controls::Frame mainFrame = winrt::WordWiz::implementation::MainWindow::GetMainFrame();
+        if (mainFrame)
+        {
+            // 现在可以使用获取到的 mainFrame 进行导航
+            WordWizServices::NavigationService::NavigateTo<WordWiz::WordSearchResultPage>(
+                mainFrame,
+                winrt::box_value(L"文档ID") // 你的导航参数
+            );
+        }
+        else
+        {
+            // 处理 Frame 未获取到的情况，例如记录错误日志
+            WordWizServices::Log::LogMessage(L"HomePage::NavigateToSearchResults: MainWindow's main Frame is not available.");
+        }
     }
 }

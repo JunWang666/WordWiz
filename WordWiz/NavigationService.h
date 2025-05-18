@@ -1,121 +1,151 @@
-// NavigationService.h
 #pragma once
 
-#include <winrt/Microsoft.UI.Xaml.Controls.h>
-#include <winrt/Microsoft.UI.Xaml.Navigation.h>
-#include <winrt/Windows.UI.Xaml.Interop.h>
+#include "pch.h"
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
-#include <functional>
-#include <logger.h>
+
+// 前向声明
+namespace WordWizServices::Log
+{
+    void LogMessage(const std::wstring& message);
+    void LogMessage(const wchar_t* message);
+}
 
 namespace WordWizServices
 {
-    // 导航事件参数
     struct NavigationEventArgs
     {
-        std::wstring SourcePageName;
-        std::wstring TargetPageName;
-        winrt::Windows::Foundation::IInspectable Parameter;
+        winrt::Microsoft::UI::Xaml::Controls::Frame SourceFrame{ nullptr }; // 发生导航的 Frame
+        winrt::Windows::UI::Xaml::Interop::TypeName SourcePageType{};
+        winrt::Windows::UI::Xaml::Interop::TypeName TargetPageType{};
+        winrt::Windows::Foundation::IInspectable Parameter{ nullptr };
     };
 
-    // 导航服务类 - 用于管理应用的页面导航
     class NavigationService
     {
+    private:
+        // 每个 Frame 的导航上下文
+        struct FrameContext
+        {
+            winrt::Microsoft::UI::Xaml::Controls::NavigationView NavigationView{ nullptr }; // 与此 Frame 关联的 NavigationView (可选)
+            winrt::Windows::UI::Xaml::Interop::TypeName CurrentPageType{};
+            winrt::Microsoft::UI::Xaml::Controls::Frame::Navigated_revoker FrameNavigatedRevoker{};
+            winrt::Microsoft::UI::Xaml::Controls::Frame::NavigationFailed_revoker FrameNavigationFailedRevoker{};
+            // 不再需要 WindowClosedRevoker，因为我们直接与 Frame 关联
+        };
+
     public:
-        // 初始化导航服务
-        static void Initialize(winrt::Microsoft::UI::Xaml::Controls::Frame frame);
-        
-        // 扩展初始化方法，包含NavigationView
-        static void Initialize(winrt::Microsoft::UI::Xaml::Controls::Frame frame, 
-                             winrt::Microsoft::UI::Xaml::Controls::NavigationView navView);
+        NavigationService() = delete; // 静态类，禁止实例化
 
-        // 判断导航服务是否已初始化
-        static bool IsInitialized();
+        // 初始化指定 Frame 的导航服务
+        static void Initialize(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame,
+            winrt::Microsoft::UI::Xaml::Controls::NavigationView const& associatedNavView = nullptr);
 
-        // 获取当前Frame
-        static winrt::Microsoft::UI::Xaml::Controls::Frame GetFrame();
+        // 反初始化指定 Frame 的导航服务 (例如，当 Frame 不再使用时)
+        static void Uninitialize(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
 
-        // 注册页面类型 - 通过指定类型和名称
-        template<typename T>
-        static void RegisterPage(std::wstring_view pageName)
+        // 判断指定 Frame 的导航服务是否已初始化
+        static bool IsInitialized(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
+
+        // 设置或更新与指定 Frame 关联的 NavigationView
+        static void SetNavigationViewForFrame(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame,
+            winrt::Microsoft::UI::Xaml::Controls::NavigationView const& navView);
+
+        template <typename PageType>
+        static bool NavigateTo(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame,
+            winrt::Windows::Foundation::IInspectable const& parameter = nullptr,
+            winrt::Microsoft::UI::Xaml::Media::Animation::NavigationTransitionInfo const& infoOverride = nullptr)
         {
-            m_pageTypes[std::wstring(pageName)] = winrt::xaml_typename<T>();
+            if (!targetFrame)
+            {
+                Log::LogMessage(L"NavigationService: targetFrame cannot be null in NavigateTo.");
+                return false;
+            }
+            auto context = GetFrameContext(targetFrame);
+            if (!context) // 如果 Frame 未初始化，则不能导航
+            {
+                Log::LogMessage(L"NavigationService: Target Frame not initialized for NavigateTo.");
+                return false;
+            }
+            auto targetPageTypeName = winrt::xaml_typename<PageType>();
+            return targetFrame.Navigate(targetPageTypeName, parameter, infoOverride);
         }
 
-        // 导航到页面 - 通过页面名称
-        static bool NavigateTo(std::wstring_view pageName, winrt::Windows::Foundation::IInspectable parameter = nullptr);
+        static bool NavigateFromTag(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame,
+            winrt::hstring const& pageTypeNameString,
+            winrt::Windows::Foundation::IInspectable const& parameter = nullptr,
+            winrt::Microsoft::UI::Xaml::Media::Animation::NavigationTransitionInfo const& infoOverride = nullptr);
 
-        // 通过类型直接导航
-        template<typename T>
-        static bool NavigateToType(winrt::Windows::Foundation::IInspectable parameter = nullptr)
+        // 页面类型注册是全局的
+        template <typename PageType>
+        static void RegisterPageTypeForNavViewGlobal()
         {
-            if (!m_frame) return false;
-
-            // 获取当前页面名称和目标页面名称
-            std::wstring sourcePage = m_currentPageName;
-            std::wstring targetPage;
-
-            // 尝试从注册表中查找类型对应的名称
-            for (const auto& pair : m_pageTypes)
+            auto tn = winrt::xaml_typename<PageType>();
+            if (!tn.Name.empty())
             {
-                if (pair.second == winrt::xaml_typename<T>())
-                {
-                    targetPage = pair.first;
-                    break;
-                }
+                s_knownPageTypesForNavView[tn.Name] = tn;
+                Log::LogMessage(L"NavigationService: Registered global NavView page type - " + std::wstring(tn.Name.c_str()));
             }
-
-            bool result = m_frame.Navigate(winrt::xaml_typename<T>(), parameter);
-            if (result && !targetPage.empty())
+            else
             {
-                m_currentPageName = targetPage;
-                OnNavigated(sourcePage, targetPage, parameter);
+                Log::LogMessage(L"NavigationService: Failed to register global NavView page type (empty TypeName.Name).");
             }
-            return result;
         }
 
-        // 返回上一页
-        static bool GoBack();
+        static bool AddCurrentPageToHistoryWithData(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame,
+            winrt::Windows::Foundation::IInspectable const& dataPacket,
+            winrt::Microsoft::UI::Xaml::Media::Animation::NavigationTransitionInfo const& infoOverride = nullptr);
 
-        // 前进
-        static bool GoForward();
+        static bool GoBack(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame, winrt::Microsoft::UI::Xaml::Media::Animation::NavigationTransitionInfo const& infoOverride = nullptr);
+        static bool GoForward(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
+        static bool CanGoBack(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
+        static bool CanGoForward(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
+        static void ClearNavigationHistory(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
+        static winrt::Windows::UI::Xaml::Interop::TypeName GetCurrentPageType(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame);
 
-        // 判断是否可以返回
-        static bool CanGoBack();
-
-        // 判断是否可以前进
-        static bool CanGoForward();
-
-        // 清除导航历史
-        static void ClearNavigationHistory();
-
-        // 获取当前页面名称
-        static std::wstring GetCurrentPageName();
-
-        // 添加导航事件监听
-        static void AddNavigationListener(std::function<void(NavigationEventArgs)> listener);
-
-        // 清除导航事件监听
-        static void ClearNavigationListeners();
-
-        // 清除NavigationView的选中状态
-        static void ClearNavigationViewSelection();
+        // 导航事件监听器是全局的，但事件参数会包含 SourceFrame
+        static winrt::event_token AddNavigationListener(std::function<void(NavigationEventArgs const&)> const& listener);
+        static void RemoveNavigationListener(winrt::event_token const& token);
 
     private:
-        // 更新当前页面名称
-        static void UpdateCurrentPageName();
+        static FrameContext* GetFrameContext(winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame, bool createIfNotFound = false);
 
-        // 触发导航完成事件
-        static void OnNavigated(const std::wstring& sourcePage, const std::wstring& targetPage,
-            winrt::Windows::Foundation::IInspectable parameter);
+        // 静态事件处理函数
+        static void OnFrameNavigated(
+            winrt::Windows::Foundation::IInspectable const& sender, // This will be the Frame
+            winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
+
+        static void OnFrameNavigationFailed(
+            winrt::Windows::Foundation::IInspectable const& sender, // This will be the Frame
+            winrt::Microsoft::UI::Xaml::Navigation::NavigationFailedEventArgs const& e);
+
+        static void RaiseNavigatedEvent(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& sourceFrame,
+            winrt::Windows::UI::Xaml::Interop::TypeName const& sourcePageType,
+            winrt::Windows::UI::Xaml::Interop::TypeName const& targetPageType,
+            winrt::Windows::Foundation::IInspectable const& parameter);
+
+        static void UpdateNavigationViewSelection(
+            winrt::Microsoft::UI::Xaml::Controls::Frame const& targetFrame,
+            winrt::Windows::UI::Xaml::Interop::TypeName const& targetPageType);
 
         // 静态成员变量
-        inline static winrt::Microsoft::UI::Xaml::Controls::Frame m_frame{ nullptr };
-        inline static winrt::Microsoft::UI::Xaml::Controls::NavigationView m_navigationView{ nullptr };
-        inline static std::map<std::wstring, winrt::Windows::UI::Xaml::Interop::TypeName> m_pageTypes{};
-        inline static std::wstring m_currentPageName{};
-        inline static std::vector<std::function<void(NavigationEventArgs)>> m_navigationListeners{};
+        static std::map<winrt::Microsoft::UI::Xaml::Controls::Frame, FrameContext> s_frameContexts;
+        static std::map<winrt::hstring, winrt::Windows::UI::Xaml::Interop::TypeName> s_knownPageTypesForNavView; // 全局页面类型
+
+        struct NavigatedListener
+        {
+            winrt::event_token token;
+            std::function<void(NavigationEventArgs const&)> handler;
+        };
+        static std::vector<NavigatedListener> s_navigationListeners; // 全局监听器
+        static int64_t s_nextTokenValue;
     };
 }
