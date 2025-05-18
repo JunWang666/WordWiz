@@ -63,8 +63,19 @@ namespace winrt::WordWiz::implementation
     // ListView 的 SelectionChanged 事件处理函数实现
     void WordSearchResultList::ResultsListView_SelectionChanged(IInspectable const& sender, Controls::SelectionChangedEventArgs const& /*args*/)
     {
-        auto listView = sender.as<Controls::ListView>();
-        this->CurrentDetailItem(listView.SelectedItem().try_as<WordWiz::WordItem>());
+        auto listView = sender.as<Microsoft::UI::Xaml::Controls::ListView>();
+        auto selectedListViewItem = listView.SelectedItem(); // 获取当前选中的原始项
+
+        if (selectedListViewItem) // 关键：仅当确实有一个选中项时才更新
+        {
+            // 将选中的项转换为 WordItem 并更新 CurrentDetailItem
+            this->CurrentDetailItem(selectedListViewItem.try_as<WordWiz::WordItem>());
+        }
+        // else (如果 selectedListViewItem 是 nullptr，例如列表被清空或用户取消选择)
+        // {
+        //     我们不执行任何操作，CurrentDetailItem 保持其之前的值。
+        //     这样 WordDetails 控件就不会“复原”。
+        // }
     }
 
     // SearchTextBox 的 TextChanged 事件处理函数 (防抖逻辑)
