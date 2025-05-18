@@ -23,6 +23,9 @@
     <Midl Include="WordItem.idl">
       <Filter>dataModels\WordItem</Filter>
     </Midl>
+    <Midl Include="WordSearch.idl">
+      <Filter>modules\WordSearch</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -36,6 +39,9 @@
     <ClCompile Include="WordItem.cpp">
       <Filter>dataModels\WordItem</Filter>
     </ClCompile>
+    <ClCompile Include="WordSearch.cpp">
+      <Filter>modules\WordSearch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -47,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="WordItem.h">
       <Filter>dataModels\WordItem</Filter>
+    </ClInclude>
+    <ClInclude Include="WordSearch.h">
+      <Filter>modules\WordSearch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +102,12 @@
     </Filter>
     <Filter Include="dataModels\WordItem">
       <UniqueIdentifier>{6aab73bc-d2fc-43c0-abf9-868b51ce1257}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules">
+      <UniqueIdentifier>{268d6a2f-5b6c-49e5-ae55-1c2f5ff24cfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\WordSearch">
+      <UniqueIdentifier>{83af1190-eb87-420b-8bf1-abacb12b9465}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

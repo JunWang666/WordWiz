@@ -125,6 +125,7 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="WordItem.h" />
+    <ClInclude Include="WordSearch.h" />
     <ClInclude Include="WordSearchResultList.xaml.h">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -172,6 +173,7 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
+    <ClCompile Include="WordSearch.cpp" />
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -195,6 +197,7 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="WordItem.idl" />
+    <Midl Include="WordSearch.idl" />
     <Midl Include="WordSearchResultList.idl">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>

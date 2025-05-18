@@ -1,0 +1,12 @@
+// WordSearch.idl
+import "WordItem.idl";
+
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass WordSearch
+    {
+        WordSearch();
+        Windows.Foundation.Collections.IVector<WordWiz.WordItem> Search(String query);
+    }
+}
