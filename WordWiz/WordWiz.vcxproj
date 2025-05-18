@@ -120,6 +120,15 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="WordDetails.xaml.h">
+      <DependentUpon>WordDetails.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="WordItem.h" />
+    <ClInclude Include="WordSearchResultList.xaml.h">
+      <DependentUpon>WordSearchResultList.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="WordSearchResultPage.xaml.h">
       <DependentUpon>WordSearchResultPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -131,6 +140,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
+    <Page Include="WordDetails.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WordSearchResultList.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="WordSearchResultPage.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -152,6 +167,15 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="WordDetails.xaml.cpp">
+      <DependentUpon>WordDetails.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="WordItem.cpp" />
+    <ClCompile Include="WordSearchResultList.xaml.cpp">
+      <DependentUpon>WordSearchResultList.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="WordSearchResultPage.xaml.cpp">
       <DependentUpon>WordSearchResultPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -165,6 +189,15 @@
     <Midl Include="MainWindow.idl">
       <SubType>Code</SubType>
       <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="WordDetails.idl">
+      <DependentUpon>WordDetails.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="WordItem.idl" />
+    <Midl Include="WordSearchResultList.idl">
+      <DependentUpon>WordSearchResultList.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Midl>
     <Midl Include="WordSearchResultPage.idl">
       <DependentUpon>WordSearchResultPage.xaml</DependentUpon>
@@ -182,8 +215,9 @@
     <Image Include="Assets\Square150x150Logo.scale-200.png" />
     <Image Include="Assets\Square44x44Logo.scale-200.png" />
     <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Image Include="Assets\StoreLogo.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Image Include="Logo.png" />
+    <Image Include="StoreLogo.png" />
   </ItemGroup>
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging

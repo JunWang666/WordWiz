@@ -1,0 +1,23 @@
+// WordSearchResultList.idl
+import "WordItem.idl"; // 确保 WordItem 定义可用
+
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass WordSearchResultList : Microsoft.UI.Xaml.Controls.UserControl
+    {
+        WordSearchResultList();
+
+    // 用于 ListView 的数据源
+    Windows.Foundation.Collections.IObservableVector<WordWiz.WordItem> Items { get; };
+
+    // 依赖属性，用于暴露当前 ListView 中选中的 WordItem
+    WordWiz.WordItem CurrentDetailItem;
+    static Microsoft.UI.Xaml.DependencyProperty CurrentDetailItemProperty{ get; };
+
+    // 如果 WordSearchResultList 内部仍有添加、删除等按钮，它们的事件处理器也在这里声明（可选）
+    // void AddItemButton_Click(Object sender, Microsoft.UI.Xaml.RoutedEventArgs e);
+    // void RemoveSelectedItemsButton_Click(Object sender, Microsoft.UI.Xaml.RoutedEventArgs e);
+    // ...
+}
+}

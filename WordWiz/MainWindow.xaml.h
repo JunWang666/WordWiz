@@ -13,15 +13,20 @@ namespace winrt::WordWiz::implementation
         void MyProperty(int32_t value);
 
         void NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs);
+        void NavigationView_ItemInvoked(
+            winrt::Microsoft::UI::Xaml::Controls::NavigationView const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::NavigationViewItemInvokedEventArgs const& args);
 
         void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
 
         void OnWindowLoaded(winrt::Windows::Foundation::IInspectable const& sender,winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
 
-    private:
-        winrt::AppWindow GetAppWindowForCurrentWindow();
+        static winrt::Microsoft::UI::Xaml::Controls::Frame GetMainFrame();
 
-        winrt::AppWindow m_mainAppWindow{ nullptr };
+    private:
+        winrt::Microsoft::UI::Windowing::AppWindow GetAppWindowForCurrentWindow();
+        static winrt::Microsoft::UI::Xaml::Controls::Frame mainFrame;
+        winrt::Microsoft::UI::Windowing::AppWindow m_mainAppWindow{ nullptr };
         hstring m_windowTitle = L"WinUI Desktop C++ Sample App";
     };
 }

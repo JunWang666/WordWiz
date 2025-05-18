@@ -8,7 +8,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Success</Button>
-    </StackPanel>
+    <Grid HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <local:WordSearchResultList Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    CurrentDetailItem="{x:Bind PageLevelSelectedItem, Mode=TwoWay}"/>
+        <local:WordDetails Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                           ItemToDisplay="{x:Bind PageLevelSelectedItem, Mode=OneWay}"/>
+    </Grid>
 </Page>

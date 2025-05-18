@@ -1,0 +1,16 @@
+
+// WordItem.idl
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass WordItem
+    {
+        WordItem(String word, String explanation); // Constructor
+        String Word { get; };
+        String Explanation { get; };
+        // 如果将来词条内容（比如解释）创建后还需要修改，并希望UI自动更新单个词条的这部分，
+        // WordItem 需要实现 Microsoft.UI.Xaml.Data.INotifyPropertyChanged，
+        // 并在 Word 和 Explanation 的 setter 中触发 PropertyChanged 事件。
+        // 为简单起见，这里设为创建后只读。
+    }
+}
