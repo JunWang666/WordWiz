@@ -1,9 +1,12 @@
+import "WordItem.idl";
+
 namespace WordWiz
 {
     [default_interface]
     runtimeclass WordSearchResultPage : Microsoft.UI.Xaml.Controls.Page
     {
-        WordSearchResultPage();
-        Int32 MyProperty;
-    }
+        WordSearchResultPage(); // 构造函数名与类名一致
+    WordWiz.WordItem PageLevelSelectedItem; // 保持这个，因为它作为父页面需要这个DP
+    static Microsoft.UI.Xaml.DependencyProperty PageLevelSelectedItemProperty{ get; };
+}
 }
