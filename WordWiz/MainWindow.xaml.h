@@ -19,6 +19,8 @@ namespace winrt::WordWiz::implementation
 
         void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
 
+        void BackButton_Click(IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+
         void OnWindowLoaded(winrt::Windows::Foundation::IInspectable const& sender,winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
 
         static winrt::Microsoft::UI::Xaml::Controls::Frame GetMainFrame();

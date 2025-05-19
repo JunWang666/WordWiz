@@ -1,0 +1,9 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass Settings : Microsoft.UI.Xaml.Controls.Page
+    {
+        Settings();
+        Int32 MyProperty;
+    }
+}

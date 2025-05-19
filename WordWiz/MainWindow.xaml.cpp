@@ -12,12 +12,14 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Microsoft.UI.Xaml.Media.Animation.h> // For navigation transition info
 // 用于实现背景切换
 #include <NavigationService.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
+using namespace Microsoft::UI::Xaml::Media::Animation;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -142,6 +144,14 @@ namespace winrt::WordWiz::implementation
 		
     }
 
+    void MainWindow::BackButton_Click(IInspectable const&, RoutedEventArgs const&)
+    {
+        if (mainFrame && WordWizServices::NavigationService::CanGoBack(mainFrame))
+        {
+            WordWizServices::NavigationService::GoBack(mainFrame, EntranceNavigationTransitionInfo());
+        }
+    }
+
     winrt::AppWindow MainWindow::GetAppWindowForCurrentWindow()
     {
         // Get access to IWindowNative
@@ -192,4 +202,26 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::WordSearchResultPage>();
 
     WordWizServices::NavigationService::NavigateTo<WordWiz::HomePage>(MainWindow::GetMainFrame());
+
+
+    // Update back button enabled state on navigation
+    auto updateBackButtonEnabled = [this]()
+    {
+        if (mainFrame && BackButton())
+        {
+            BackButton().IsEnabled(
+                WordWizServices::NavigationService::CanGoBack(mainFrame)
+            );
+        }
+    };
+
+    // Register navigation listener to update back button
+    static auto navToken = WordWizServices::NavigationService::AddNavigationListener(
+        [updateBackButtonEnabled](auto&&...) 
+        { 
+            updateBackButtonEnabled(); 
+        }
+    );
+
+    updateBackButtonEnabled(); // Initial state
 }

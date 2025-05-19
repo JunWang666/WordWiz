@@ -3,11 +3,13 @@
 #include "WordDetails.xaml.h"
 #include "WordDetails.g.cpp"
 #include "WordItem.h" 
+#include "NavigationService.h" // 新增：引入NavigationService实现
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls; // For SelectorBar related types
 using namespace Windows::Foundation::Collections;
+using namespace WordWizServices; // 新增：使用NavigationService命名空间
 
 namespace winrt::WordWiz::implementation
 {
@@ -118,6 +120,17 @@ namespace winrt::WordWiz::implementation
         if (auto SendersThis{ d.try_as<WordDetails>() }) // 将 d 转换为 WordDetails 实例指针
         {
             auto newItem = e.NewValue().try_as<WordWiz::WordItem>(); // 获取新的 WordItem
+
+            // 新增：通过NavigationService记录历史
+            if (SendersThis->m_hostFrame && newItem && !newItem.Word().empty())
+            {
+                // 这里将WordItem作为参数传递，infoOverride可用默认
+                NavigationService::AddCurrentPageToHistoryWithData(
+                    SendersThis->m_hostFrame,
+                    newItem,
+                    nullptr // 可根据需要传递NavigationTransitionInfo
+                );
+            }
 
             // 清理 SelectorBar 中的旧项目
             // 假设你的 SelectorBar 在 XAML 中的 x:Name 是 DictionarySelectorBar

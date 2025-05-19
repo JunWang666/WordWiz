@@ -3,6 +3,7 @@
 #include "WordDetails.g.h"
 #include "WordItem.h" 
 #include "WordSearch.h" // 引入 WordSearch 服务
+#include "NavigationService.h" // 新增：引入NavigationService头文件
 
 namespace winrt::WordWiz::implementation
 {
@@ -38,6 +39,9 @@ namespace winrt::WordWiz::implementation
         // SelectedDictionaryHtml 属性更改回调
         static void OnSelectedDictionaryHtmlChanged(Microsoft::UI::Xaml::DependencyObject const& d, Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs const& e);
 
+        // 新增：设置Frame的方法（外部页面初始化WordDetails后应调用）
+        void SetHostFrame(winrt::Microsoft::UI::Xaml::Controls::Frame const& frame) { m_hostFrame = frame; }
+
     private:
         static Microsoft::UI::Xaml::DependencyProperty m_itemToDisplayProperty;
         // 新增依赖属性的静态成员
@@ -50,6 +54,8 @@ namespace winrt::WordWiz::implementation
         bool m_isCoreWebView2Initialized{ false };
         winrt::hstring m_pendingHtmlToNavigate{ L"" };
 
+        // 新增：用于记录Frame的弱引用（需在构造或初始化时赋值）
+        winrt::Microsoft::UI::Xaml::Controls::Frame m_hostFrame{ nullptr };
     };
 }
 namespace winrt::WordWiz::factory_implementation

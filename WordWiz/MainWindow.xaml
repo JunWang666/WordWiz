@@ -28,29 +28,49 @@
               x:FieldModifier="public" 
               Visibility="Visible"
               Height="48"
-              Margin="48,0,0,0"
+              Margin="0,0,0,0"
               VerticalAlignment="Top"
               Padding="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/> <!-- Add for back button -->
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             
+            <!-- Back Button -->
+            <Button x:Name="BackButton"
+                    Grid.Column="0"
+                    FontFamily="Segoe MDL2 Assets" 
+                    Content="&#xE0A6;" 
+                    Width="48" 
+                    Height="48"
+                    Margin="0,0,0,0"
+                    Click="BackButton_Click"
+                    ToolTipService.ToolTip="返回"
+                    Visibility="Visible"  
+                    IsEnabled="False"
+                    Background="Transparent" 
+                    BorderThickness="0"
+                    VerticalAlignment="Top" 
+                    HorizontalAlignment="Left">    
+        
+            </Button>
+
             <Image x:Name="WindowIcon" 
                 Source="Logo.png" 
                 Grid.Column="0" 
                 HorizontalAlignment="Left" 
                 x:FieldModifier="public" 
-                Width="30" Height="30" Margin="12,0,0,-20"
+                Width="30" Height="30" Margin="48,0,0,-20"
                 VerticalAlignment="Center"/>
             <TextBlock  
-               Text="WordWiz by SWJTU"  
+               Text="WordWiz by Go学长"  
                Grid.Column="0"  
                Style="{StaticResource CaptionTextBlockStyle}"  
-               Margin="44,17,0,0"  
+               Margin="80,17,0,-10"  
                FontSize="13"  
                FontWeight="Normal"/>
         </Grid>
@@ -73,13 +93,13 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="HomePage" Tag="WordWiz.HomePage" x:Name="HomePageItem">
                     <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Play" />
+                        <SymbolIcon Symbol="Home"  />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItemHeader Content="Actions"/>
                 <NavigationViewItem Content="Search" Tag="WordWiz.WordSearchResultPage" x:Name="WordSearchResultPageItem" SelectsOnInvoked="True">
                     <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Save" />
+                        <SymbolIcon Symbol="Zoom" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Menu Item3" Tag="SamplePage3" x:Name="SamplePage3Item">
