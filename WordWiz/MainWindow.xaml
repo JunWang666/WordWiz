@@ -56,7 +56,8 @@
                     Background="Transparent" 
                     BorderThickness="0"
                     VerticalAlignment="Top" 
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left"
+                    Style="{StaticResource SubtleButtonStyle}">
                 <Button.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="选项 1"/>

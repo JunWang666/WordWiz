@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
+    <Page Include="Button.xaml" />
     <Page Include="FavoritePage.xaml">
       <SubType>Designer</SubType>
     </Page>

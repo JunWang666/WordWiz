@@ -26,6 +26,9 @@
     <Page Include="FavoritePage.xaml">
       <Filter>pages</Filter>
     </Page>
+    <Page Include="Button.xaml">
+      <Filter>others\Styles</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
@@ -129,6 +132,12 @@
     </Filter>
     <Filter Include="Assets\ArtWorks">
       <UniqueIdentifier>{d7340e83-b95b-4731-aca2-4203d13579b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="others">
+      <UniqueIdentifier>{dfbb8d6f-da7c-416d-b30a-23036aade32c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="others\Styles">
+      <UniqueIdentifier>{71c367fd-1d1b-4efb-853b-a7bbb8cf5575}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
