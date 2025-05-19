@@ -107,6 +107,14 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FavoritePage.xaml.h">
+      <DependentUpon>FavoritePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="HistoryPage.xaml.h">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="HomePage.xaml.h">
       <DependentUpon>HomePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -120,11 +128,16 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="SettingsPage.xaml.h">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="WordDetails.xaml.h">
       <DependentUpon>WordDetails.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="WordItem.h" />
+    <ClInclude Include="WordSearch.h" />
     <ClInclude Include="WordSearchResultList.xaml.h">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -136,10 +149,20 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
+    <Page Include="Button.xaml" />
+    <Page Include="FavoritePage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HistoryPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="HomePage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
+    <Page Include="SettingsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="WordDetails.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -151,6 +174,14 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FavoritePage.xaml.cpp">
+      <DependentUpon>FavoritePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="HistoryPage.xaml.cpp">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="HomePage.xaml.cpp">
       <DependentUpon>HomePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -167,11 +198,16 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="SettingsPage.xaml.cpp">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="WordDetails.xaml.cpp">
       <DependentUpon>WordDetails.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
+    <ClCompile Include="WordSearch.cpp" />
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -182,6 +218,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="FavoritePage.idl">
+      <DependentUpon>FavoritePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="HistoryPage.idl">
+      <DependentUpon>HistoryPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="HomePage.idl">
       <DependentUpon>HomePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -190,11 +234,16 @@
       <SubType>Code</SubType>
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Midl>
+    <Midl Include="SettingsPage.idl">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="WordDetails.idl">
       <DependentUpon>WordDetails.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="WordItem.idl" />
+    <Midl Include="WordSearch.idl" />
     <Midl Include="WordSearchResultList.idl">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -210,6 +259,9 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Assets\ArtWorks\c68572fb477372ac6163295b7a0a7bb73493090700560683.jpg" />
+    <Image Include="Assets\ArtWorks\d4c31bd0260dac01a76f46ec17883b02_3912538206445877688.png" />
+    <Image Include="Assets\ArtWorks\df6b6a852f2d0e5ee1e264236e82b9d2_385285744710158316.jpg" />
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
     <Image Include="Assets\SplashScreen.scale-200.png" />
     <Image Include="Assets\Square150x150Logo.scale-200.png" />

@@ -1,0 +1,9 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass FavoritePage : Microsoft.UI.Xaml.Controls.Page
+    {
+        FavoritePage();
+        Int32 MyProperty;
+    }
+}
