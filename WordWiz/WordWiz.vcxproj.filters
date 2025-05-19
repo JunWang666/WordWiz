@@ -23,9 +23,6 @@
     <Midl Include="WordItem.idl">
       <Filter>dataModels\WordItem</Filter>
     </Midl>
-    <Midl Include="WordSearch.idl">
-      <Filter>modules\WordSearch</Filter>
-    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -39,9 +36,6 @@
     <ClCompile Include="WordItem.cpp">
       <Filter>dataModels\WordItem</Filter>
     </ClCompile>
-    <ClCompile Include="WordSearch.cpp">
-      <Filter>modules\WordSearch</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -53,9 +47,6 @@
     </ClInclude>
     <ClInclude Include="WordItem.h">
       <Filter>dataModels\WordItem</Filter>
-    </ClInclude>
-    <ClInclude Include="WordSearch.h">
-      <Filter>modules\WordSearch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,15 +74,6 @@
     <Image Include="StoreLogo.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\ArtWorks\df6b6a852f2d0e5ee1e264236e82b9d2_385285744710158316.jpg">
-      <Filter>Assets\ArtWorks</Filter>
-    </Image>
-    <Image Include="Assets\ArtWorks\c68572fb477372ac6163295b7a0a7bb73493090700560683.jpg">
-      <Filter>Assets\ArtWorks</Filter>
-    </Image>
-    <Image Include="Assets\ArtWorks\d4c31bd0260dac01a76f46ec17883b02_3912538206445877688.png">
-      <Filter>Assets\ArtWorks</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -111,15 +93,6 @@
     </Filter>
     <Filter Include="dataModels\WordItem">
       <UniqueIdentifier>{6aab73bc-d2fc-43c0-abf9-868b51ce1257}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules">
-      <UniqueIdentifier>{268d6a2f-5b6c-49e5-ae55-1c2f5ff24cfe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules\WordSearch">
-      <UniqueIdentifier>{83af1190-eb87-420b-8bf1-abacb12b9465}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assets\ArtWorks">
-      <UniqueIdentifier>{d7340e83-b95b-4731-aca2-4203d13579b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
