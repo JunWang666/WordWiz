@@ -15,7 +15,7 @@ namespace winrt::WordWiz::implementation
 {
     Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
     {
-        // 移除: std::this_thread::sleep_for(std::chrono::seconds(1));
+        
 
         auto results = winrt::single_threaded_observable_vector<WordWiz::WordItem>();
         if (query.empty())
