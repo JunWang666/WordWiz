@@ -68,6 +68,11 @@ namespace winrt::WordWiz::implementation
 
     void MainWindow::NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView sender, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs args)
     {
+        if (args.SelectedItem() == nullptr) {
+            // 空白区域点击或取消选择，不做任何处理
+            return;
+        }
+
         if (args.IsSettingsSelected())
         {
             // 如果需要，更新标题为 "设置"
@@ -93,11 +98,13 @@ namespace winrt::WordWiz::implementation
 
     void MainWindow::NavigationView_ItemInvoked(winrt::Microsoft::UI::Xaml::Controls::NavigationView const& sender, winrt::Microsoft::UI::Xaml::Controls::NavigationViewItemInvokedEventArgs const& args)
     {
+
         winrt::hstring tag_to_navigate;
 
         if (args.IsSettingsInvoked())
         {
             // 处理设置项的调用
+			tag_to_navigate = L"WordWiz.SettingsPage"; // 示例，实际值根据你的设置项决定   
         }
         else
         {
@@ -136,13 +143,12 @@ namespace winrt::WordWiz::implementation
                 WordWizServices::Log::LogMessage(L"NavigationView_ItemInvoked: m_contentFrame is null! Cannot navigate.");
             }
         }
+        else {
+            WordWizServices::Log::LogMessage(L"NavigationView导航失败，无效的Tag："+ tag_to_navigate);
+        }
         // else: tag 无效或为空，可以忽略或记录日志
     }
 
-    void MainWindow::myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args)
-    {
-		
-    }
 
     void MainWindow::BackButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
@@ -150,6 +156,11 @@ namespace winrt::WordWiz::implementation
         {
             WordWizServices::NavigationService::GoBack(mainFrame, EntranceNavigationTransitionInfo());
         }
+    }
+
+    void MainWindow::CustomPaneToggleButton_Click(IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&)
+    {
+        SideNavigationView().IsPaneOpen(!SideNavigationView().IsPaneOpen());
     }
 
     winrt::AppWindow MainWindow::GetAppWindowForCurrentWindow()
@@ -200,6 +211,9 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
     //注册页面
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::HomePage>();
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::WordSearchResultPage>();
+	WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::SettingsPage>();
+    WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::FavoritePage>();
+    WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::HistoryPage>();
 
     WordWizServices::NavigationService::NavigateTo<WordWiz::HomePage>(MainWindow::GetMainFrame());
 
@@ -224,4 +238,8 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
     );
 
     updateBackButtonEnabled(); // Initial state
+}
+void winrt::WordWiz::implementation::MainWindow::BackButton_RightTapped(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::RightTappedRoutedEventArgs const& e)
+{
+    e.Handled(true);
 }

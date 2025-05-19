@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "Settings.xaml.h"
-#if __has_include("Settings.g.cpp")
-#include "Settings.g.cpp"
+#include "FavoritePage.xaml.h"
+#if __has_include("FavoritePage.g.cpp")
+#include "FavoritePage.g.cpp"
 #endif
 
 using namespace winrt;
@@ -12,17 +12,17 @@ using namespace Microsoft::UI::Xaml;
 
 namespace winrt::WordWiz::implementation
 {
-    int32_t Settings::MyProperty()
+    int32_t FavoritePage::MyProperty()
     {
         throw hresult_not_implemented();
     }
 
-    void Settings::MyProperty(int32_t /* value */)
+    void FavoritePage::MyProperty(int32_t /* value */)
     {
         throw hresult_not_implemented();
     }
 
-    void Settings::myButton_Click(IInspectable const&, RoutedEventArgs const&)
+    void FavoritePage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
     {
         myButton().Content(box_value(L"Clicked"));
     }

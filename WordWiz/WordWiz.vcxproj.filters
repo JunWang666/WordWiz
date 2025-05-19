@@ -17,7 +17,13 @@
     <Page Include="WordDetails.xaml">
       <Filter>views</Filter>
     </Page>
-    <Page Include="Settings.xaml">
+    <Page Include="HistoryPage.xaml">
+      <Filter>pages</Filter>
+    </Page>
+    <Page Include="SettingsPage.xaml">
+      <Filter>pages</Filter>
+    </Page>
+    <Page Include="FavoritePage.xaml">
       <Filter>pages</Filter>
     </Page>
   </ItemGroup>

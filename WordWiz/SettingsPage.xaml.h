@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Settings.g.h"
+#include "SettingsPage.g.h"
 
 namespace winrt::WordWiz::implementation
 {
-    struct Settings : SettingsT<Settings>
+    struct SettingsPage : SettingsPageT<SettingsPage>
     {
-        Settings()
+        SettingsPage()
         {
             // Xaml objects should not call InitializeComponent during construction.
             // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
@@ -21,7 +21,7 @@ namespace winrt::WordWiz::implementation
 
 namespace winrt::WordWiz::factory_implementation
 {
-    struct Settings : SettingsT<Settings, implementation::Settings>
+    struct SettingsPage : SettingsPageT<SettingsPage, implementation::SettingsPage>
     {
     };
 }

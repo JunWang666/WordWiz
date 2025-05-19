@@ -339,26 +339,26 @@ namespace WordWizServices
                 found = true;
             }
         }
+        // 修复 SettingsPage 匹配问题，确保 SettingsItem 被正确选中
         if (!found && context->NavigationView.SettingsItem()) {
             if (auto settingsItem = context->NavigationView.SettingsItem().try_as<winrt::Microsoft::UI::Xaml::Controls::NavigationViewItem>()) {
-                if (auto tagInspectable = settingsItem.Tag()) {
-                    if (auto tag = tagInspectable.try_as<winrt::hstring>()) {
-                        if (tag == targetPageTypeNameStr) {
-                            selectedItem = settingsItem;
-                            found = true;
-                        }
-                    }
+                // 支持 SettingsPage 名称的多种写法
+                if (targetPageTypeNameStr == L"SettingsPage" ||
+                    targetPageTypeNameStr == L"WordWiz.SettingsPage" ||
+                    (settingsItem.Tag() && settingsItem.Tag().try_as<winrt::hstring>() == targetPageTypeNameStr)) {
+                    selectedItem = settingsItem;
+                    found = true;
                 }
             }
         }
 
         if (found) {
-            Log::LogMessage(L"NavigationService: Setting NavigationView selected item for " + std::wstring(targetPageTypeNameStr.c_str()) + L" associated with the Frame.");
+            // 先清空再设置，避免残影
             context->NavigationView.SelectedItem(selectedItem);
-        }
-        else {
-            Log::LogMessage(L"NavigationService: No matching NavigationViewItem found for " + std::wstring(targetPageTypeNameStr.c_str()) + L" in NavigationView associated with the Frame. Clearing selection.");
+            Log::LogMessage(L"NavigationService: Setting NavigationView selected item for " + std::wstring(targetPageTypeNameStr.c_str()) + L" associated with the Frame.");
+        } else {
             context->NavigationView.SelectedItem(nullptr);
+            Log::LogMessage(L"NavigationService: No matching NavigationViewItem found for " + std::wstring(targetPageTypeNameStr.c_str()) + L" in NavigationView associated with the Frame. Clearing selection.");
         }
     }
 } // namespace WordWizServices

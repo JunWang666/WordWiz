@@ -49,28 +49,44 @@
                     Height="48"
                     Margin="0,0,0,0"
                     Click="BackButton_Click"
+                    RightTapped="BackButton_RightTapped"
                     ToolTipService.ToolTip="返回"
                     Visibility="Visible"  
                     IsEnabled="False"
                     Background="Transparent" 
                     BorderThickness="0"
                     VerticalAlignment="Top" 
-                    HorizontalAlignment="Left">    
-        
+                    HorizontalAlignment="Left">
+                <Button.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="选项 1"/>
+                        <MenuFlyoutItem Text="选项 2"/>
+                        <MenuFlyoutSeparator/>
+                        <ToggleMenuFlyoutItem Text="切换选项"/>
+                    </MenuFlyout>
+                </Button.ContextFlyout>
             </Button>
+
+            <AppBarButton x:Name="CustomPaneToggleButton"
+                      Icon="GlobalNavigationButton"
+                      Label="菜单"
+                      Width="48" 
+                      Height="48"
+                      Margin="40,0,0,0"
+                      Click="CustomPaneToggleButton_Click"/>
 
             <Image x:Name="WindowIcon" 
                 Source="Logo.png" 
                 Grid.Column="0" 
                 HorizontalAlignment="Left" 
                 x:FieldModifier="public" 
-                Width="30" Height="30" Margin="48,0,0,-20"
+                Width="30" Height="30" Margin="80,0,0,-20"
                 VerticalAlignment="Center"/>
             <TextBlock  
                Text="WordWiz by Go学长"  
                Grid.Column="0"  
                Style="{StaticResource CaptionTextBlockStyle}"  
-               Margin="80,17,0,-10"  
+               Margin="110,17,0,-10"  
                FontSize="13"  
                FontWeight="Normal"/>
         </Grid>
@@ -79,7 +95,7 @@
             Grid.Row="1"
             IsSettingsVisible="True"
             IsBackButtonVisible="Collapsed"
-            IsBackEnabled="False"
+            IsBackEnabled="True"
             SelectionChanged="NavigationView_SelectionChanged"
             ItemInvoked="NavigationView_ItemInvoked"
             Header="Header"
@@ -87,38 +103,51 @@
             PaneTitle=""
             PaneDisplayMode ="Auto"
             OpenPaneLength="250"
-            SelectionFollowsFocus="Enabled"
+            IsPaneToggleButtonVisible="False"
+            SelectionFollowsFocus="Disabled"
             IsTabStop="False">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="HomePage" Tag="WordWiz.HomePage" x:Name="HomePageItem">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Home"  />
-                    </NavigationViewItem.Icon>
+                <NavigationViewItem Content="HomePage" 
+                                    Tag="WordWiz.HomePage" 
+                                    x:Name="HomePageItem"
+                                    Icon="Home"
+                                    SelectsOnInvoked="True"
+                                    AutomationProperties.Name="Home Page">
                 </NavigationViewItem>
-                <NavigationViewItemHeader Content="Actions"/>
-                <NavigationViewItem Content="Search" Tag="WordWiz.WordSearchResultPage" x:Name="WordSearchResultPageItem" SelectsOnInvoked="True">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Zoom" />
-                    </NavigationViewItem.Icon>
+                
+                <NavigationViewItemHeader Content="查词"/>
+                
+                <NavigationViewItem Content="Search" 
+                                    Tag="WordWiz.WordSearchResultPage" 
+                                    x:Name="WordSearchResultPageItem" 
+                                    SelectsOnInvoked="True"
+                                    Icon="Zoom"
+                                    AutomationProperties.Name="Search Words">
                 </NavigationViewItem>
-                <NavigationViewItem Content="Menu Item3" Tag="SamplePage3" x:Name="SamplePage3Item">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Refresh" />
-                    </NavigationViewItem.Icon>
+
+                <NavigationViewItemHeader Content="Dock"/>
+
+                <NavigationViewItem Content="Favorite" 
+                     Tag="WordWiz.FavoritePage" 
+                     x:Name="FavoritePageItem" 
+                     SelectsOnInvoked="True"
+                     Icon="Favorite"
+                     AutomationProperties.Name="Favorites">
                 </NavigationViewItem>
+                <NavigationViewItem Content="History" 
+                     Tag="WordWiz.HistoryPage" 
+                     x:Name="HistoryPageItem" 
+                     SelectsOnInvoked="True"
+                     Icon="Clock"
+                     AutomationProperties.Name="History">
+                </NavigationViewItem>
+
             </NavigationView.MenuItems>
 
             <NavigationView.PaneCustomContent>
                 <HyperlinkButton x:Name="PaneHyperlink" Content="More info" Margin="12,0" Visibility="Collapsed" />
             </NavigationView.PaneCustomContent>
-
-            <NavigationView.PaneFooter>
-                <StackPanel x:Name="FooterStackPanel" Orientation="Vertical" Visibility="Visible">
-                    <NavigationViewItem Icon="Download" AutomationProperties.Name="download" />
-                    <NavigationViewItem Icon="Favorite" AutomationProperties.Name="favorite" />
-                </StackPanel>
-            </NavigationView.PaneFooter>
 
             <Frame x:Name="contentFrame" />
         </NavigationView>
