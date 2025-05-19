@@ -5,46 +5,17 @@
     xmlns:local="using:WordWiz"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Loaded="OnLoaded"
-    >
-    <Grid Padding="0" RowSpacing="0">
-        <Grid Grid.Row="0" x:Name="PlaceholderPanel" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
-                <!-- Replace the Source with your illustration path if needed -->
-                <Image Source="/Assets/ArtWorks/d4c31bd0260dac01a76f46ec17883b02_3912538206445877688.png" Width="520" Height="Auto" Stretch="Uniform"/>
-                <TextBlock Text="请选择一个单词以查看详细信息" 
-                           FontSize="18" 
-                           Foreground="{ThemeResource TextControlPlaceholderForeground}" 
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+    mc:Ignorable="d">
 
-        <Grid RowSpacing="0" Grid.Row="0" x:Name="DetalPanel">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <StackPanel Padding="10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+        <TextBlock Text="详细信息" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,0,20"/>
 
-            <TextBlock x:Name="WordTextBlock"
-                    Grid.Row="0" 
-                   Text="{x:Bind ItemToDisplay.Word, Mode=OneWay, FallbackValue='单词'}" 
-                   Style="{ThemeResource TitleTextBlockStyle}" 
-                   Margin="0,0,0,8"/>
+        <TextBlock Text="词语 (Word):" Style="{ThemeResource CaptionTextBlockStyle}"/>
+        <TextBlock Text="{x:Bind ItemToDisplay.Word, Mode=OneWay, FallbackValue='--- 请选择一个词条 ---'}"
+                   Style="{ThemeResource BodyStrongTextBlockStyle}" Margin="0,5,0,15" FontSize="20"/>
 
-            <SelectorBar Grid.Row="1" x:Name="DictionarySelectorBar"
-                     SelectionChanged="DictionarySelectorBar_SelectionChanged">
-            </SelectorBar>
-
-
-            <WebView2 Grid.Row="2" 
-                  x:Name="DictionaryWebView"
-                  DefaultBackgroundColor="Transparent">
-                <WebView2.OpacityTransition>
-                    <ScalarTransition Duration="0:0:0.200" />
-                </WebView2.OpacityTransition>
-            </WebView2>
-        </Grid>
-    </Grid>
+        <TextBlock Text="解释 (Explanation):" Style="{ThemeResource CaptionTextBlockStyle}"/>
+        <TextBlock Text="{x:Bind ItemToDisplay.Explanation, Mode=OneWay, FallbackValue='N/A'}"
+                   Style="{ThemeResource BodyTextBlockStyle}" Margin="0,5,0,0" TextWrapping="WrapWholeWords" FontSize="16"/>
+    </StackPanel>
 </UserControl>
