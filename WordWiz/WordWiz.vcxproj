@@ -118,6 +118,7 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="database.h" />
     <ClInclude Include="FavoritePage.xaml.h">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -185,6 +186,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="database.cpp" />
     <ClCompile Include="FavoritePage.xaml.cpp">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -342,6 +344,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="vcpkg.json" />
     <None Include="WordWiz_TemporaryKey.pfx" />
   </ItemGroup>
   <!--
@@ -359,6 +362,10 @@
     <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" />
     <Import Project="..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets" Condition="Exists('..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets')" />
     <Import Project="..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
+    <Import Project="..\packages\soci.redist.3.2\build\native\soci.redist.targets" Condition="Exists('..\packages\soci.redist.3.2\build\native\soci.redist.targets')" />
+    <Import Project="..\packages\soci.3.2\build\native\soci.targets" Condition="Exists('..\packages\soci.3.2\build\native\soci.targets')" />
+    <Import Project="..\packages\soci.sqlite.redist.3.2\build\native\soci.sqlite.redist.targets" Condition="Exists('..\packages\soci.sqlite.redist.3.2\build\native\soci.sqlite.redist.targets')" />
+    <Import Project="..\packages\boost.1.87.0\build\boost.targets" Condition="Exists('..\packages\boost.1.87.0\build\boost.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -372,5 +379,9 @@
     <Error Condition="!Exists('..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets'))" />
+    <Error Condition="!Exists('..\packages\soci.redist.3.2\build\native\soci.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\soci.redist.3.2\build\native\soci.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\soci.3.2\build\native\soci.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\soci.3.2\build\native\soci.targets'))" />
+    <Error Condition="!Exists('..\packages\soci.sqlite.redist.3.2\build\native\soci.sqlite.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\soci.sqlite.redist.3.2\build\native\soci.sqlite.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))" />
   </Target>
 </Project>

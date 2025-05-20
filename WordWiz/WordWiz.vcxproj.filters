@@ -54,6 +54,9 @@
     <ClCompile Include="WordSearch.cpp">
       <Filter>modules\WordSearch</Filter>
     </ClCompile>
+    <ClCompile Include="database.cpp">
+      <Filter>services\DataManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -68,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="WordSearch.h">
       <Filter>modules\WordSearch</Filter>
+    </ClInclude>
+    <ClInclude Include="database.h">
+      <Filter>services\DataManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +298,9 @@
     <Filter Include="Assets\Logo">
       <UniqueIdentifier>{9ec57027-a5f8-41ed-bb4f-e029c7542bc8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="services\DataManager">
+      <UniqueIdentifier>{d397f5bb-203f-4fce-aed7-14e855deb73b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
@@ -305,6 +314,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="WordWiz_TemporaryKey.pfx" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
