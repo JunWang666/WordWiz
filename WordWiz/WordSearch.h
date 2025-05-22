@@ -1,7 +1,11 @@
 // WordSearch.h
 #pragma once
 #include "WordSearch.g.h"
-#include "WordItem.h" 
+#include "WordItem.h"
+#include "DictionaryItemInWordDetail.g.h" // 只 include g.h
+
+using namespace winrt;
+using namespace Windows::Foundation::Collections;
 
 namespace winrt::WordWiz::implementation
 {
@@ -9,12 +13,9 @@ namespace winrt::WordWiz::implementation
     {
         WordSearch() = default;
 
-        // 原有的 Search 方法 (我们将从中移除延迟)
-        Windows::Foundation::Collections::IVector<WordWiz::WordItem> Search(winrt::hstring const& query);
-
-        // 新增方法
-        Windows::Foundation::Collections::IVector<winrt::hstring> GetAvailableDictionaries(winrt::hstring const& word);
-        winrt::hstring GetDictionaryHtmlContent(winrt::hstring const& word, winrt::hstring const& dictionaryName);
+        IVector<WordWiz::WordItem> Search(winrt::hstring const& query);
+        IVector<WordWiz::DictionaryItemInWordDetail> GetAvailableDictionaries(winrt::hstring const& word);
+        winrt::hstring GetDictionaryHtmlContent(winrt::hstring const& word, winrt::hstring const& dictionaryId);
     };
 }
 

@@ -1,5 +1,7 @@
 // WordSearch.idl
 import "WordItem.idl";
+import "DictionaryItemInWordDetail.idl";
+
 
 namespace WordWiz
 {
@@ -9,7 +11,7 @@ namespace WordWiz
         WordSearch();
         Windows.Foundation.Collections.IVector<WordWiz.WordItem> Search(String query);
 
-        Windows.Foundation.Collections.IVector<String> GetAvailableDictionaries(String word);
+        Windows.Foundation.Collections.IVector<WordWiz.DictionaryItemInWordDetail> GetAvailableDictionaries(String word);
         String GetDictionaryHtmlContent(String word, String dictionaryName);
     
     }

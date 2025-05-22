@@ -1,0 +1,10 @@
+namespace WordWiz
+{
+    runtimeclass DictionaryItemInWordDetail
+    {
+        DictionaryItemInWordDetail(String id, String name, String displayName);
+        String Id{ get; };
+        String Name{ get; };
+        String DisplayName{ get; };
+    }
+}
