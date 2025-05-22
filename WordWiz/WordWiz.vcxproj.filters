@@ -54,6 +54,15 @@
     <ClCompile Include="WordSearch.cpp">
       <Filter>modules\WordSearch</Filter>
     </ClCompile>
+    <ClCompile Include="database.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="FilePathProvider.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsData.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -68,6 +77,12 @@
     </ClInclude>
     <ClInclude Include="WordSearch.h">
       <Filter>modules\WordSearch</Filter>
+    </ClInclude>
+    <ClInclude Include="FilePathProvider.h">
+      <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsData.h">
+      <Filter>services\Database</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -291,6 +306,9 @@
     </Filter>
     <Filter Include="Assets\Logo">
       <UniqueIdentifier>{9ec57027-a5f8-41ed-bb4f-e029c7542bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="services\Database">
+      <UniqueIdentifier>{dca91415-7da1-428b-895d-f88b4f2b333c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

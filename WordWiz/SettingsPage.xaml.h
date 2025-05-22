@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SettingsPage.g.h"
+#include "SettingsData.h"
 
 namespace winrt::WordWiz::implementation
 {
