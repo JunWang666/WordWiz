@@ -225,9 +225,7 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
-    </ClCompile>
     <ClCompile Include="WordSearch.cpp" />
-    </ClCompile>
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
