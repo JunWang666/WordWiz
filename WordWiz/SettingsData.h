@@ -34,6 +34,10 @@ public:
     // 移除一个键
     void remove(const std::string& key);
 
+	void setTableName(const std::string tableName) {
+		TABLE_NAME = tableName;
+	}
+
 private:
     SettingsManager() = delete;
     ~SettingsManager() = delete;
@@ -49,5 +53,5 @@ private:
     static Poco::FastMutex _mutex;      // 保证线程安全的互斥锁
     static bool _isInitialized;         // 标记是否已初始化
 
-    const std::string TABLE_NAME; // 表名
+    std::string TABLE_NAME; // 表名
 };

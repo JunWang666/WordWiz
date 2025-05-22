@@ -122,6 +122,7 @@
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="FilePathProvider.h" />
     <ClInclude Include="HistoryPage.xaml.h">
       <DependentUpon>HistoryPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -191,6 +192,7 @@
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="FilePathProvider.cpp" />
     <ClCompile Include="HistoryPage.xaml.cpp">
       <DependentUpon>HistoryPage.xaml</DependentUpon>
       <SubType>Code</SubType>
