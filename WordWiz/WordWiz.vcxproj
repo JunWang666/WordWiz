@@ -118,6 +118,7 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DictionaryItemInWordDetail.h" />
     <ClInclude Include="FavoritePage.xaml.h">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -188,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="database.cpp" />
+    <ClCompile Include="DictionaryItemInWordDetail.cpp" />
     <ClCompile Include="FavoritePage.xaml.cpp">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -223,7 +225,9 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
+    </ClCompile>
     <ClCompile Include="WordSearch.cpp" />
+    </ClCompile>
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -234,6 +238,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="DictionaryItemInWordDetail.idl" />
     <Midl Include="FavoritePage.idl">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
