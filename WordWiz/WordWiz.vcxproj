@@ -97,7 +97,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;POCO_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -123,6 +123,7 @@
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="FilePathProvider.h" />
     <ClInclude Include="HistoryPage.xaml.h">
       <DependentUpon>HistoryPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -140,6 +141,7 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="SettingsData.h" />
     <ClInclude Include="SettingsPage.xaml.h">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -186,11 +188,13 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="database.cpp" />
     <ClCompile Include="DictionaryItemInWordDetail.cpp" />
     <ClCompile Include="FavoritePage.xaml.cpp">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="FilePathProvider.cpp" />
     <ClCompile Include="HistoryPage.xaml.cpp">
       <DependentUpon>HistoryPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -211,6 +215,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="SettingsData.cpp" />
     <ClCompile Include="SettingsPage.xaml.cpp">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -220,7 +225,9 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="WordItem.cpp" />
+    </ClCompile>
     <ClCompile Include="WordSearch.cpp" />
+    </ClCompile>
     <ClCompile Include="WordSearchResultList.xaml.cpp">
       <DependentUpon>WordSearchResultList.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -362,6 +369,13 @@
     <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" />
     <Import Project="..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets" Condition="Exists('..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets')" />
     <Import Project="..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
+    <Import Project="..\packages\boost.1.87.0\build\boost.targets" Condition="Exists('..\packages\boost.1.87.0\build\boost.targets')" />
+    <Import Project="..\packages\Poco.Data.vs150.noarch.1.10.1\build\native\Poco.Data.vs150.noarch.targets" Condition="Exists('..\packages\Poco.Data.vs150.noarch.1.10.1\build\native\Poco.Data.vs150.noarch.targets')" />
+    <Import Project="..\packages\Poco.DataSQLite.vs150.noarch.1.10.1\build\native\Poco.DataSQLite.vs150.noarch.targets" Condition="Exists('..\packages\Poco.DataSQLite.vs150.noarch.1.10.1\build\native\Poco.DataSQLite.vs150.noarch.targets')" />
+    <Import Project="..\packages\Poco.Foundation.vs150.noarch.1.10.1\build\native\Poco.Foundation.vs150.noarch.targets" Condition="Exists('..\packages\Poco.Foundation.vs150.noarch.1.10.1\build\native\Poco.Foundation.vs150.noarch.targets')" />
+    <Import Project="..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets" Condition="Exists('..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets')" />
+    <Import Project="..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets" Condition="Exists('..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets')" />
+    <Import Project="..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets" Condition="Exists('..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -375,5 +389,12 @@
     <Error Condition="!Exists('..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.BuildTools.10.0.26100.3916\build\Microsoft.Windows.SDK.BuildTools.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.ImplementationLibrary.1.0.250325.1\build\native\Microsoft.Windows.ImplementationLibrary.targets'))" />
+    <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.Data.vs150.noarch.1.10.1\build\native\Poco.Data.vs150.noarch.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.Data.vs150.noarch.1.10.1\build\native\Poco.Data.vs150.noarch.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.DataSQLite.vs150.noarch.1.10.1\build\native\Poco.DataSQLite.vs150.noarch.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.DataSQLite.vs150.noarch.1.10.1\build\native\Poco.DataSQLite.vs150.noarch.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.Foundation.vs150.noarch.1.10.1\build\native\Poco.Foundation.vs150.noarch.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.Foundation.vs150.noarch.1.10.1\build\native\Poco.Foundation.vs150.noarch.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets'))" />
   </Target>
 </Project>

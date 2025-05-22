@@ -57,6 +57,15 @@
     <ClCompile Include="WordSearch.cpp">
       <Filter>modules\WordSearch</Filter>
     </ClCompile>
+    <ClCompile Include="database.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="FilePathProvider.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsData.cpp">
+      <Filter>services\Database</Filter>
+    </ClInclude>
     <ClCompile Include="DictionaryItemInWordDetail.cpp">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClCompile>
@@ -74,6 +83,12 @@
     </ClInclude>
     <ClInclude Include="WordSearch.h">
       <Filter>modules\WordSearch</Filter>
+    </ClInclude>
+    <ClInclude Include="FilePathProvider.h">
+      <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsData.h">
+      <Filter>services\Database</Filter>
     </ClInclude>
     <ClInclude Include="DictionaryItemInWordDetail.h">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
@@ -300,6 +315,9 @@
     </Filter>
     <Filter Include="Assets\Logo">
       <UniqueIdentifier>{9ec57027-a5f8-41ed-bb4f-e029c7542bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="services\Database">
+      <UniqueIdentifier>{dca91415-7da1-428b-895d-f88b4f2b333c}</UniqueIdentifier>
     </Filter>
     <Filter Include="dataModels\DictionaryItemInWordDetail">
       <UniqueIdentifier>{9c26d520-f438-45f3-b77c-6605c4c99b71}</UniqueIdentifier>
