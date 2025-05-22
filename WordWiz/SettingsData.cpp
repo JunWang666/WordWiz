@@ -11,11 +11,13 @@
 #include "Poco/File.h"   // For Poco::File
 #include "Poco/Path.h"   // For Poco::Path
 
+#include<FilePathProvider.h>
+
 // 静态成员变量定义
 // Poco::AutoPtr<Poco::Data::Session> SettingsManager::_pSession; // 替换
 std::unique_ptr<Poco::Data::Session> SettingsManager::_pSession; // 使用 std::unique_ptr
 
-std::string SettingsManager::_dbPath;
+std::string SettingsManager::_dbPath = WordWiz::Data::FilePathProvider::GetAppLocalFolderPath() + "AppData.db";
 Poco::FastMutex SettingsManager::_mutex;
 bool SettingsManager::_isInitialized = false;
 
