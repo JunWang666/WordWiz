@@ -3,12 +3,14 @@
 #include "WordDetails.xaml.h"
 #include "WordDetails.g.cpp"
 #include "WordItem.h" 
+#include "DictionaryItemInWordDetail.h" // 引入字典项定义
 #include "NavigationService.h" // 新增：引入NavigationService实现
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls; // For SelectorBar related types
 using namespace Windows::Foundation::Collections;
+using namespace WordWiz; // 用于 DictionaryItemInWordDetal
 using namespace WordWizServices; // 新增：使用NavigationService命名空间
 
 namespace winrt::WordWiz::implementation
@@ -22,11 +24,11 @@ namespace winrt::WordWiz::implementation
             Microsoft::UI::Xaml::PropertyMetadata{ nullptr, PropertyChangedCallback(&WordDetails::OnItemToDisplayChanged) } // 添加回调
         );
 
-    // 新增 DictionaryNamesProperty
-    Microsoft::UI::Xaml::DependencyProperty WordDetails::m_dictionaryNamesProperty =
+    // 新增 DictionaryItemsProperty
+    Microsoft::UI::Xaml::DependencyProperty WordDetails::m_dictionaryItemsProperty =
         Microsoft::UI::Xaml::DependencyProperty::Register(
-            L"DictionaryNames",
-            xaml_typename<IObservableVector<winrt::hstring>>(),
+            L"DictionaryItems",
+            xaml_typename<IObservableVector<WordWiz::DictionaryItemInWordDetail>>(),
             xaml_typename<WordWiz::WordDetails>(),
             Microsoft::UI::Xaml::PropertyMetadata{ nullptr }
         );
@@ -43,10 +45,8 @@ namespace winrt::WordWiz::implementation
     WordDetails::WordDetails()
     {
         InitializeComponent();
-        // 初始化 WordSearch 服务
-        m_wordSearchService = winrt::make<WordWiz::implementation::WordSearch>();
-        // 初始化 DictionaryNames 为一个空的 observable vector
-        SetValue(m_dictionaryNamesProperty, winrt::single_threaded_observable_vector<winrt::hstring>());
+        // 初始化 DictionaryItems
+        SetValue(m_dictionaryItemsProperty, winrt::single_threaded_observable_vector<WordWiz::DictionaryItemInWordDetail>());
     }
 
     void WordDetails::OnLoaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
@@ -63,18 +63,13 @@ namespace winrt::WordWiz::implementation
         {
             if (strong_this->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
             {
-                // Debug输出，确认调用
-                // OutputDebugString(L"InitializeWebView2Async: Calling EnsureCoreWebView2Async...\n");
                 co_await strong_this->DictionaryWebView().EnsureCoreWebView2Async();
                 
-                
                 strong_this->m_isCoreWebView2Initialized = true;
-                // OutputDebugString(L"InitializeWebView2Async: CoreWebView2 Initialized.\n");
 
                 // 如果有待处理的HTML，现在加载它
                 if (strong_this->m_isCoreWebView2Initialized && !strong_this->m_pendingHtmlToNavigate.empty())
                 {
-                    // OutputDebugString((L"InitializeWebView2Async: Navigating to pending HTML: " + strong_this->m_pendingHtmlToNavigate + L"\n").c_str());
                     strong_this->DictionaryWebView().NavigateToString(strong_this->m_pendingHtmlToNavigate);
                     strong_this->m_pendingHtmlToNavigate = L""; // 清除待处理的HTML
                 }
@@ -82,9 +77,7 @@ namespace winrt::WordWiz::implementation
         }
         catch (winrt::hresult_error const& ex)
         {
-            // 记录或处理 CoreWebView2 初始化失败的情况
             winrt::hstring errorMessage = ex.message();
-            // OutputDebugString((L"InitializeWebView2Async: CoreWebView2 Init Error: " + errorMessage + L"\n").c_str());
             // 在UI上显示错误，或者进行其他错误处理
         }
     }
@@ -99,10 +92,10 @@ namespace winrt::WordWiz::implementation
         SetValue(m_itemToDisplayProperty, value);
     }
 
-    // DictionaryNames Getter
-    IObservableVector<winrt::hstring> WordDetails::DictionaryNames()
+    // DictionaryItems Getter
+    IObservableVector<WordWiz::DictionaryItemInWordDetail> WordDetails::DictionaryItems()
     {
-        return GetValue(m_dictionaryNamesProperty).try_as<IObservableVector<winrt::hstring>>();
+        return GetValue(m_dictionaryItemsProperty).try_as<IObservableVector<WordWiz::DictionaryItemInWordDetail>>();
     }
 
     // SelectedDictionaryHtml Getter/Setter
@@ -124,7 +117,6 @@ namespace winrt::WordWiz::implementation
             // 新增：通过NavigationService记录历史
             if (SendersThis->m_hostFrame && newItem && !newItem.Word().empty())
             {
-                // 这里将WordItem作为参数传递，infoOverride可用默认
                 NavigationService::AddCurrentPageToHistoryWithData(
                     SendersThis->m_hostFrame,
                     newItem,
@@ -133,31 +125,35 @@ namespace winrt::WordWiz::implementation
             }
 
             // 清理 SelectorBar 中的旧项目
-            // 假设你的 SelectorBar 在 XAML 中的 x:Name 是 DictionarySelectorBar
-            // 并且 C++/WinRT 为你生成了 DictionarySelectorBar() 成员函数来访问它
             if (SendersThis->DictionarySelectorBar()) // 检查控件是否有效
             {
                 SendersThis->DictionarySelectorBar().Items().Clear();
             }
 
-            // 清理可能存在的旧的字典名列表（如果你的 DictionaryNames 属性仍在使用）
-            // if (SendersThis->DictionaryNames()) SendersThis->DictionaryNames().Clear();
-
+            // 清理可能存在的旧的字典项列表
+            if (SendersThis->DictionaryItems())
+                SendersThis->DictionaryItems().Clear();
 
             if (newItem) // 如果新的 WordItem 有效
             {
                 winrt::hstring word = newItem.Word(); // 获取单词
 
-                // 调用 WordSearch 服务获取可用词典列表
-                // !!! 再次确认 m_wordSearchService 已初始化，并且 GetAvailableDictionaries 方法已在 WordSearch.idl, .h, .cpp 中正确声明和实现 !!!
-                auto availableDictionaries = SendersThis->m_wordSearchService.GetAvailableDictionaries(word);
+                // 调用 WordSearch 服务获取可用词典列表 (现在返回DictionaryItemInWordDetal对象)
+                Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> availableDictionaries = WordWiz::WordSearch().GetAvailableDictionaries(word);
+                
+                // 存储所有字典项
+                for (auto const& dictItem : availableDictionaries)
+                {
+                    SendersThis->DictionaryItems().Append(dictItem);
+                }
 
                 if (SendersThis->DictionarySelectorBar()) // 再次检查
                 {
-                    for (auto const& dictName : availableDictionaries)
+                    for (auto const& dictItem : availableDictionaries)
                     {
                         SelectorBarItem sbItem;          // 创建新的 SelectorBarItem
-                        sbItem.Text(dictName);           // 设置其文本
+                        sbItem.Text(dictItem.DisplayName()); // 设置其显示名称
+                        sbItem.Tag(box_value(dictItem.Id())); // 使用Tag存储字典ID（hstring）
                         SendersThis->DictionarySelectorBar().Items().Append(sbItem); // 添加到 SelectorBar
                     }
                 }
@@ -165,8 +161,6 @@ namespace winrt::WordWiz::implementation
                 if (SendersThis->DictionarySelectorBar() && SendersThis->DictionarySelectorBar().Items().Size() > 0)
                 {
                     // 自动选中第一个词典项
-                    // 注意：直接设置 SelectedItem 通常会触发 SelectionChanged 事件，
-                    // 在该事件的处理函数中我们会加载HTML内容到 WebView2
                     SendersThis->DictionarySelectorBar().SelectedItem(
                         SendersThis->DictionarySelectorBar().Items().GetAt(0).try_as<SelectorBarItem>()
                     );
@@ -189,52 +183,42 @@ namespace winrt::WordWiz::implementation
     }
 
     // ItemToDisplay 属性更改时的回调
-    // 在 WordDetails::OnItemToDisplayChanged 方法内部，获取到 availableDictionaries 之后：
     void WordDetails::OnSelectedDictionaryHtmlChanged(DependencyObject const& d, DependencyPropertyChangedEventArgs const& e)
     {
         if (auto SendersThis{ d.try_as<WordDetails>() })
         {
             winrt::hstring actualHtmlString = winrt::unbox_value<winrt::hstring>(e.NewValue());
-            // OutputDebugString((L"OnSelectedDictionaryHtmlChanged: Received HTML. CoreWebView2 initialized: " + (SendersThis->m_isCoreWebView2Initialized ? L"true" : L"false") + L"\n").c_str());
-            // OutputDebugString((L"HTML to load: " + actualHtmlString + L"\n").c_str());
-
 
             if (SendersThis->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
             {
                 if (SendersThis->m_isCoreWebView2Initialized)
                 {
-                    // OutputDebugString(L"OnSelectedDictionaryHtmlChanged: CoreWebView2 is ready, navigating.\n");
                     SendersThis->DictionaryWebView().NavigateToString(actualHtmlString);
                 }
                 else
                 {
-                    // OutputDebugString(L"OnSelectedDictionaryHtmlChanged: CoreWebView2 not ready, storing HTML as pending.\n");
                     SendersThis->m_pendingHtmlToNavigate = actualHtmlString;
-                    // InitializeWebView2Async 应该已经由 Loaded 事件触发了，
-                    // 如果担心 Loaded 可能晚于第一次 SelectedDictionaryHtml 变化（不太可能但极端情况），
-                    // 可以考虑再次调用，但要注意避免多次不必要的 EnsureCoreWebView2Async 调用。
-                    // 通常，依赖 Loaded 触发一次初始化即可。
                 }
             }
         }
     }
 
-    // DictionarySelectorBar_SelectionChanged 可能需要调整以从 SelectorBarItem 获取文本
+    // DictionarySelectorBar_SelectionChanged 更新以使用字符串ID标识字典
     void WordDetails::DictionarySelectorBar_SelectionChanged(SelectorBar const& sender, SelectorBarSelectionChangedEventArgs const& /*args*/)
     {
-        // args 参数实际更有用，因为它直接包含 SelectedItem
-        // auto selectedBarItem = args.SelectedItem().try_as<SelectorBarItem>();
-        // 如果用 sender:
         auto selectedBarItem = sender.SelectedItem().try_as<SelectorBarItem>();
 
         if (selectedBarItem && ItemToDisplay())
         {
-            winrt::hstring dictionaryName = selectedBarItem.Text(); // 从 SelectorBarItem 获取文本
-            if (!dictionaryName.empty())
+            // 从Tag中获取字典ID（hstring）
+            if (selectedBarItem.Tag())
             {
+                auto dictionaryId = unbox_value<winrt::hstring>(selectedBarItem.Tag());
                 winrt::hstring word = ItemToDisplay().Word();
-                winrt::hstring htmlContent = m_wordSearchService.GetDictionaryHtmlContent(word, dictionaryName);
-                SelectedDictionaryHtml(htmlContent); // 这个DP仍然用来驱动WebView2
+                
+                // 使用字符串ID调用获取字典内容
+                winrt::hstring htmlContent = WordWiz::WordSearch().GetDictionaryHtmlContent(word, dictionaryId);
+                SelectedDictionaryHtml(htmlContent);
             }
         }
     }
@@ -247,7 +231,7 @@ namespace winrt::WordWiz::implementation
 
         if (hasWord)
         {
-			DetalPanel().Visibility(Visibility::Visible);
+            DetalPanel().Visibility(Visibility::Visible);
             PlaceholderPanel().Visibility(Visibility::Collapsed);
         }
         else
