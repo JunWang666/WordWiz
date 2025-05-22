@@ -38,6 +38,9 @@
     <Midl Include="WordSearch.idl">
       <Filter>modules\WordSearch</Filter>
     </Midl>
+    <Midl Include="DictionaryItemInWordDetail.idl">
+      <Filter>dataModels\DictionaryItemInWordDetail</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -54,6 +57,9 @@
     <ClCompile Include="WordSearch.cpp">
       <Filter>modules\WordSearch</Filter>
     </ClCompile>
+    <ClCompile Include="DictionaryItemInWordDetail.cpp">
+      <Filter>dataModels\DictionaryItemInWordDetail</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -68,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="WordSearch.h">
       <Filter>modules\WordSearch</Filter>
+    </ClInclude>
+    <ClInclude Include="DictionaryItemInWordDetail.h">
+      <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -291,6 +300,9 @@
     </Filter>
     <Filter Include="Assets\Logo">
       <UniqueIdentifier>{9ec57027-a5f8-41ed-bb4f-e029c7542bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dataModels\DictionaryItemInWordDetail">
+      <UniqueIdentifier>{9c26d520-f438-45f3-b77c-6605c4c99b71}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
