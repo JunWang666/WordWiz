@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="WordWiz.HomePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,7 +8,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Image Source="/Assets/Logos/Gemini_Generated_Image_rqzbvgrqzbvgrqzb.png" Width="520" Height="Auto" Stretch="Uniform"/>
+        <TextBox
+            Width="600"
+            Height="100"
+            TextWrapping="Wrap"
+            PlaceholderText="在此输入任何你感兴趣的话题..."
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            KeyDown="TextBox_KeyDown"/>
     </StackPanel>
 </Page>

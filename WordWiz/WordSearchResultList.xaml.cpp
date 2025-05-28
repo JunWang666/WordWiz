@@ -1,9 +1,9 @@
-// WordSearchResultList.xaml.cpp
+ï»¿// WordSearchResultList.xaml.cpp
 #include "pch.h"
 #include "WordSearchResultList.xaml.h"
-#include "WordSearchResultList.g.cpp" // ÓÉ MIDL Éú³É
-#include "WordItem.h"                 // ´´½¨ WordItem ÊµÀıĞèÒª
-// #include "WordSearch.h" // ÒÑ¾­ÔÚ pch.h »ò WordSearchResultList.xaml.h ÖĞ°üº¬ÁË
+#include "WordSearchResultList.g.cpp" // ç”± MIDL ç”Ÿæˆ
+#include "WordItem.h"                 // åˆ›å»º WordItem å®ä¾‹éœ€è¦
+// #include "WordSearch.h" // å·²ç»åœ¨ pch.h æˆ– WordSearchResultList.xaml.h ä¸­åŒ…å«äº†
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -13,7 +13,7 @@ using namespace Windows::System; // For VirtualKey
 
 namespace winrt::WordWiz::implementation
 {
-    // ¾²Ì¬ÒÀÀµÊôĞÔ m_currentDetailItemProperty µÄ¶¨ÒåºÍ×¢²á
+    // é™æ€ä¾èµ–å±æ€§ m_currentDetailItemProperty çš„å®šä¹‰å’Œæ³¨å†Œ
     Microsoft::UI::Xaml::DependencyProperty WordSearchResultList::m_currentDetailItemProperty =
         Microsoft::UI::Xaml::DependencyProperty::Register(
             L"CurrentDetailItem",
@@ -22,109 +22,110 @@ namespace winrt::WordWiz::implementation
             Microsoft::UI::Xaml::PropertyMetadata{ nullptr }
         );
 
-    // ¹¹Ôìº¯Êı
+
+    // æ„é€ å‡½æ•°
     WordSearchResultList::WordSearchResultList()
     {
         m_items = winrt::single_threaded_observable_vector<WordWiz::WordItem>();
 
-        // ³õÊ¼»¯ WordSearch ·şÎñ
+        // åˆå§‹åŒ– WordSearch æœåŠ¡
         m_wordSearchService = winrt::make<WordWiz::implementation::WordSearch>();
 
-        // ³õÊ¼»¯·À¶¶¼ÆÊ±Æ÷
+        // åˆå§‹åŒ–é˜²æŠ–è®¡æ—¶å™¨
         m_debounceTimer = Microsoft::UI::Xaml::DispatcherTimer();
-        m_debounceTimer.Interval(std::chrono::milliseconds{ 500 }); // ÉèÖÃ0.5Ãë¼ä¸ô
+        m_debounceTimer.Interval(std::chrono::milliseconds{ 500 }); // è®¾ç½®0.5ç§’é—´éš”
         m_debounceTimer.Tick({ this, &WordSearchResultList::OnDebounceTimerTick });
 
-        InitializeComponent(); // XAML Éú³ÉµÄ´úÂë£¬±ØĞëµ÷ÓÃ
+        InitializeComponent(); // XAML ç”Ÿæˆçš„ä»£ç ï¼Œå¿…é¡»è°ƒç”¨
 
-        // ÄãÔ­ÓĞµÄÊ¾ÀıÊı¾İÌí¼Ó´úÂë
+        // ä½ åŸæœ‰çš„ç¤ºä¾‹æ•°æ®æ·»åŠ ä»£ç 
         // AddSampleItems(); 
-        // ½¨ÒéÔÚÊµ¼ÊÊ¹ÓÃÊ±£¬ÁĞ±í³õÊ¼Îª¿Õ£¬Í¨¹ıËÑË÷Ìî³ä
+        // å»ºè®®åœ¨å®é™…ä½¿ç”¨æ—¶ï¼Œåˆ—è¡¨åˆå§‹ä¸ºç©ºï¼Œé€šè¿‡æœç´¢å¡«å……
     }
 
-    // Items ÊôĞÔµÄ getter ÊµÏÖ
+    // Items å±æ€§çš„ getter å®ç°
     IObservableVector<WordWiz::WordItem> WordSearchResultList::Items()
     {
         return m_items;
     }
 
-    // CurrentDetailItem ÒÀÀµÊôĞÔµÄ getter ÊµÏÖ
+    // CurrentDetailItem ä¾èµ–å±æ€§çš„ getter å®ç°
     WordWiz::WordItem WordSearchResultList::CurrentDetailItem()
     {
         return GetValue(m_currentDetailItemProperty).try_as<WordWiz::WordItem>();
     }
 
-    // CurrentDetailItem ÒÀÀµÊôĞÔµÄ setter ÊµÏÖ
+    // CurrentDetailItem ä¾èµ–å±æ€§çš„ setter å®ç°
     void WordSearchResultList::CurrentDetailItem(WordWiz::WordItem const& value)
     {
         SetValue(m_currentDetailItemProperty, value);
     }
 
-    // ListView µÄ SelectionChanged ÊÂ¼ş´¦Àíº¯ÊıÊµÏÖ
+    // ListView çš„ SelectionChanged äº‹ä»¶å¤„ç†å‡½æ•°å®ç°
     void WordSearchResultList::ResultsListView_SelectionChanged(IInspectable const& sender, Controls::SelectionChangedEventArgs const& /*args*/)
     {
         auto listView = sender.as<Microsoft::UI::Xaml::Controls::ListView>();
-        auto selectedListViewItem = listView.SelectedItem(); // »ñÈ¡µ±Ç°Ñ¡ÖĞµÄÔ­Ê¼Ïî
+        auto selectedListViewItem = listView.SelectedItem(); // è·å–å½“å‰é€‰ä¸­çš„åŸå§‹é¡¹
 
-        if (selectedListViewItem) // ¹Ø¼ü£º½öµ±È·ÊµÓĞÒ»¸öÑ¡ÖĞÏîÊ±²Å¸üĞÂ
+        if (selectedListViewItem) // å…³é”®ï¼šä»…å½“ç¡®å®æœ‰ä¸€ä¸ªé€‰ä¸­é¡¹æ—¶æ‰æ›´æ–°
         {
-            // ½«Ñ¡ÖĞµÄÏî×ª»»Îª WordItem ²¢¸üĞÂ CurrentDetailItem
+            // å°†é€‰ä¸­çš„é¡¹è½¬æ¢ä¸º WordItem å¹¶æ›´æ–° CurrentDetailItem
             this->CurrentDetailItem(selectedListViewItem.try_as<WordWiz::WordItem>());
         }
-        // else (Èç¹û selectedListViewItem ÊÇ nullptr£¬ÀıÈçÁĞ±í±»Çå¿Õ»òÓÃ»§È¡ÏûÑ¡Ôñ)
+        // else (å¦‚æœ selectedListViewItem æ˜¯ nullptrï¼Œä¾‹å¦‚åˆ—è¡¨è¢«æ¸…ç©ºæˆ–ç”¨æˆ·å–æ¶ˆé€‰æ‹©)
         // {
-        //     ÎÒÃÇ²»Ö´ĞĞÈÎºÎ²Ù×÷£¬CurrentDetailItem ±£³ÖÆäÖ®Ç°µÄÖµ¡£
-        //     ÕâÑù WordDetails ¿Ø¼ş¾Í²»»á¡°¸´Ô­¡±¡£
+        //     æˆ‘ä»¬ä¸æ‰§è¡Œä»»ä½•æ“ä½œï¼ŒCurrentDetailItem ä¿æŒå…¶ä¹‹å‰çš„å€¼ã€‚
+        //     è¿™æ · WordDetails æ§ä»¶å°±ä¸ä¼šâ€œå¤åŸâ€ã€‚
         // }
     }
 
-    // SearchTextBox µÄ TextChanged ÊÂ¼ş´¦Àíº¯Êı (·À¶¶Âß¼­)
+    // SearchTextBox çš„ TextChanged äº‹ä»¶å¤„ç†å‡½æ•° (é˜²æŠ–é€»è¾‘)
     void WordSearchResultList::SearchTextBox_TextChanged(Windows::Foundation::IInspectable const& /*sender*/, Microsoft::UI::Xaml::Controls::TextChangedEventArgs const& /*args*/)
     {
-        //m_debounceTimer.Stop(); // Ã¿´ÎÊäÈë±ä»¯Ê±£¬ÖØÖÃ¼ÆÊ±Æ÷
+        //m_debounceTimer.Stop(); // æ¯æ¬¡è¾“å…¥å˜åŒ–æ—¶ï¼Œé‡ç½®è®¡æ—¶å™¨
         m_debounceTimer.Start();
     }
 
-    // SearchTextBox µÄ KeyDown ÊÂ¼ş´¦Àíº¯Êı (»Ø³µÁ¢¼´ËÑË÷)
+    // SearchTextBox çš„ KeyDown äº‹ä»¶å¤„ç†å‡½æ•° (å›è½¦ç«‹å³æœç´¢)
     void WordSearchResultList::SearchTextBox_KeyDown(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e)
     {
         if (e.Key() == VirtualKey::Enter)
         {
-            m_debounceTimer.Stop(); // Í£Ö¹¿ÉÄÜÕıÔÚ¼ÆÊ±µÄ·À¶¶²Ù×÷
+            m_debounceTimer.Stop(); // åœæ­¢å¯èƒ½æ­£åœ¨è®¡æ—¶çš„é˜²æŠ–æ“ä½œ
             auto textBox = sender.as<Controls::TextBox>();
             ExecuteSearch(textBox.Text());
         }
     }
 
-    // ·À¶¶¼ÆÊ±Æ÷´¥·¢ÊÂ¼ş
+    // é˜²æŠ–è®¡æ—¶å™¨è§¦å‘äº‹ä»¶
     void WordSearchResultList::OnDebounceTimerTick(Windows::Foundation::IInspectable const& /*sender*/, Windows::Foundation::IInspectable const& /*e*/)
     {
-        m_debounceTimer.Stop(); // ¼ÆÊ±Æ÷´¥·¢ºóÏÈÍ£Ö¹
-        // ¼ÙÉè SearchTextBox µÄ x:Name ÊÇ "SearchTextBox"
-        // ÄãĞèÒªÈ·±£ÔÚ XAML ÖĞ SearchTextBox ÓĞÒ»¸ö x:Name£¬»òÕßÍ¨¹ıÆäËû·½Ê½»ñÈ¡Ëü
-        // Èç¹û SearchTextBox ÊÇ´ËÓÃ»§¿Ø¼şµÄ XAML ÄÚÈİµÄÒ»²¿·Ö£¬¿ÉÒÔÖ±½ÓÊ¹ÓÃÆä³ÉÔ±±äÁ¿Ãû
-        ExecuteSearch(SearchTextBox().Text()); // SearchTextBox() ÊÇ XAML ÖĞ¶¨ÒåµÄ¿Ø¼ş
+        m_debounceTimer.Stop(); // è®¡æ—¶å™¨è§¦å‘åå…ˆåœæ­¢
+        // å‡è®¾ SearchTextBox çš„ x:Name æ˜¯ "SearchTextBox"
+        // ä½ éœ€è¦ç¡®ä¿åœ¨ XAML ä¸­ SearchTextBox æœ‰ä¸€ä¸ª x:Nameï¼Œæˆ–è€…é€šè¿‡å…¶ä»–æ–¹å¼è·å–å®ƒ
+        // å¦‚æœ SearchTextBox æ˜¯æ­¤ç”¨æˆ·æ§ä»¶çš„ XAML å†…å®¹çš„ä¸€éƒ¨åˆ†ï¼Œå¯ä»¥ç›´æ¥ä½¿ç”¨å…¶æˆå‘˜å˜é‡å
+        ExecuteSearch(SearchTextBox().Text()); // SearchTextBox() æ˜¯ XAML ä¸­å®šä¹‰çš„æ§ä»¶
     }
 
-    // Ö´ĞĞËÑË÷µÄ¸¨Öú·½·¨
+    // æ‰§è¡Œæœç´¢çš„è¾…åŠ©æ–¹æ³•
     void WordSearchResultList::ExecuteSearch(winrt::hstring const& query)
     {
-        // µ÷ÓÃ WordSearch ·şÎñÖ´ĞĞËÑË÷
+        // è°ƒç”¨ WordSearch æœåŠ¡æ‰§è¡Œæœç´¢
         auto searchResults = m_wordSearchService.Search(query);
 
-        m_items.Clear(); // Çå¿ÕÏÖÓĞÁĞ±íÏî
-        if (searchResults != nullptr) // È·±£ searchResults ²»ÊÇ nullptr
+        m_items.Clear(); // æ¸…ç©ºç°æœ‰åˆ—è¡¨é¡¹
+        if (searchResults != nullptr) // ç¡®ä¿ searchResults ä¸æ˜¯ nullptr
         {
             for (auto const& item : searchResults)
             {
                 m_items.Append(item);
             }
         }
-        // Äã¿ÉÒÔÔÚÕâÀïÌí¼ÓÂß¼­£¬±ÈÈçµ± searchResults Îª¿Õ»ò m_items Îª¿ÕÊ±ÏÔÊ¾ "ÎŞ½á¹û" µÄÌáÊ¾
+        // ä½ å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ é€»è¾‘ï¼Œæ¯”å¦‚å½“ searchResults ä¸ºç©ºæˆ– m_items ä¸ºç©ºæ—¶æ˜¾ç¤º "æ— ç»“æœ" çš„æç¤º
     }
 
 
-    // ÄãÒÑÓĞµÄ¸¨Öú·½·¨
+    // ä½ å·²æœ‰çš„è¾…åŠ©æ–¹æ³•
     void WordSearchResultList::AddSampleItems()
     {
         AddNewEntry(L"WinUI 3 Sample", L"Native UX platform from Microsoft.");
@@ -135,5 +136,10 @@ namespace winrt::WordWiz::implementation
     {
         auto newItem = winrt::make<WordWiz::implementation::WordItem>(word, explanation);
         m_items.Append(newItem);
+    }
+    void WordSearchResultList::searchWord(winrt::hstring const& query)
+    {
+		SearchTextBox().Text(query); // æ›´æ–°æœç´¢æ¡†æ–‡æœ¬
+        ExecuteSearch(query); // æ‰§è¡Œæœç´¢
     }
 }

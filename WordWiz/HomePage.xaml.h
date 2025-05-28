@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "HomePage.g.h"
 
@@ -16,6 +16,8 @@ namespace winrt::WordWiz::implementation
         void MyProperty(int32_t value);
 
         void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void TextBox_DragEnter(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::DragEventArgs const& e);
+        void TextBox_KeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e);
     };
 }
 

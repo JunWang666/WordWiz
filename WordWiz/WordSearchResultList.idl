@@ -1,5 +1,5 @@
-// WordSearchResultList.idl
-import "WordItem.idl"; // È·±£ WordItem ¶¨Òå¿ÉÓÃ
+ï»¿// WordSearchResultList.idl
+import "WordItem.idl"; // ç¡®ä¿ WordItem å®šä¹‰å¯ç”¨
 
 namespace WordWiz
 {
@@ -8,14 +8,16 @@ namespace WordWiz
     {
         WordSearchResultList();
 
-    // ÓÃÓÚ ListView µÄÊı¾İÔ´
+    // ç”¨äº ListView çš„æ•°æ®æº
     Windows.Foundation.Collections.IObservableVector<WordWiz.WordItem> Items { get; };
 
-    // ÒÀÀµÊôĞÔ£¬ÓÃÓÚ±©Â¶µ±Ç° ListView ÖĞÑ¡ÖĞµÄ WordItem
+    // ä¾èµ–å±æ€§ï¼Œç”¨äºæš´éœ²å½“å‰ ListView ä¸­é€‰ä¸­çš„ WordItem
     WordWiz.WordItem CurrentDetailItem;
     static Microsoft.UI.Xaml.DependencyProperty CurrentDetailItemProperty{ get; };
 
-    // Èç¹û WordSearchResultList ÄÚ²¿ÈÔÓĞÌí¼Ó¡¢É¾³ıµÈ°´Å¥£¬ËüÃÇµÄÊÂ¼ş´¦ÀíÆ÷Ò²ÔÚÕâÀïÉùÃ÷£¨¿ÉÑ¡£©
+    void searchWord(String query);
+
+    // å¦‚æœ WordSearchResultList å†…éƒ¨ä»æœ‰æ·»åŠ ã€åˆ é™¤ç­‰æŒ‰é’®ï¼Œå®ƒä»¬çš„äº‹ä»¶å¤„ç†å™¨ä¹Ÿåœ¨è¿™é‡Œå£°æ˜ï¼ˆå¯é€‰ï¼‰
     // void AddItemButton_Click(Object sender, Microsoft.UI.Xaml.RoutedEventArgs e);
     // void RemoveSelectedItemsButton_Click(Object sender, Microsoft.UI.Xaml.RoutedEventArgs e);
     // ...
