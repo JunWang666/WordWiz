@@ -292,6 +292,7 @@
     <Image Include="Assets\LargeTile.scale-200.png" />
     <Image Include="Assets\LargeTile.scale-400.png" />
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
+    <Image Include="Assets\Logos\Gemini_Generated_Image_rqzbvgrqzbvgrqzb.png" />
     <Image Include="Assets\SmallTile.scale-100.png" />
     <Image Include="Assets\SmallTile.scale-125.png" />
     <Image Include="Assets\SmallTile.scale-150.png" />
@@ -374,6 +375,8 @@
     <Import Project="..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets" Condition="Exists('..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets')" />
     <Import Project="..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets" Condition="Exists('..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets')" />
     <Import Project="..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets" Condition="Exists('..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets')" />
+    <Import Project="..\packages\Poco.JSON.vs150.noarch.1.10.1\build\native\Poco.JSON.vs150.noarch.targets" Condition="Exists('..\packages\Poco.JSON.vs150.noarch.1.10.1\build\native\Poco.JSON.vs150.noarch.targets')" />
+    <Import Project="..\packages\Poco.JSON.vs150.static.1.10.1\build\native\Poco.JSON.vs150.static.targets" Condition="Exists('..\packages\Poco.JSON.vs150.static.1.10.1\build\native\Poco.JSON.vs150.static.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -394,5 +397,7 @@
     <Error Condition="!Exists('..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.Foundation.vs150.static.1.10.1\build\native\Poco.Foundation.vs150.static.targets'))" />
     <Error Condition="!Exists('..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.Data.vs150.static.1.10.1\build\native\Poco.Data.vs150.static.targets'))" />
     <Error Condition="!Exists('..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.DataSQLite.vs150.static.1.10.1\build\native\Poco.DataSQLite.vs150.static.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.JSON.vs150.noarch.1.10.1\build\native\Poco.JSON.vs150.noarch.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.JSON.vs150.noarch.1.10.1\build\native\Poco.JSON.vs150.noarch.targets'))" />
+    <Error Condition="!Exists('..\packages\Poco.JSON.vs150.static.1.10.1\build\native\Poco.JSON.vs150.static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Poco.JSON.vs150.static.1.10.1\build\native\Poco.JSON.vs150.static.targets'))" />
   </Target>
 </Project>

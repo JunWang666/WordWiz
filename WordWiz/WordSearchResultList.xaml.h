@@ -1,10 +1,10 @@
-// WordSearchResultList.xaml.h
+ï»¿// WordSearchResultList.xaml.h
 #pragma once
-#include "WordSearchResultList.g.h" // ÓÉ MIDL Éú³É
-#include "WordItem.h"                 // WordItem ÀàĞÍ¶¨Òå
-#include "WordSearch.h"               // WordSearch ·şÎñ
+#include "WordSearchResultList.g.h" // ç”± MIDL ç”Ÿæˆ
+#include "WordItem.h"                 // WordItem ç±»å‹å®šä¹‰
+#include "WordSearch.h"               // WordSearch æœåŠ¡
 
-// ĞÂÔö°üº¬
+// æ–°å¢åŒ…å«
 #include <winrt/Microsoft.UI.Xaml.Input.h> // For KeyRoutedEventArgs
 #include <winrt/Windows.System.h>          // For VirtualKey
 
@@ -14,40 +14,42 @@ namespace winrt::WordWiz::implementation
     {
         WordSearchResultList();
 
-        // Items ÊôĞÔµÄ getter
+        // Items å±æ€§çš„ getter
         Windows::Foundation::Collections::IObservableVector<WordWiz::WordItem> Items();
 
-        // CurrentDetailItem ÒÀÀµÊôĞÔµÄ getter ºÍ setter
+        // CurrentDetailItem ä¾èµ–å±æ€§çš„ getter å’Œ setter
         WordWiz::WordItem CurrentDetailItem();
         void CurrentDetailItem(WordWiz::WordItem const& value);
 
-        // CurrentDetailItemProperty ÒÀÀµÊôĞÔµÄ¾²Ì¬ getter
-        static Microsoft::UI::Xaml::DependencyProperty CurrentDetailItemProperty() { return m_currentDetailItemProperty; }
+        // CurrentDetailItemProperty ä¾èµ–å±æ€§çš„é™æ€ getter
+		static Microsoft::UI::Xaml::DependencyProperty CurrentDetailItemProperty() {
+			return m_currentDetailItemProperty;
+		}
 
-        // ÊÂ¼ş´¦Àíº¯Êı
+        // äº‹ä»¶å¤„ç†å‡½æ•°
         void ResultsListView_SelectionChanged(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
         void SearchTextBox_TextChanged(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Controls::TextChangedEventArgs const& args);
-        // ĞÂÔö KeyDown ÊÂ¼ş´¦Àíº¯Êı for Enter key
+        // æ–°å¢ KeyDown äº‹ä»¶å¤„ç†å‡½æ•° for Enter key
         void SearchTextBox_KeyDown(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e);
 
 
-        // ¸¨Öú·½·¨ (Èç¹ûĞèÒª)
-        void AddSampleItems(); // ÄãÒÑÓĞµÄ·½·¨
-        void AddNewEntry(winrt::hstring const& word, winrt::hstring const& explanation); // ÄãÒÑÓĞµÄ·½·¨
+        // è¾…åŠ©æ–¹æ³• (å¦‚æœéœ€è¦)
+        void AddSampleItems(); // ä½ å·²æœ‰çš„æ–¹æ³•
+        void AddNewEntry(winrt::hstring const& word, winrt::hstring const& explanation); // ä½ å·²æœ‰çš„æ–¹æ³•
 
-
+        void searchWord(winrt::hstring const& query);
     private:
-        // ´æ´¢ WordItem ¶ÔÏóµÄÁĞ±í
+        // å­˜å‚¨ WordItem å¯¹è±¡çš„åˆ—è¡¨
         Windows::Foundation::Collections::IObservableVector<WordWiz::WordItem> m_items;
 
-        // CurrentDetailItem ÒÀÀµÊôĞÔµÄ¾²Ì¬ÊµÀı
+        // CurrentDetailItem ä¾èµ–å±æ€§çš„é™æ€å®ä¾‹
         static Microsoft::UI::Xaml::DependencyProperty m_currentDetailItemProperty;
 
-        // ĞÂÔö³ÉÔ±
+        // æ–°å¢æˆå‘˜
         Microsoft::UI::Xaml::DispatcherTimer m_debounceTimer{ nullptr };
-        WordWiz::WordSearch m_wordSearchService{ nullptr }; // WordSearch ·şÎñÊµÀı
+        WordWiz::WordSearch m_wordSearchService{ nullptr }; // WordSearch æœåŠ¡å®ä¾‹
 
-        // ĞÂÔöË½ÓĞ·½·¨
+        // æ–°å¢ç§æœ‰æ–¹æ³•
         void OnDebounceTimerTick(Windows::Foundation::IInspectable const& sender, Windows::Foundation::IInspectable const& e);
         void ExecuteSearch(winrt::hstring const& query);
     };
