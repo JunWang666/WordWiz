@@ -38,6 +38,9 @@
     <Midl Include="WordSearch.idl">
       <Filter>modules\WordSearch</Filter>
     </Midl>
+    <Midl Include="DictionaryItemInWordDetail.idl">
+      <Filter>dataModels\DictionaryItemInWordDetail</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -63,6 +66,9 @@
     <ClCompile Include="SettingsData.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
+    <ClCompile Include="DictionaryItemInWordDetail.cpp">
+      <Filter>dataModels\DictionaryItemInWordDetail</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -83,6 +89,15 @@
     </ClInclude>
     <ClInclude Include="SettingsData.h">
       <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="HistoryPackage_base.h">
+      <Filter>dataModels\HistoryPackages</Filter>
+    </ClInclude>
+    <ClInclude Include="DictionaryItemInWordDetail.h">
+      <Filter>dataModels\DictionaryItemInWordDetail</Filter>
+    </ClInclude>
+    <ClInclude Include="HistoryPackage_WordSearch.h">
+      <Filter>dataModels\HistoryPackages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -269,6 +284,9 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png">
       <Filter>Assets\Logo</Filter>
     </Image>
+    <Image Include="Assets\Logos\Gemini_Generated_Image_rqzbvgrqzbvgrqzb.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -309,6 +327,12 @@
     </Filter>
     <Filter Include="services\Database">
       <UniqueIdentifier>{dca91415-7da1-428b-895d-f88b4f2b333c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dataModels\HistoryPackages">
+      <UniqueIdentifier>{a062ea97-0024-48bc-beff-251144c6cd78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dataModels\DictionaryItemInWordDetail">
+      <UniqueIdentifier>{36c27601-ff0a-4396-a683-74b32d89f464}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

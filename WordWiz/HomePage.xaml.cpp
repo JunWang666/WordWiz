@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "HomePage.xaml.h"
 #if __has_include("HomePage.g.cpp")
 #include "HomePage.g.cpp"
@@ -29,16 +29,49 @@ namespace winrt::WordWiz::implementation
         winrt::Microsoft::UI::Xaml::Controls::Frame mainFrame = winrt::WordWiz::implementation::MainWindow::GetMainFrame();
         if (mainFrame)
         {
-            // ÏÖÔÚ¿ÉÒÔÊ¹ÓÃ»ñÈ¡µ½µÄ mainFrame ½øĞĞµ¼º½
+            // ç°åœ¨å¯ä»¥ä½¿ç”¨è·å–åˆ°çš„ mainFrame è¿›è¡Œå¯¼èˆª
             WordWizServices::NavigationService::NavigateTo<WordWiz::WordSearchResultPage>(
                 mainFrame,
-                winrt::box_value(L"ÎÄµµID") // ÄãµÄµ¼º½²ÎÊı
+                winrt::box_value(L"æ–‡æ¡£ID") // ä½ çš„å¯¼èˆªå‚æ•°
             );
         }
         else
         {
-            // ´¦Àí Frame Î´»ñÈ¡µ½µÄÇé¿ö£¬ÀıÈç¼ÇÂ¼´íÎóÈÕÖ¾
+            // å¤„ç† Frame æœªè·å–åˆ°çš„æƒ…å†µï¼Œä¾‹å¦‚è®°å½•é”™è¯¯æ—¥å¿—
             WordWizServices::Log::LogMessage(L"HomePage::NavigateToSearchResults: MainWindow's main Frame is not available.");
         }
     }
+}
+
+void winrt::WordWiz::implementation::HomePage::TextBox_DragEnter(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::DragEventArgs const& e)
+{
+
+}
+
+void winrt::WordWiz::implementation::HomePage::TextBox_KeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e)  
+{  
+   if (e.Key() != winrt::Windows::System::VirtualKey::Enter)
+   {
+       return; // Only process when Enter key is pressed
+   }
+
+   winrt::Microsoft::UI::Xaml::Controls::Frame mainFrame = winrt::WordWiz::implementation::MainWindow::GetMainFrame();  
+   auto textBox = sender.as<Controls::TextBox>();  
+   if (mainFrame)  
+   {  
+       // Create a parameter map to pass the search word to the result page
+       auto map = winrt::single_threaded_map<winrt::hstring, winrt::Windows::Foundation::IInspectable>();  
+       // Fix: Pass the actual text value instead of the TextBox control
+       map.Insert(L"search_word", winrt::box_value(textBox.Text()));  
+
+       WordWizServices::NavigationService::NavigateTo<WordWiz::WordSearchResultPage>(  
+           mainFrame,  
+           winrt::box_value(map)  
+       );  
+   }  
+   else  
+   {  
+       // å¤„ç† Frame æœªè·å–åˆ°çš„æƒ…å†µï¼Œä¾‹å¦‚è®°å½•é”™è¯¯æ—¥å¿—  
+       WordWizServices::Log::LogMessage(L"HomePage::NavigateToSearchResults: MainWindow's main Frame is not available.");  
+   }  
 }

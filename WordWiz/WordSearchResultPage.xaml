@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="WordWiz.WordSearchResultPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,9 +13,15 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        <local:WordSearchResultList Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    CurrentDetailItem="{x:Bind PageLevelSelectedItem, Mode=TwoWay}"/>
-        <local:WordDetails Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                           ItemToDisplay="{x:Bind PageLevelSelectedItem, Mode=OneWay}"/>
+        <local:WordSearchResultList x:Name="WordSearchResultListControl"
+            Grid.Column="0" 
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch"
+            CurrentDetailItem="{x:Bind PageLevelSelectedItem, Mode=TwoWay}"/>
+        <local:WordDetails x:Name="WordDetailsControl"
+            Grid.Column="1" 
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch"
+            ItemToDisplay="{x:Bind PageLevelSelectedItem, Mode=OneWay}"/>
     </Grid>
 </Page>

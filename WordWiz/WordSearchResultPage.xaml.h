@@ -1,9 +1,12 @@
-// ResultPage.xaml.h
+ï»¿// ResultPage.xaml.h
 #pragma once
-#include "WordSearchResultPage.g.h" // MIDL Éú³É
-#include "WordItem.h"     // WordItem ÀàĞÍ
+#include "WordSearchResultPage.g.h" // MIDL ç”Ÿæˆ
+#include "WordItem.h"     // WordItem ç±»å‹
+#include "WordSearchResultList.xaml.h" // Include the header for WordSearchResultList  
+#include <winrt/Microsoft.UI.Xaml.Navigation.h> // Add this include for NavigationEventArgs
+#include <winrt/Windows.Foundation.Collections.h> // For IMap
 
-namespace winrt::WordWiz::implementation // È·±£ÃüÃû¿Õ¼äÕıÈ·
+namespace winrt::WordWiz::implementation // ç¡®ä¿å‘½åç©ºé—´æ­£ç¡®
 {
     struct WordSearchResultPage : WordSearchResultPageT<WordSearchResultPage>
     {
@@ -12,6 +15,9 @@ namespace winrt::WordWiz::implementation // È·±£ÃüÃû¿Õ¼äÕıÈ·
         WordWiz::WordItem PageLevelSelectedItem();
         void PageLevelSelectedItem(WordWiz::WordItem const& value);
         static Microsoft::UI::Xaml::DependencyProperty PageLevelSelectedItemProperty() { return m_pageLevelSelectedItemProperty; }
+
+        // Add override for OnNavigatedTo
+        void OnNavigatedTo(Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
 
     private:
         static Microsoft::UI::Xaml::DependencyProperty m_pageLevelSelectedItemProperty;
