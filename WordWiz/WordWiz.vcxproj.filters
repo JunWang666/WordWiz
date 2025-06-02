@@ -29,6 +29,8 @@
     <Page Include="Button.xaml">
       <Filter>others\Styles</Filter>
     </Page>
+    <Page Include="DictionarySettingsPage.xaml" />
+    <Page Include="GeneralSettingsPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
@@ -90,14 +92,8 @@
     <ClInclude Include="SettingsData.h">
       <Filter>services\Database</Filter>
     </ClInclude>
-    <ClInclude Include="HistoryPackage_base.h">
-      <Filter>dataModels\HistoryPackages</Filter>
-    </ClInclude>
     <ClInclude Include="DictionaryItemInWordDetail.h">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
-    </ClInclude>
-    <ClInclude Include="HistoryPackage_WordSearch.h">
-      <Filter>dataModels\HistoryPackages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -333,6 +329,9 @@
     </Filter>
     <Filter Include="dataModels\DictionaryItemInWordDetail">
       <UniqueIdentifier>{36c27601-ff0a-4396-a683-74b32d89f464}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\AI">
+      <UniqueIdentifier>{9d1c8ce1-edc3-4cfd-a37b-ff8d8bf7ecc3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
