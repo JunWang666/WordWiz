@@ -94,7 +94,8 @@
       <WarningLevel>Level4</WarningLevel>
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
     </ClCompile>
-  </ItemDefinitionGroup>  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;POCO_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -120,11 +121,14 @@
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
-  <ItemGroup>    <ClInclude Include="DictionaryItemInWordDetail.h" />
+  <ItemGroup>
+    <ClInclude Include="database.h" />
+    <ClInclude Include="DictionaryItemInWordDetail.h" />
     <ClInclude Include="DictionarySettingsPage.xaml.h">
       <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </ClInclude>    <ClInclude Include="FavoritePage.xaml.h">
+    </ClInclude>
+    <ClInclude Include="FavoritePage.xaml.h">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
@@ -170,11 +174,13 @@
       <SubType>Code</SubType>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>    <ApplicationDefinition Include="App.xaml" />
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
     <Page Include="Button.xaml" />
     <Page Include="DictionarySettingsPage.xaml">
       <SubType>Designer</SubType>
-    </Page>    <Page Include="FavoritePage.xaml">
+    </Page>
+    <Page Include="FavoritePage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="GeneralSettingsPage.xaml">
@@ -200,12 +206,14 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>    <ClCompile Include="database.cpp" />
+  <ItemGroup>
+    <ClCompile Include="database.cpp" />
     <ClCompile Include="DictionaryItemInWordDetail.cpp" />
     <ClCompile Include="DictionarySettingsPage.xaml.cpp">
       <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </ClCompile>    <ClCompile Include="FavoritePage.xaml.cpp">
+    </ClCompile>
+    <ClCompile Include="FavoritePage.xaml.cpp">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
@@ -254,11 +262,13 @@
       <SubType>Code</SubType>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>    <Midl Include="DictionaryItemInWordDetail.idl" />
+  <ItemGroup>
+    <Midl Include="DictionaryItemInWordDetail.idl" />
     <Midl Include="DictionarySettingsPage.idl">
       <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </Midl>    <Midl Include="FavoritePage.idl">
+    </Midl>
+    <Midl Include="FavoritePage.idl">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>

@@ -1,44 +1,43 @@
-#pragma once
+ï»¿#pragma once
 #include <pch.h>
 
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SQLite/Connector.h"
-// #include "Poco/AutoPtr.h" // ÒÆ³ı AutoPtr
-#include <memory>      // °üº¬ <memory> ÒÔÊ¹ÓÃ std::unique_ptr
+#include <memory>      // åŒ…å« <memory> ä»¥ä½¿ç”¨ std::unique_ptr
 #include "Poco/Mutex.h"
 #include <string>
 #include <vector>
 
 namespace WordWiz::Data{
-    // Ê¹ÓÃ SQLite Êı¾İ¿â´æ´¢ºÍ¼ìË÷Ó¦ÓÃ³ÌĞòÉèÖÃ
+    // ä½¿ç”¨ SQLite æ•°æ®åº“å­˜å‚¨å’Œæ£€ç´¢åº”ç”¨ç¨‹åºè®¾ç½®
     class SettingsManager {
     public:
 
-        // ¹Ø±ÕÊı¾İ¿âÁ¬½Ó (¿ÉÑ¡£¬Í¨³£ÔÚ³ÌĞò½áÊøÊ±ÓÉ unique_ptr µÄÎö¹¹º¯Êı´¦Àí)
+        // å…³é—­æ•°æ®åº“è¿æ¥ (å¯é€‰ï¼Œé€šå¸¸åœ¨ç¨‹åºç»“æŸæ—¶ç”± unique_ptr çš„ææ„å‡½æ•°å¤„ç†)
         void shutdown();
 
-        // ¼ì²é SettingsManager ÊÇ·ñÒÑ³õÊ¼»¯
+        // æ£€æŸ¥ SettingsManager æ˜¯å¦å·²åˆå§‹åŒ–
         bool isInitialized();
 
         std::string getString(const std::string& key, const std::string& defaultValue = "");
 
         void setString(const std::string& key, const std::string& value);
 
-        // ÒÆ³ıÒ»¸ö¼ü
+        // ç§»é™¤ä¸€ä¸ªé”®
         void remove(const std::string& key);
 
         SettingsManager(const std::string& tableName);
         ~SettingsManager();
 
     private:
-        void createTableIfNotExists(); // ´´½¨ÉèÖÃ±íµÄ¸¨Öúº¯Êı
+        void createTableIfNotExists(); // åˆ›å»ºè®¾ç½®è¡¨çš„è¾…åŠ©å‡½æ•°
 
-        static std::unique_ptr<Poco::Data::Session> _pSession; // POCO Êı¾İ¿â»á»°
+        static std::unique_ptr<Poco::Data::Session> _pSession; // POCO æ•°æ®åº“ä¼šè¯
 
-        static std::string _dbPath;         // Êı¾İ¿âÎÄ¼şµÄÂ·¾¶
-        static Poco::FastMutex _mutex;      // ±£Ö¤Ïß³Ì°²È«µÄ»¥³âËø
-        static bool _isInitialized;         // ±ê¼ÇÊÇ·ñÒÑ³õÊ¼»¯
+        static std::string _dbPath;         // æ•°æ®åº“æ–‡ä»¶çš„è·¯å¾„
+        static Poco::FastMutex _mutex;      // ä¿è¯çº¿ç¨‹å®‰å…¨çš„äº’æ–¥é”
+        static bool _isInitialized;         // æ ‡è®°æ˜¯å¦å·²åˆå§‹åŒ–
 
-        std::string TABLE_NAME; // ±íÃû
+        std::string TABLE_NAME; // è¡¨å
     };
 }
