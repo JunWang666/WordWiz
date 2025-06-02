@@ -94,11 +94,13 @@
       <WarningLevel>Level4</WarningLevel>
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
     </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+  </ItemDefinitionGroup>  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;POCO_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -107,6 +109,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup Condition="'$(WindowsPackageType)'!='None' and Exists('Package.appxmanifest')">
@@ -117,13 +120,19 @@
   <ItemGroup>
     <Manifest Include="app.manifest" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="DictionaryItemInWordDetail.h" />
-    <ClInclude Include="FavoritePage.xaml.h">
+  <ItemGroup>    <ClInclude Include="DictionaryItemInWordDetail.h" />
+    <ClInclude Include="DictionarySettingsPage.xaml.h">
+      <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>    <ClInclude Include="FavoritePage.xaml.h">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="FilePathProvider.h" />
+    <ClInclude Include="GeneralSettingsPage.xaml.h">
+      <DependentUpon>GeneralSettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="HistoryPage.xaml.h">
       <DependentUpon>HistoryPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -161,10 +170,14 @@
       <SubType>Code</SubType>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" />
+  <ItemGroup>    <ApplicationDefinition Include="App.xaml" />
     <Page Include="Button.xaml" />
-    <Page Include="FavoritePage.xaml">
+    <Page Include="DictionarySettingsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>    <Page Include="FavoritePage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="GeneralSettingsPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="HistoryPage.xaml">
@@ -187,14 +200,20 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="database.cpp" />
+  <ItemGroup>    <ClCompile Include="database.cpp" />
     <ClCompile Include="DictionaryItemInWordDetail.cpp" />
-    <ClCompile Include="FavoritePage.xaml.cpp">
+    <ClCompile Include="DictionarySettingsPage.xaml.cpp">
+      <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>    <ClCompile Include="FavoritePage.xaml.cpp">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="FilePathProvider.cpp" />
+    <ClCompile Include="GeneralSettingsPage.xaml.cpp">
+      <DependentUpon>GeneralSettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="HistoryPage.xaml.cpp">
       <DependentUpon>HistoryPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -235,10 +254,16 @@
       <SubType>Code</SubType>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Midl Include="DictionaryItemInWordDetail.idl" />
-    <Midl Include="FavoritePage.idl">
+  <ItemGroup>    <Midl Include="DictionaryItemInWordDetail.idl" />
+    <Midl Include="DictionarySettingsPage.idl">
+      <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>    <Midl Include="FavoritePage.idl">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="GeneralSettingsPage.idl">
+      <DependentUpon>GeneralSettingsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="HistoryPage.idl">
