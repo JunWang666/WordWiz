@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="WordWiz.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,23 +12,25 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- 页面标题 -->
+        <!-- 自定义页面标题 -->
         <Border Grid.Row="0" Padding="24,16,24,8">
             <TextBlock Text="设置" 
                        Style="{ThemeResource TitleTextBlockStyle}" 
                        FontWeight="Bold"/>
-        </Border>
-        
-        <!-- 设置内容区域 -->
+        </Border>        <!-- 设置内容区域 -->
         <NavigationView Grid.Row="1" 
                         x:Name="SettingsNavigationView"
-                        PaneDisplayMode="Left"
+                        PaneDisplayMode="Auto"
                         IsSettingsVisible="False"
                         IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
                         OpenPaneLength="200"
-                        CompactModeThresholdWidth="0"
-                        ExpandedModeThresholdWidth="0"
-                        SelectionChanged="SettingsNavigationView_SelectionChanged">            <!-- 导航菜单项 -->
+                        CompactModeThresholdWidth="390"
+                        ExpandedModeThresholdWidth="590"
+                        Header=""
+                        SelectionChanged="SettingsNavigationView_SelectionChanged">
+            
+            <!-- 导航菜单项 -->
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="常规" Tag="General">
                     <NavigationViewItem.Icon>

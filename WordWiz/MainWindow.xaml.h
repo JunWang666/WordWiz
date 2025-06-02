@@ -21,13 +21,14 @@ namespace winrt::WordWiz::implementation
         void CustomPaneToggleButton_Click(IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
         void OnWindowLoaded(winrt::Windows::Foundation::IInspectable const& sender,winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
 
-        static winrt::Microsoft::UI::Xaml::Controls::Frame GetMainFrame();
-
-    private:
+        static winrt::Microsoft::UI::Xaml::Controls::Frame GetMainFrame();    private:
         winrt::Microsoft::UI::Windowing::AppWindow GetAppWindowForCurrentWindow();
         static winrt::Microsoft::UI::Xaml::Controls::Frame mainFrame;
         winrt::Microsoft::UI::Windowing::AppWindow m_mainAppWindow{ nullptr };
         hstring m_windowTitle = L"WinUI Desktop C++ Sample App";
+        
+        // 窗口最小尺寸处理
+        static LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
     public:
         void BackButton_RightTapped(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::RightTappedRoutedEventArgs const& e);
     };
