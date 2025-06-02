@@ -1,82 +1,242 @@
-#include "pch.h" // Èç¹ûÄãµÄÏîÄ¿Ê¹ÓÃÔ¤±àÒëÍ·ÎÄ¼ş£¬Çë°üº¬Ëü
-#include "FilePathProvider.h" // È·±£ÕâÀïµÄÂ·¾¶ºÍÄãµÄÏîÄ¿½á¹¹Ò»ÖÂ
+ï»¿#include "pch.h"
+#include "FilePathProvider.h"
 #include <winrt/Windows.Storage.h>
-#include <locale> // ÓÃÓÚ wstring_convert
-#include <codecvt> // ÓÃÓÚ wstring_convert
+#include <winrt/base.h>
+#include <locale> // ç”¨äº wstring_convert
+#include <codecvt> // ç”¨äº wstring_convert
 
-// ¸¨Öúº¯Êı£º½« std::wstring (Í¨³£ÊÇ UTF-16 on Windows) ×ª»»Îª std::string (UTF-8)
+// è¾…åŠ©å‡½æ•°ï¼šå°† std::wstring (é€šå¸¸æ˜¯ UTF-16 on Windows) è½¬æ¢ä¸º std::string (UTF-8)
 std::string WideStringToString_UTF8(const std::wstring& wstr)
 {
     if (wstr.empty())
     {
         return std::string();
     }
-    // ¼ÆËã×ª»»ºóµÄUTF-8×Ö·û´®ËùĞèµÄ´óĞ¡
+    // è®¡ç®—è½¬æ¢åçš„UTF-8å­—ç¬¦ä¸²æ‰€éœ€çš„å¤§å°
     int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
-    if (size_needed <= 0) // ´íÎó¼ì²é
+    if (size_needed <= 0)
     {
-        // ¿ÉÒÔ¸ù¾İĞèÒª´¦Àí´íÎó£¬ÀıÈçÅ×³öÒì³£»ò·µ»Ø¿Õ×Ö·û´®
-        // For simplicity, returning empty string here.
-        // Consider logging an error in a real application.
         return std::string();
     }
     std::string strTo(size_needed, 0);
-    // Ö´ĞĞ×ª»»
+    // æ‰§è¡Œè½¬æ¢
     int chars_converted = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), &strTo[0], size_needed, NULL, NULL);
-    if (chars_converted <= 0) // ´íÎó¼ì²é
+    if (chars_converted <= 0)
     {
-        // Í¬ÉÏ£¬´¦Àí´íÎó
         return std::string();
     }
     return strTo;
 }
 
 
-namespace WordWiz // Íâ²¿ÃüÃû¿Õ¼ä
+namespace WordWiz
 {
-    namespace Data // ÄÚ²¿ÃüÃû¿Õ¼ä
-    {
-        std::string FilePathProvider::GetAppLocalFolderPath()
+    namespace Data 
+    {        std::string FilePathProvider::GetAppLocalFolderPath()
         {
             try
             {
-                // »ñÈ¡Ó¦ÓÃµÄ±¾µØÊı¾İÎÄ¼ş¼Ğ¶ÔÏó
-                winrt::Windows::Storage::StorageFolder localFolder = winrt::Windows::Storage::ApplicationData::Current().LocalFolder();
+                // è·å–åº”ç”¨çš„æœ¬åœ°æ•°æ®æ–‡ä»¶å¤¹å¯¹è±¡
+                auto applicationData = winrt::Windows::Storage::ApplicationData::Current();
+                if (!applicationData)
+                {
+                    WordWizServices::Log::LogMessage(L"æ— æ³•è·å–ApplicationDataå¯¹è±¡ã€‚");
+                    return std::string();
+                }
 
-                // »ñÈ¡ÎÄ¼ş¼ĞÂ·¾¶µÄ hstring (¿í×Ö·û)
+                winrt::Windows::Storage::StorageFolder localFolder = applicationData.LocalFolder();
+                if (!localFolder)
+                {
+                    WordWizServices::Log::LogMessage(L"LocalFolderä¸å¯ç”¨ã€‚");
+                    return std::string();
+                }
+
+                // è·å–æ–‡ä»¶å¤¹è·¯å¾„çš„ hstring (å®½å­—ç¬¦)
                 winrt::hstring path_hstring = localFolder.Path();
+                if (path_hstring.empty())
+                {
+                    WordWizServices::Log::LogMessage(L"LocalFolderè·¯å¾„ä¸ºç©ºã€‚");
+                    return std::string();
+                }
 
-                // ½« winrt::hstring (Æä .c_str() ·µ»Ø const wchar_t*) ×ª»»Îª std::wstring
+                // å°† winrt::hstring (å…¶ .c_str() è¿”å› const wchar_t*) è½¬æ¢ä¸º std::wstring
                 std::wstring wide_path(path_hstring.c_str());
-
-                // Ê¹ÓÃ¸¨Öúº¯Êı½« std::wstring (UTF-16) ×ª»»Îª std::string (UTF-8)
+                // ä½¿ç”¨è¾…åŠ©å‡½æ•°å°† std::wstring (UTF-16) è½¬æ¢ä¸º std::string (UTF-8)
                 return WideStringToString_UTF8(wide_path);
             }
-            catch (winrt::hresult_error const& ex)
+            catch (const winrt::hresult_error& e)
             {
-                // ·¢Éú WinRT API ´íÎó£¬ÀıÈçÈ¨ÏŞÎÊÌâ»òAPI²»¿ÉÓÃ
-                // ÔÚÊµ¼ÊÓ¦ÓÃÖĞ£¬ÕâÀïÓ¦¸Ã¼ÇÂ¼´íÎóÏêÇé
-                // winrt::hstring errorMessage = ex.message();
-                // std::wstring wErrorMessage(errorMessage.c_str());
-                // OutputDebugStringW(L"Error getting app local folder path: ");
-                // OutputDebugStringW(wErrorMessage.c_str());
-                // OutputDebugStringW(L"\n");
-                return std::string(); // ·µ»Ø¿Õ×Ö·û´®±íÊ¾Ê§°Ü
-            }
-            catch (const std::exception& e)
-            {
-                // ·¢Éú±ê×¼¿âÒì³£ (ÀıÈç£¬ÄÚ´æ·ÖÅäÊ§°Ü)
-                // ÔÚÊµ¼ÊÓ¦ÓÃÖĞ£¬ÕâÀïÓ¦¸Ã¼ÇÂ¼´íÎóÏêÇé
-                // OutputDebugStringA("Standard exception getting app local folder path: ");
-                // OutputDebugStringA(e.what());
-                // OutputDebugStringA("\n");
-                return std::string(); // ·µ»Ø¿Õ×Ö·û´®±íÊ¾Ê§°Ü
+                std::wstring errorMsg = L"è·å–æœ¬åœ°æ–‡ä»¶å¤¹å¤±è´¥ï¼Œé”™è¯¯ä»£ç : 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return std::string();
             }
             catch (...)
             {
-                // ²¶»ñËùÓĞÆäËûÎ´ÖªÀàĞÍµÄÒì³£
-                // OutputDebugStringW(L"Unknown error getting app local folder path.\n");
-                return std::string(); // ·µ»Ø¿Õ×Ö·û´®±íÊ¾Ê§°Ü
+                WordWizServices::Log::LogMessage(L"è·å–åº”ç”¨æœ¬åœ°æ–‡ä»¶å¤¹è·¯å¾„å¤±è´¥ã€‚è¯·æ£€æŸ¥åº”ç”¨æƒé™æˆ–æ–‡ä»¶å¤¹æ˜¯å¦å­˜åœ¨ã€‚");
+                return std::string(); // è¿”å›ç©ºå­—ç¬¦ä¸²è¡¨ç¤ºå¤±è´¥
+            }
+        }std::string FilePathProvider::GetAppLocalCacheFolderPath()
+        {
+            try
+            {
+                // è·å–åº”ç”¨çš„æœ¬åœ°ç¼“å­˜æ–‡ä»¶å¤¹å¯¹è±¡
+                auto applicationData = winrt::Windows::Storage::ApplicationData::Current();
+                if (!applicationData)
+                {
+                    WordWizServices::Log::LogMessage(L"æ— æ³•è·å–ApplicationDataå¯¹è±¡ã€‚");
+                    return std::string();
+                }
+
+                winrt::Windows::Storage::StorageFolder localCacheFolder = applicationData.LocalCacheFolder();
+                if (!localCacheFolder)
+                {
+                    WordWizServices::Log::LogMessage(L"LocalCacheFolderä¸å¯ç”¨ã€‚");
+                    return std::string();
+                }
+
+                winrt::hstring path_hstring = localCacheFolder.Path();
+                if (path_hstring.empty())
+                {
+                    WordWizServices::Log::LogMessage(L"LocalCacheFolderè·¯å¾„ä¸ºç©ºã€‚");
+                    return std::string();
+                }
+
+                std::wstring wide_path(path_hstring.c_str());
+                return WideStringToString_UTF8(wide_path);
+            }
+            catch (const winrt::hresult_error& e)
+            {
+                std::wstring errorMsg = L"è·å–æœ¬åœ°ç¼“å­˜æ–‡ä»¶å¤¹å¤±è´¥ï¼Œé”™è¯¯ä»£ç : 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return std::string();
+            }
+            catch (...)
+            {
+                WordWizServices::Log::LogMessage(L"è·å–åº”ç”¨æœ¬åœ°ç¼“å­˜æ–‡ä»¶å¤¹è·¯å¾„å¤±è´¥ã€‚è¯·æ£€æŸ¥åº”ç”¨æƒé™æˆ–æ–‡ä»¶å¤¹æ˜¯å¦å­˜åœ¨ã€‚");
+                return std::string();
+            }
+        }        std::string FilePathProvider::GetAppLocalSettingsPath()
+        {
+            try
+            {
+                // è·å–åº”ç”¨çš„æœ¬åœ°è®¾ç½®å®¹å™¨
+                auto applicationData = winrt::Windows::Storage::ApplicationData::Current();
+                if (!applicationData)
+                {
+                    WordWizServices::Log::LogMessage(L"æ— æ³•è·å–ApplicationDataå¯¹è±¡ã€‚");
+                    return std::string();
+                }
+
+                winrt::Windows::Storage::ApplicationDataContainer localSettings = applicationData.LocalSettings();
+                if (!localSettings)
+                {
+                    WordWizServices::Log::LogMessage(L"LocalSettingsä¸å¯ç”¨ã€‚");
+                    return std::string();
+                }
+
+                // æ³¨æ„ï¼šLocalSettings æ²¡æœ‰ç›´æ¥çš„ Path å±æ€§ï¼Œæˆ‘ä»¬è¿”å›ä¸€ä¸ªæè¿°æ€§çš„è·¯å¾„
+                std::string localFolderPath = GetAppLocalFolderPath();
+                if (!localFolderPath.empty())
+                {
+                    return localFolderPath + "\\Settings";
+                }
+                return std::string();
+            }
+            catch (const winrt::hresult_error& e)
+            {
+                std::wstring errorMsg = L"è·å–æœ¬åœ°è®¾ç½®è·¯å¾„å¤±è´¥ï¼Œé”™è¯¯ä»£ç : 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return std::string();
+            }
+            catch (...)
+            {
+                WordWizServices::Log::LogMessage(L"è·å–åº”ç”¨æœ¬åœ°è®¾ç½®è·¯å¾„å¤±è´¥ã€‚è¯·æ£€æŸ¥åº”ç”¨æƒé™ã€‚");
+                return std::string();
+            }
+        }std::string FilePathProvider::GetAppSharedLocalFolderPath()
+        {
+            try
+            {
+                // è·å–åº”ç”¨çš„å…±äº«æœ¬åœ°æ–‡ä»¶å¤¹å¯¹è±¡
+                auto applicationData = winrt::Windows::Storage::ApplicationData::Current();
+                if (!applicationData)
+                {
+                    WordWizServices::Log::LogMessage(L"æ— æ³•è·å–ApplicationDataå¯¹è±¡ã€‚");
+                    return std::string();
+                }
+
+                winrt::Windows::Storage::StorageFolder sharedLocalFolder = applicationData.SharedLocalFolder();
+                if (!sharedLocalFolder)
+                {
+                    WordWizServices::Log::LogMessage(L"SharedLocalFolderä¸å¯ç”¨ï¼Œå¯èƒ½ç³»ç»Ÿä¸æ”¯æŒæ­¤åŠŸèƒ½ã€‚");
+                    return std::string();
+                }
+
+                winrt::hstring path_hstring = sharedLocalFolder.Path();
+                if (path_hstring.empty())
+                {
+                    WordWizServices::Log::LogMessage(L"SharedLocalFolderè·¯å¾„ä¸ºç©ºã€‚");
+                    return std::string();
+                }
+
+                std::wstring wide_path(path_hstring.c_str());
+                return WideStringToString_UTF8(wide_path);
+            }
+            catch (const winrt::hresult_error& e)
+            {
+                std::wstring errorMsg = L"è·å–å…±äº«æœ¬åœ°æ–‡ä»¶å¤¹å¤±è´¥ï¼Œé”™è¯¯ä»£ç : 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return std::string();
+            }
+            catch (...)
+            {
+                WordWizServices::Log::LogMessage(L"è·å–åº”ç”¨å…±äº«æœ¬åœ°æ–‡ä»¶å¤¹è·¯å¾„å¤±è´¥ã€‚SharedLocalFolderå¯èƒ½ä¸å—æ”¯æŒã€‚");
+                return std::string();
+            }
+        }        std::string FilePathProvider::GetAppTemporaryFolderPath()
+        {
+            try
+            {
+                // è·å–åº”ç”¨çš„ä¸´æ—¶æ–‡ä»¶å¤¹å¯¹è±¡
+                auto applicationData = winrt::Windows::Storage::ApplicationData::Current();
+                if (!applicationData)
+                {
+                    WordWizServices::Log::LogMessage(L"æ— æ³•è·å–ApplicationDataå¯¹è±¡ã€‚");
+                    return std::string();
+                }
+
+                winrt::Windows::Storage::StorageFolder temporaryFolder = applicationData.TemporaryFolder();
+                if (!temporaryFolder)
+                {
+                    WordWizServices::Log::LogMessage(L"TemporaryFolderä¸å¯ç”¨ã€‚");
+                    return std::string();
+                }
+
+                winrt::hstring path_hstring = temporaryFolder.Path();
+                if (path_hstring.empty())
+                {
+                    WordWizServices::Log::LogMessage(L"TemporaryFolderè·¯å¾„ä¸ºç©ºã€‚");
+                    return std::string();
+                }
+
+                std::wstring wide_path(path_hstring.c_str());
+                return WideStringToString_UTF8(wide_path);
+            }
+            catch (const winrt::hresult_error& e)
+            {
+                std::wstring errorMsg = L"è·å–ä¸´æ—¶æ–‡ä»¶å¤¹å¤±è´¥ï¼Œé”™è¯¯ä»£ç : 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return std::string();
+            }
+            catch (...)
+            {
+                WordWizServices::Log::LogMessage(L"è·å–åº”ç”¨ä¸´æ—¶æ–‡ä»¶å¤¹è·¯å¾„å¤±è´¥ã€‚è¯·æ£€æŸ¥åº”ç”¨æƒé™æˆ–æ–‡ä»¶å¤¹æ˜¯å¦å­˜åœ¨ã€‚");
+                return std::string();
             }
         }
     }

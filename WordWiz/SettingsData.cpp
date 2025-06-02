@@ -1,4 +1,4 @@
-#include <pch.h>
+ï»¿#include <pch.h>
 
 #include "SettingsData.h"
 #include "Poco/Data/Statement.h"
@@ -15,21 +15,21 @@
 #include<logger.h>
 
 namespace WordWiz::Data {
-    // ¾²Ì¬³ÉÔ±±äÁ¿¶¨Òå
-    // Poco::AutoPtr<Poco::Data::Session> SettingsManager::_pSession; // Ìæ»»
-    std::unique_ptr<Poco::Data::Session> SettingsManager::_pSession; // Ê¹ÓÃ std::unique_ptr
+    // é™æ€æˆå‘˜å˜é‡å®šä¹‰
+    // Poco::AutoPtr<Poco::Data::Session> SettingsManager::_pSession; // æ›¿æ¢
+    std::unique_ptr<Poco::Data::Session> SettingsManager::_pSession; // ä½¿ç”¨ std::unique_ptr
 
-    std::string SettingsManager::_dbPath = WordWiz::Data::FilePathProvider::GetAppLocalFolderPath() + "\\AppData.db";
+    std::string SettingsManager::_dbPath = WordWiz::Data::FilePathProvider::GetAppLocalFolderPath() + "\\AppSettings.db";
     Poco::FastMutex SettingsManager::_mutex;
     bool SettingsManager::_isInitialized = false;
 
     SettingsManager::SettingsManager(const std::string& tableName = "test_table") : TABLE_NAME(tableName) {
         if (!_isInitialized) {
             Poco::FastMutex::ScopedLock lock(_mutex);
-            if (!_isInitialized) { // Ë«ÖØ¼ì²éËø¶¨
+            if (!_isInitialized) { // åŒé‡æ£€æŸ¥é”å®š
                 try {
 					WordWizServices::Log::LogMessage("Initializing SettingsManager with database path: " + _dbPath);
-                    // ×¢²á SQLite Á¬½ÓÆ÷
+                    // æ³¨å†Œ SQLite è¿æ¥å™¨
                     Poco::Data::SQLite::Connector::registerConnector();
                     _pSession = std::make_unique<Poco::Data::Session>("SQLite", _dbPath);
                     createTableIfNotExists();
@@ -43,8 +43,8 @@ namespace WordWiz::Data {
     }
 
 	SettingsManager::~SettingsManager() {
-		// Îö¹¹º¯ÊıÖĞ²»ĞèÒª¹Ø±ÕÊı¾İ¿âÁ¬½Ó
-		// ÓÉ std::unique_ptr ×Ô¶¯¹ÜÀí
+		// ææ„å‡½æ•°ä¸­ä¸éœ€è¦å…³é—­æ•°æ®åº“è¿æ¥
+		// ç”± std::unique_ptr è‡ªåŠ¨ç®¡ç†
 		// Poco::Data::SQLite::Connector::unregisterConnector();
 	}
 
@@ -59,13 +59,13 @@ namespace WordWiz::Data {
                 // Poco::Logger::get("SettingsManager").error("Error shutting down SQLite session: " + e.displayText());
             }
         }
-        _pSession.reset(); // Ê¹ÓÃ reset() Çå¿Õ unique_ptr
+        _pSession.reset(); // ä½¿ç”¨ reset() æ¸…ç©º unique_ptr
         _isInitialized = false;
     }
 
 
     void SettingsManager::createTableIfNotExists() {
-        if (!_pSession || !_pSession->isConnected()) { // _pSession ¿ÉÒÔÖ±½ÓÓÃÓÚ²¼¶ûÅĞ¶Ï
+        if (!_pSession || !_pSession->isConnected()) { // _pSession å¯ä»¥ç›´æ¥ç”¨äºå¸ƒå°”åˆ¤æ–­
             throw Poco::IllegalStateException("Session not available or not connected for createTableIfNotExists");
         }
         try {
@@ -81,20 +81,20 @@ namespace WordWiz::Data {
 
     bool SettingsManager::isInitialized() {
         Poco::FastMutex::ScopedLock lock(_mutex);
-        return _isInitialized && _pSession && _pSession->isConnected(); // _pSession ¿ÉÒÔÖ±½ÓÓÃÓÚ²¼¶ûÅĞ¶Ï
+        return _isInitialized && _pSession && _pSession->isConnected(); // _pSession å¯ä»¥ç›´æ¥ç”¨äºå¸ƒå°”åˆ¤æ–­
     }
 
     // --- Getters ---
     std::string SettingsManager::getString(const std::string& key, const std::string& defaultValue) {
         Poco::FastMutex::ScopedLock lock(_mutex);
-        if (!isInitialized()) { // isInitialized ÄÚ²¿»á¼ì²é _pSession
+        if (!isInitialized()) { // isInitialized å†…éƒ¨ä¼šæ£€æŸ¥ _pSession
             // Poco::Logger::get("SettingsManager").warning("Attempted to get string from uninitialized SettingsManager for key: " + key);
             return defaultValue;
         }
 
         std::string valueFromDb;
         try {
-            Poco::Data::Statement select(*_pSession); // Ê¹ÓÃ _pSession.get() »òÖ±½Ó *_pSession ¶¼¿ÉÒÔ
+            Poco::Data::Statement select(*_pSession); // ä½¿ç”¨ _pSession.get() æˆ–ç›´æ¥ *_pSession éƒ½å¯ä»¥
             select << "SELECT value FROM " + TABLE_NAME + " WHERE key = ?",
                 Poco::Data::Keywords::into(valueFromDb),
                 Poco::Data::Keywords::bind(key),
