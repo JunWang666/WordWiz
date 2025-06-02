@@ -2,21 +2,23 @@
 
 #include "SettingsPage.g.h"
 #include "SettingsData.h"
+#include "GeneralSettingsPage.xaml.h"
+#include "DictionarySettingsPage.xaml.h"
 
 namespace winrt::WordWiz::implementation
 {
     struct SettingsPage : SettingsPageT<SettingsPage>
     {
-        SettingsPage()
-        {
-            // Xaml objects should not call InitializeComponent during construction.
-            // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
-        }
+        SettingsPage();
 
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
         void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void SettingsNavigationView_SelectionChanged(IInspectable const& sender, Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs const& args);
+
+    private:
+        void NavigateToPage(winrt::hstring const& tag);
     };
 }
 

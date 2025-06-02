@@ -4,15 +4,28 @@
 #include "SettingsPage.g.cpp"
 #endif
 #include "SettingsData.h"
+#include "GeneralSettingsPage.xaml.h"
+#include "DictionarySettingsPage.xaml.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
+using namespace Microsoft::UI::Xaml::Controls;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace winrt::WordWiz::implementation
 {
+    SettingsPage::SettingsPage()
+    {
+        InitializeComponent();
+        
+        // é»˜è®¤é€‰æ‹©ç¬¬ä¸€ä¸ªé¡¹ç›®ï¼ˆå¸¸è§„ï¼‰
+        if (SettingsNavigationView().MenuItems().Size() > 0) {
+            SettingsNavigationView().SelectedItem(SettingsNavigationView().MenuItems().GetAt(0));
+            NavigateToPage(L"General");
+        }
+    }
     int32_t SettingsPage::MyProperty()
     {
         throw hresult_not_implemented();
@@ -21,42 +34,29 @@ namespace winrt::WordWiz::implementation
     void SettingsPage::MyProperty(int32_t /* value */)
     {
         throw hresult_not_implemented();
+    }    void SettingsPage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
+    {
+        // è¿™ä¸ªæ–¹æ³•ç°åœ¨ä¸å†ä½¿ç”¨ï¼Œå› ä¸ºæˆ‘ä»¬å·²ç»ç§»é™¤äº†æµ‹è¯•æŒ‰é’®
+        // ä¿ç•™ç©ºå®ç°ä»¥é¿å…ç¼–è¯‘é”™è¯¯
     }
 
-    void SettingsPage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
+    void SettingsPage::SettingsNavigationView_SelectionChanged(IInspectable const& sender, NavigationViewSelectionChangedEventArgs const& args)
     {
-        // 1. ¶¨ÒåÒª²Ù×÷µÄ±íÃûºÍ¼üÃû
-        const std::string tableName = "user_settings"; // ÀıÈç£¬Ê¹ÓÃ "user_settings" ×÷Îª±íÃû
-        const std::string clickKey = "test_click_value";
-
-        // 2. ´´½¨ SettingsManager µÄÊµÀı£¬²¢Ö¸¶¨±íÃû
-        //    ¹¹Ôìº¯Êı»á´¦ÀíÊı¾İ¿âµÄ³õÊ¼»¯£¨Èç¹ûÉĞÎ´³õÊ¼»¯£©ºÍ±íµÄ´´½¨£¨Èç¹û²»´æÔÚ£©
-        ::WordWiz::Data::SettingsManager settingsDbManager(tableName);
-
-        // 3. ¼ì²é SettingsManager ÊÇ·ñ³É¹¦³õÊ¼»¯£¨Í¨¹ıÆäÄÚ²¿Âß¼­£©
-        //    SettingsManager µÄ isInitialized() ·½·¨ÏÖÔÚÊÇÊµÀı·½·¨
-        if (!settingsDbManager.isInitialized())
-        {
-            // ´¦Àí´íÎó£ºSettingsManager ³õÊ¼»¯Ê§°Ü
-            if (auto button = myButton()) { // ¼ÙÉè myButton() ·µ»Ø°´Å¥¿Ø¼ş
-                button.Content(winrt::box_value(L"´íÎó: Êı¾İ¿â³õÊ¼»¯Ê§°Ü"));
+        if (auto selectedItem = args.SelectedItem()) {
+            if (auto navItem = selectedItem.try_as<NavigationViewItem>()) {
+                auto tag = winrt::unbox_value_or<winrt::hstring>(navItem.Tag(), L"");
+                NavigateToPage(tag);
             }
-            return;
         }
+    }
 
-        // 4. ´ÓÊı¾İ¿â»ñÈ¡µ±Ç°Öµ
-        std::string currentValue = settingsDbManager.getString(clickKey, ""); // Í¨¹ıÊµÀıµ÷ÓÃ
-
-        // 5. ÔÚµ±Ç°ÖµºóÃæ×·¼Ó×Ö·û 'A'
-        currentValue += "A";
-
-        // 6. ½«ĞÂÖµ±£´æ»ØÊı¾İ¿â
-        settingsDbManager.setString(clickKey, currentValue); // Í¨¹ıÊµÀıµ÷ÓÃ
-
-        // 7. ¸üĞÂ°´Å¥ÄÚÈİÒÔÏÔÊ¾ĞÂµÄ×Ö·û´®Öµ
-        winrt::hstring displayText = winrt::to_hstring(currentValue);
-        if (auto button = myButton()) {
-            button.Content(winrt::box_value(displayText));
+    void SettingsPage::NavigateToPage(winrt::hstring const& tag)
+    {
+        if (tag == L"General") {
+            SettingsContentFrame().Navigate(winrt::xaml_typename<WordWiz::GeneralSettingsPage>());
+        }
+        else if (tag == L"Dictionary") {
+            SettingsContentFrame().Navigate(winrt::xaml_typename<WordWiz::DictionarySettingsPage>());
         }
     }
 }
