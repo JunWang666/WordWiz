@@ -5,11 +5,8 @@ namespace WordWiz
     [default_interface]
     runtimeclass WordSearchResultPage : Microsoft.UI.Xaml.Controls.Page
     {
-        WordSearchResultPage(); // æ„é€ å‡½æ•°
-        WordWiz.WordItem PageLevelSelectedItem; // é¡µé¢çº§é€‰ä¸­é¡¹å±æ€§
-        static Microsoft.UI.Xaml.DependencyProperty PageLevelSelectedItemProperty{ get; };
-        
-        // Items å±æ€§ç”¨äºç»‘å®šåˆ° ListView
-        Windows.Foundation.Collections.IObservableVector<WordWiz.WordItem> Items{ get; };
-    }
+        WordSearchResultPage(); // ¹¹Ôìº¯ÊıÃûÓëÀàÃûÒ»ÖÂ
+    WordWiz.WordItem PageLevelSelectedItem; // ±£³ÖÕâ¸ö£¬ÒòÎªËü×÷Îª¸¸Ò³ÃæĞèÒªÕâ¸öDP
+    static Microsoft.UI.Xaml.DependencyProperty PageLevelSelectedItemProperty{ get; };
+}
 }
