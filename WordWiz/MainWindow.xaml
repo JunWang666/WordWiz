@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Window
     x:Class="WordWiz.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -103,7 +103,9 @@
             AlwaysShowHeader="False"
             PaneTitle=""
             PaneDisplayMode ="Auto"
-            OpenPaneLength="250"
+            CompactModeThresholdWidth="600"
+            ExpandedModeThresholdWidth="800"
+            OpenPaneLength="200"
             IsPaneToggleButtonVisible="False"
             SelectionFollowsFocus="Disabled"
             IsTabStop="False">

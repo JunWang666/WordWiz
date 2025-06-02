@@ -1,19 +1,20 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "MainWindow.xaml.h"
 #if __has_include("MainWindow.g.cpp")
 #include "MainWindow.g.cpp"
-#include <winrt/Microsoft.UI.Interop.h> // Ìá¹© IWindowNative
-#include <winrt/Microsoft.UI.h>         // Ìá¹© GetWindowIdFromWindow
-#include <windows.h>                  // Ìá¹© HWND ¶¨Òå
-#include <winrt/Microsoft.UI.Windowing.h> // Ìá¹© AppWindow ºÍ AppWindowTitleBar
-#include <winrt/Microsoft.UI.Xaml.h>     // Ìá¹© UIElement (SetTitleBar µÄ²ÎÊıÀàĞÍ)
+#include <winrt/Microsoft.UI.Interop.h> // ï¿½á¹© IWindowNative
+#include <winrt/Microsoft.UI.h>         // ï¿½á¹© GetWindowIdFromWindow
+#include <windows.h>                  // ï¿½á¹© HWND ï¿½ï¿½ï¿½ï¿½
+#include <winrt/Microsoft.UI.Windowing.h> // æä¾› AppWindow å’Œ AppWindowTitleBar
+#include <winrt/Microsoft.UI.Xaml.h>     // æä¾› UIElement (SetTitleBar çš„å‚æ•°ç±»å‹)
+#include <commctrl.h>                     // æä¾› SetWindowSubclass
 #endif
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Microsoft.UI.Xaml.Media.Animation.h> // For navigation transition info
-// ÓÃÓÚÊµÏÖ±³¾°ÇĞ»»
+// ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ğ»ï¿½
 #include <NavigationService.h>
 
 using namespace winrt;
@@ -30,25 +31,25 @@ namespace winrt::WordWiz::implementation
 
     MainWindow::MainWindow()
     {
-        // »ñÈ¡ AppWindow ¶ÔÏó
+        // ï¿½ï¿½È¡ AppWindow ï¿½ï¿½ï¿½ï¿½
         auto appWindow = GetAppWindowForCurrentWindow();
 
         if (appWindow)
         {
-            // ¼ì²éÏµÍ³ÊÇ·ñÖ§³Ö±êÌâÀ¸×Ô¶¨Òå (Í¨³£ÔÚ Win11 ÉÏÖ§³Ö)
+            // ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ç·ï¿½Ö§ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ (Í¨ï¿½ï¿½ï¿½ï¿½ Win11 ï¿½ï¿½Ö§ï¿½ï¿½)
             if (AppWindowTitleBar::IsCustomizationSupported())
             {
                 auto titleBar = appWindow.TitleBar();
-                // À©Õ¹ÄÚÈİµ½±êÌâÀ¸ÇøÓò
+                // ï¿½ï¿½Õ¹ï¿½ï¿½ï¿½İµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 titleBar.ExtendsContentIntoTitleBar(true);
-				// ÉèÖÃ±êÌâÀ¸
+				// ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½
                 this->SetTitleBar(AppTitleBar());
                 titleBar.ButtonBackgroundColor(Windows::UI::Colors::Transparent());
             }
             else
             {
-                // Èç¹ûÏµÍ³²»Ö§³Ö×Ô¶¨Òå£¬Äã¿ÉÄÜĞèÒªÒ»Ğ©»ØÍË´¦Àí
-                // ÀıÈç£¬Òş²ØÄãµÄ×Ô¶¨Òå±êÌâÀ¸ÄÚÈİ£¬ÈÃÏµÍ³ÏÔÊ¾Ä¬ÈÏ±êÌâÀ¸
+                // ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½Ö§ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½å£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÒªÒ»Ğ©ï¿½ï¿½ï¿½Ë´ï¿½ï¿½ï¿½
+                // ï¿½ï¿½ï¿½ç£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½Ê¾Ä¬ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½
                 AppTitleBar().Visibility(Visibility::Collapsed);
             }
         }
@@ -69,21 +70,21 @@ namespace winrt::WordWiz::implementation
     void MainWindow::NavigationView_SelectionChanged(const winrt::Microsoft::UI::Xaml::Controls::NavigationView sender, const winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItem() == nullptr) {
-            // ¿Õ°×ÇøÓòµã»÷»òÈ¡ÏûÑ¡Ôñ£¬²»×öÈÎºÎ´¦Àí
+            // ï¿½Õ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ñ¡ï¿½ñ£¬²ï¿½ï¿½ï¿½ï¿½ÎºÎ´ï¿½ï¿½ï¿½
             return;
         }
 
         if (args.IsSettingsSelected())
         {
-            // Èç¹ûĞèÒª£¬¸üĞÂ±êÌâÎª "ÉèÖÃ"
-            sender.Header(winrt::box_value(L"ÉèÖÃ")); // Ê¾Àı
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Â±ï¿½ï¿½ï¿½Îª "ï¿½ï¿½ï¿½ï¿½"
+            sender.Header(winrt::box_value(L"ï¿½ï¿½ï¿½ï¿½")); // Ê¾ï¿½ï¿½
         }
         else
         {
             auto selectedItem = args.SelectedItem().try_as<winrt::Microsoft::UI::Xaml::Controls::NavigationViewItem>();
             if (selectedItem)
             {
-                // ¸üĞÂ±êÌâ
+                // ï¿½ï¿½ï¿½Â±ï¿½ï¿½ï¿½
                 if (sender.PaneDisplayMode() == winrt::Microsoft::UI::Xaml::Controls::NavigationViewPaneDisplayMode::Top)
                 {
                     sender.Header(selectedItem.Content());
@@ -103,17 +104,17 @@ namespace winrt::WordWiz::implementation
 
         if (args.IsSettingsInvoked())
         {
-            // ´¦ÀíÉèÖÃÏîµÄµ÷ÓÃ
-			tag_to_navigate = L"WordWiz.SettingsPage"; // Ê¾Àı£¬Êµ¼ÊÖµ¸ù¾İÄãµÄÉèÖÃÏî¾ö¶¨   
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½
+			tag_to_navigate = L"WordWiz.SettingsPage"; // Ê¾ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½   
         }
         else
         {
-            // ´¦ÀíÆÕÍ¨²Ëµ¥ÏîµÄµ÷ÓÃ
-            // args.InvokedItemContainer() ·µ»Ø±»µ÷ÓÃµÄ NavigationViewItem
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Ëµï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½
+            // args.InvokedItemContainer() ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½ï¿½Ãµï¿½ NavigationViewItem
             auto invokedItem = args.InvokedItemContainer().try_as<winrt::Microsoft::UI::Xaml::Controls::NavigationViewItem>();
             if (invokedItem)
             {
-                // Tag ¿ÉÄÜÊÇ IInspectable£¬ĞèÒªÏÈÅĞ¶ÏÀàĞÍ
+                // Tag ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ IInspectableï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½
                 auto tagInspectable = invokedItem.Tag();
                 if (auto ref = tagInspectable.try_as<winrt::Windows::Foundation::IReference<winrt::hstring>>())
                 {
@@ -123,18 +124,18 @@ namespace winrt::WordWiz::implementation
                 {
                     tag_to_navigate = str.value();
                 }
-                // Äã¿ÉÒÔ¸ù¾İĞèÒª¼ÌĞø else if ÅĞ¶ÏÆäËûÀàĞÍ
+                // ï¿½ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ else if ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             }
         }
 
         if (!tag_to_navigate.empty())
         {
-            if (mainFrame) // È·±£ÄãµÄ Frame ÊµÀıÓĞĞ§
+            if (mainFrame) // È·ï¿½ï¿½ï¿½ï¿½ï¿½ Frame Êµï¿½ï¿½ï¿½ï¿½Ğ§
             {
                 WordWizServices::NavigationService::NavigateFromTag(
                     mainFrame,
                     tag_to_navigate,
-                    nullptr, // µ¼º½²ÎÊı (Èç¹ûĞèÒªµÄ»°)
+                    nullptr, // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ä»ï¿½)
                     args.RecommendedNavigationTransitionInfo()
                 );
             }
@@ -144,9 +145,9 @@ namespace winrt::WordWiz::implementation
             }
         }
         else {
-            WordWizServices::Log::LogMessage(L"NavigationViewµ¼º½Ê§°Ü£¬ÎŞĞ§µÄTag£º"+ tag_to_navigate);
+            WordWizServices::Log::LogMessage(L"NavigationViewï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½Tagï¿½ï¿½"+ tag_to_navigate);
         }
-        // else: tag ÎŞĞ§»òÎª¿Õ£¬¿ÉÒÔºöÂÔ»ò¼ÇÂ¼ÈÕÖ¾
+        // else: tag ï¿½ï¿½Ğ§ï¿½ï¿½Îªï¿½Õ£ï¿½ï¿½ï¿½ï¿½Ôºï¿½ï¿½Ô»ï¿½ï¿½Â¼ï¿½ï¿½Ö¾
     }
 
 
@@ -181,11 +182,23 @@ namespace winrt::WordWiz::implementation
         Microsoft::UI::Windowing::AppWindow appWindow = Microsoft::UI::Windowing::AppWindow::GetFromWindowId(windowId);
 
         return appWindow;
-    }
-
-    winrt::Microsoft::UI::Xaml::Controls::Frame MainWindow::GetMainFrame()
+    }    winrt::Microsoft::UI::Xaml::Controls::Frame MainWindow::GetMainFrame()
     {
         return mainFrame;
+    }
+
+    // çª—å£å­ç±»åŒ–å¤„ç†å‡½æ•°ï¼Œç”¨äºè®¾ç½®æœ€å°çª—å£å°ºå¯¸
+    LRESULT CALLBACK MainWindow::WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+    {
+        if (uMsg == WM_GETMINMAXINFO)
+        {
+            MINMAXINFO* pMinMaxInfo = reinterpret_cast<MINMAXINFO*>(lParam);
+            // è®¾ç½®æœ€å°çª—å£å°ºå¯¸ä¸º 800x600
+            pMinMaxInfo->ptMinTrackSize.x = 950;
+            pMinMaxInfo->ptMinTrackSize.y = 1000;
+            return 0;
+        }
+        return DefSubclassProc(hWnd, uMsg, wParam, lParam);
     }
 
 }
@@ -194,29 +207,46 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
     winrt::Windows::Foundation::IInspectable const& sender,
     winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
 {
-    // ÔÚÕâÀïÖ´ĞĞ´°¿Ú¼ÓÔØºóµÄÂß¼­
-    // ´ËÊ±ÊÓ¾õÊ÷Ó¦¸ÃÒÑÍêÈ«¹¹½¨£¬¿ÉÒÔ°²È«·ÃÎÊ Frame
+    // è®¾ç½®çª—å£æœ€å°å°ºå¯¸
+    try {
+        // è·å–å½“å‰çª—å£çš„HWND
+        auto windowNative = this->try_as<IWindowNative>();
+        if (windowNative) {
+            HWND hwnd;
+            windowNative->get_WindowHandle(&hwnd);
+            
+            if (hwnd) {
+                // è®¾ç½®çª—å£å­ç±»åŒ–æ¥å¤„ç†WM_GETMINMAXINFOæ¶ˆæ¯
+                SetWindowSubclass(hwnd, WindowSubclassProc, 0, 0);
+               
+            }
+        }    }
+    catch (...) {
+        // å¿½ç•¥çª—å£å°ºå¯¸è®¾ç½®é”™è¯¯
+    }
+    
+    // è¿™é‡Œä¼šæ‰§è¡Œçª—å£åŠ è½½åçš„é€»è¾‘
+    // æ­¤æ—¶ä¸»çª—ä½“åº”è¯¥å·²ç»å®Œå…¨åˆ›å»ºï¼Œå¯ä»¥å®‰å…¨è®¿é—® Frame
     try
     {
         mainFrame = contentFrame();
-        // ³õÊ¼»¯NavigationService£¬´«µİcontentFrameºÍNavigationView
+        // åˆå§‹åŒ–NavigationServiceï¼Œä¼ å…¥contentFrameå’ŒNavigationView
         WordWizServices::NavigationService::Initialize(contentFrame(), SideNavigationView());
     }
     catch (winrt::hresult_error const& ex)
     {
-        // ´¦Àí´íÎó - ¿ÉÄÜÊÇ ContentFrame ÊôĞÔÃû²»ÕıÈ·
-		WordWizServices::Log::LogMessage(L"NavigationService initialization failed: " + std::to_wstring(ex.code()) + L" - " + ex.message());
+        // å¤„ç†é”™è¯¯ - ç¡®ä¿åœ¨ ContentFrame è®¾ç½®è¿‡ç¨‹ä¸­çš„æ­£ç¡®
+        WordWizServices::Log::LogMessage(L"NavigationService initialization failed: " + std::to_wstring(ex.code()) + L" - " + ex.message());
     }
 
-    //×¢²áÒ³Ãæ
+    //æ³¨å†Œé¡µé¢
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::HomePage>();
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::WordSearchResultPage>();
-	WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::SettingsPage>();
+    WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::SettingsPage>();
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::FavoritePage>();
     WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::HistoryPage>();
 
     WordWizServices::NavigationService::NavigateTo<WordWiz::HomePage>(MainWindow::GetMainFrame());
-
 
     // Update back button enabled state on navigation
     auto updateBackButtonEnabled = [this]()
@@ -239,6 +269,7 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
 
     updateBackButtonEnabled(); // Initial state
 }
+
 void winrt::WordWiz::implementation::MainWindow::BackButton_RightTapped(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::RightTappedRoutedEventArgs const& e)
 {
     e.Handled(true);
