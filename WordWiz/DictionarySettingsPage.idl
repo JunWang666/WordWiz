@@ -1,0 +1,8 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass DictionarySettingsPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        DictionarySettingsPage();
+    }
+}

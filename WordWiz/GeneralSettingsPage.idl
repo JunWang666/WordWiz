@@ -1,0 +1,8 @@
+namespace WordWiz
+{
+    [default_interface]
+    runtimeclass GeneralSettingsPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        GeneralSettingsPage();
+    }
+}
