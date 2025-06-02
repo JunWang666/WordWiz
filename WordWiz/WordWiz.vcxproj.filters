@@ -38,6 +38,7 @@
     <Midl Include="WordSearch.idl">
       <Filter>modules\WordSearch</Filter>
     </Midl>
+    <Midl Include="DictionaryItemInWordDetail.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -63,6 +64,10 @@
     <ClCompile Include="SettingsData.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
+    <ClCompile Include="DictionaryItemInWordDetail.cpp" />
+    <ClCompile Include="DatabaseHelper.cpp">
+      <Filter>modules\WordSearch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -83,6 +88,10 @@
     </ClInclude>
     <ClInclude Include="SettingsData.h">
       <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DictionaryItemInWordDetail.h" />
+    <ClInclude Include="DatabaseHelper.h">
+      <Filter>modules\WordSearch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

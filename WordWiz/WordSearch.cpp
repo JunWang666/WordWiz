@@ -4,6 +4,11 @@
 #include "WordSearch.g.cpp" 
 #include "WordItem.h"
 #include "DictionaryItemInWordDetail.h"
+#include <sqlite3.h> // 假设使用 SQLite，需根据实际数据库调整
+#include <vector>
+#include <wrl.h> // 用于智能指针管理
+#include "DatabaseHelper.h"
+using namespace ABI::Windows::Foundation;
 
 using namespace winrt;
 using namespace Windows::Foundation::Collections;
@@ -13,14 +18,36 @@ namespace winrt::WordWiz::implementation
     Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
     {
         auto results = winrt::single_threaded_observable_vector<WordWiz::WordItem>();
-        if (query.empty())
+        if (query.empty()) return results;
+
+        // 初始化数据库连接（路径需根据实际情况配置，可通过参数或配置文件传入）
+        DatabaseHelper dbHelper;
+        if (!dbHelper.OpenDatabase(L"dictionary.db")) // 假设数据库文件为 dictionary.db
         {
+            // 处理数据库连接失败（如返回错误提示项）
+            auto errorItem = winrt::make<WordWiz::implementation::WordItem>(L"错误", L"无法连接到词典数据库");
+            results.Append(errorItem);
             return results;
         }
-        auto item1 = winrt::make<WordWiz::implementation::WordItem>(query, query + L" (short explanation)");
-        results.Append(item1);
+
+        // 执行查询
+        auto dbResults = dbHelper.QueryWords(query.c_str());
+
+        // 转换为 UI 所需的 WordItem 格式
+        for (const auto& item : dbResults)
+        {
+            // 拆分数据（假设格式为 "单词 | 词性: 释义 [发音]"）
+            size_t pos = item.find(L" | ");
+            if (pos == std::wstring::npos) continue;
+
+            winrt::hstring word = item.substr(0, pos).c_str();
+            winrt::hstring explanation = item.substr(pos + 3).c_str(); // "+3" 跳过 " | "
+            auto wordItem = winrt::make<WordWiz::implementation::WordItem>(word, explanation);
+            results.Append(wordItem);
+        }
+
         return results;
-    }
+    } //修改部分
 
      Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> WordSearch::GetAvailableDictionaries(winrt::hstring const& word)
     {

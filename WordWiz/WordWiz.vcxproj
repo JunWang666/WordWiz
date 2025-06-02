@@ -118,6 +118,7 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DatabaseHelper.h" />
     <ClInclude Include="DictionaryItemInWordDetail.h" />
     <ClInclude Include="FavoritePage.xaml.h">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
@@ -189,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="database.cpp" />
+    <ClCompile Include="DatabaseHelper.cpp" />
     <ClCompile Include="DictionaryItemInWordDetail.cpp" />
     <ClCompile Include="FavoritePage.xaml.cpp">
       <DependentUpon>FavoritePage.xaml</DependentUpon>
