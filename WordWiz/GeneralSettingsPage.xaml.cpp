@@ -9,7 +9,9 @@
 #include <winrt/Windows.UI.ViewManagement.h>
 #include <winrt/Windows.System.h>
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.ApplicationModel.h> // Required for Package Version
 #include <cstdlib>
+#include <sstream> // Required for std::wstringstream
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -22,6 +24,7 @@ namespace winrt::WordWiz::implementation
         InitializeComponent();
         LoadCurrentTheme();
         LoadFolderPaths();
+        LoadAppVersion(); // Call LoadAppVersion
     }
 
     void GeneralSettingsPage::ThemeRadio_Checked(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
@@ -89,7 +92,8 @@ namespace winrt::WordWiz::implementation
         }
         catch (...) {
             // 忽略主题设置错误
-        }    }
+        }    
+    }
 
     bool GeneralSettingsPage::IsSystemInDarkMode()
     {
@@ -237,6 +241,29 @@ namespace winrt::WordWiz::implementation
             catch (...) {
                 // 忽略错误
             }
+        }
+    }
+
+    void GeneralSettingsPage::LoadAppVersion()
+    {
+        try
+        {
+            auto packageVersion = Windows::ApplicationModel::Package::Current().Id().Version();
+            std::wstringstream wss;
+            wss << L"版本 " 
+                << packageVersion.Major << L"."
+                << packageVersion.Minor << L"."
+                << packageVersion.Build << L"."
+                << packageVersion.Revision;
+            AppVersionText().Text(wss.str().c_str());
+        }
+        catch (const winrt::hresult_error& e)
+        {
+            AppVersionText().Text(L"版本 N/A");
+        }
+        catch (...)
+        {
+            AppVersionText().Text(L"版本 获取失败");
         }
     }
 }

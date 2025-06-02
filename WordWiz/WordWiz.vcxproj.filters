@@ -29,8 +29,12 @@
     <Page Include="Button.xaml">
       <Filter>others\Styles</Filter>
     </Page>
-    <Page Include="DictionarySettingsPage.xaml" />
-    <Page Include="GeneralSettingsPage.xaml" />
+    <Page Include="DictionarySettingsPage.xaml">
+      <Filter>views</Filter>
+    </Page>
+    <Page Include="GeneralSettingsPage.xaml">
+      <Filter>views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />

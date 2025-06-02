@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "GeneralSettingsPage.g.h"
 
@@ -17,6 +17,7 @@ namespace winrt::WordWiz::implementation
         bool IsSystemInDarkMode();
         void LoadFolderPaths();
         void OpenFolderInExplorer(const std::string& folderPath);
+        void LoadAppVersion();
     };
 }
 
