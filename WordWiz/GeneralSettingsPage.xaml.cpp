@@ -1,11 +1,17 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "GeneralSettingsPage.xaml.h"
 #if __has_include("GeneralSettingsPage.g.cpp")
 #include "GeneralSettingsPage.g.cpp"
 #endif
 #include "SettingsData.h"
 #include "App.xaml.h"
+#include "FilePathProvider.h"
 #include <winrt/Windows.UI.ViewManagement.h>
+#include <winrt/Windows.System.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.ApplicationModel.h> // Required for Package Version
+#include <cstdlib>
+#include <sstream> // Required for std::wstringstream
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -17,6 +23,8 @@ namespace winrt::WordWiz::implementation
     {
         InitializeComponent();
         LoadCurrentTheme();
+        LoadFolderPaths();
+        LoadAppVersion(); // Call LoadAppVersion
     }
 
     void GeneralSettingsPage::ThemeRadio_Checked(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
@@ -27,7 +35,8 @@ namespace winrt::WordWiz::implementation
         
         // 保存主题设置到数据库
         try {
-            ::WordWiz::Data::SettingsManager settingsManager("app_settings");            if (settingsManager.isInitialized()) {
+            ::WordWiz::Data::SettingsManager settingsManager("app_settings");
+            if (settingsManager.isInitialized()) {
                 settingsManager.setString("theme_mode", themeMode);
                 
                 // 立即应用主题
@@ -54,7 +63,7 @@ namespace winrt::WordWiz::implementation
                 } else {
                     LightThemeRadio().IsChecked(true);
                 }
-                  // 应用主题到应用程序
+                // 应用主题到应用程序
                 ApplyTheme(themeMode);
             }
         }
@@ -83,7 +92,7 @@ namespace winrt::WordWiz::implementation
         }
         catch (...) {
             // 忽略主题设置错误
-        }
+        }    
     }
 
     bool GeneralSettingsPage::IsSystemInDarkMode()
@@ -100,6 +109,161 @@ namespace winrt::WordWiz::implementation
         catch (...) {
             // 如果无法检测，默认使用浅色模式
             return false;
+        }
+    }
+
+    void GeneralSettingsPage::LoadFolderPaths()
+    {
+        try {
+            // 加载本地数据文件夹路径
+            std::string localPath = ::WordWiz::Data::FilePathProvider::GetAppLocalFolderPath();
+            if (localPath.empty()) {
+                LocalFolderPathText().Text(L"无法获取路径");
+                OpenLocalFolderButton().IsEnabled(false); // 假设按钮名为 OpenLocalFolderButton
+            }
+            else {
+                LocalFolderPathText().Text(winrt::to_hstring(localPath));
+                OpenLocalFolderButton().IsEnabled(true);
+            }
+
+            // 加载本地缓存文件夹路径
+            std::string cachePath = ::WordWiz::Data::FilePathProvider::GetAppLocalCacheFolderPath();
+            if (cachePath.empty()) {
+                LocalCacheFolderPathText().Text(L"无法获取路径");
+                OpenLocalCacheFolderButton().IsEnabled(false); // 假设按钮名为 OpenCacheFolderButton
+            }
+            else {
+                LocalCacheFolderPathText().Text(winrt::to_hstring(cachePath));
+                OpenLocalCacheFolderButton().IsEnabled(true);
+            }
+
+            // 加载共享本地文件夹路径
+            try {
+                std::string sharedPath = ::WordWiz::Data::FilePathProvider::GetAppSharedLocalFolderPath();
+                if (sharedPath.empty()) {
+                    SharedLocalFolderPathText().Text(L"此系统不支持共享本地文件夹");
+                    OpenSharedFolderButton().IsEnabled(false); // 假设按钮名为 OpenSharedFolderButton
+                }
+                else {
+                    SharedLocalFolderPathText().Text(winrt::to_hstring(sharedPath));
+                    OpenSharedFolderButton().IsEnabled(true);
+                }
+            }
+            catch (...) {
+                SharedLocalFolderPathText().Text(L"此系统不支持共享本地文件夹");
+                OpenSharedFolderButton().IsEnabled(false);
+            }
+
+            // 加载临时文件夹路径
+            std::string tempPath = ::WordWiz::Data::FilePathProvider::GetAppTemporaryFolderPath();
+            if (tempPath.empty()) {
+                TemporaryFolderPathText().Text(L"无法获取路径");
+                OpenTemporaryFolderButton().IsEnabled(false); // 假设按钮名为 OpenTempFolderButton
+            }
+            else {
+                TemporaryFolderPathText().Text(winrt::to_hstring(tempPath));
+                OpenTemporaryFolderButton().IsEnabled(true);
+            }
+        }
+        catch (...) {
+            // 处理异常，显示错误信息并禁用所有相关按钮
+            LocalFolderPathText().Text(L"加载失败");
+            OpenLocalFolderButton().IsEnabled(false);
+
+            LocalCacheFolderPathText().Text(L"加载失败");
+            OpenLocalCacheFolderButton().IsEnabled(false);
+
+            SharedLocalFolderPathText().Text(L"加载失败");
+            OpenSharedFolderButton().IsEnabled(false);
+
+            TemporaryFolderPathText().Text(L"加载失败");
+            OpenTemporaryFolderButton().IsEnabled(false);
+        }
+    }
+
+    void GeneralSettingsPage::OpenFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+    {
+        auto button = sender.as<winrt::Microsoft::UI::Xaml::Controls::Button>();
+        auto tag = winrt::unbox_value<winrt::hstring>(button.Tag());
+        std::string folderType = winrt::to_string(tag);
+
+        try {
+            std::string folderPath;
+            
+            if (folderType == "local") {
+                folderPath = ::WordWiz::Data::FilePathProvider::GetAppLocalFolderPath();
+            }
+            else if (folderType == "cache") {
+                folderPath = ::WordWiz::Data::FilePathProvider::GetAppLocalCacheFolderPath();
+            }
+            else if (folderType == "settings") {
+                folderPath = ::WordWiz::Data::FilePathProvider::GetAppLocalFolderPath(); // Settings is virtual, open parent folder
+            }
+            else if (folderType == "shared") {
+                try {
+                    folderPath = ::WordWiz::Data::FilePathProvider::GetAppSharedLocalFolderPath();
+                }
+                catch (...) {
+                    // 共享文件夹可能不受支持，直接返回
+                    return;
+                }
+            }
+            else if (folderType == "temp") {
+                folderPath = ::WordWiz::Data::FilePathProvider::GetAppTemporaryFolderPath();
+            }
+
+            if (!folderPath.empty()) {
+                OpenFolderInExplorer(folderPath);
+            }
+        }
+        catch (...) {
+            // 处理异常
+        }
+    }
+
+    void GeneralSettingsPage::OpenFolderInExplorer(const std::string& folderPath)
+    {
+        try {
+            // 将路径转换为宽字符串
+            winrt::hstring widePath = winrt::to_hstring(folderPath);
+            
+            // 使用 Windows::System::Launcher 打开文件夹
+            auto uri = winrt::Windows::Foundation::Uri(L"file:///" + widePath);
+            winrt::Windows::System::Launcher::LaunchUriAsync(uri);
+        }
+        catch (...) {
+            // 如果上述方法失败，尝试使用传统的方法
+            try {
+                std::string command = "explorer.exe \"" + folderPath + "\"";
+                std::wstring wcommand(command.begin(), command.end());
+                _wsystem(wcommand.c_str());
+            }
+            catch (...) {
+                // 忽略错误
+            }
+        }
+    }
+
+    void GeneralSettingsPage::LoadAppVersion()
+    {
+        try
+        {
+            auto packageVersion = Windows::ApplicationModel::Package::Current().Id().Version();
+            std::wstringstream wss;
+            wss << L"版本 " 
+                << packageVersion.Major << L"."
+                << packageVersion.Minor << L"."
+                << packageVersion.Build << L"."
+                << packageVersion.Revision;
+            AppVersionText().Text(wss.str().c_str());
+        }
+        catch (const winrt::hresult_error& e)
+        {
+            AppVersionText().Text(L"版本 N/A");
+        }
+        catch (...)
+        {
+            AppVersionText().Text(L"版本 获取失败");
         }
     }
 }

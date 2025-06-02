@@ -1,18 +1,26 @@
-#pragma once
+ï»¿#pragma once
 
 #include <string>
-#include <winrt/Windows.Storage.h> // ÒıÈë Windows.Storage ÃüÃû¿Õ¼ä
+#include <winrt/Windows.Storage.h> // å¼•å…¥ Windows.Storage å‘½åç©ºé—´
 
-namespace WordWiz // Íâ²¿ÃüÃû¿Õ¼ä
+namespace WordWiz
 {
-    namespace Data // ÄÚ²¿ÃüÃû¿Õ¼ä
-    {
-        class FilePathProvider
+    namespace Data
+    {        class FilePathProvider
         {
         public:
-            // »ñÈ¡Ó¦ÓÃµÄ±¾µØÊı¾İÎÄ¼ş¼ĞÂ·¾¶
-            // ·µ»ØÒ»¸ö UTF-8 ±àÂëµÄ std::string
+            // è·å–åº”ç”¨çš„æœ¬åœ°æ•°æ®æ–‡ä»¶å¤¹è·¯å¾„
             static std::string GetAppLocalFolderPath();
+
+            // è·å–åº”ç”¨çš„æœ¬åœ°ç¼“å­˜æ–‡ä»¶å¤¹è·¯å¾„
+            static std::string GetAppLocalCacheFolderPath();   
+            static std::string GetAppLocalSettingsPath();
+
+            // è·å–åº”ç”¨çš„å…±äº«æœ¬åœ°æ–‡ä»¶å¤¹è·¯å¾„
+            static std::string GetAppSharedLocalFolderPath();
+
+            // è·å–åº”ç”¨çš„ä¸´æ—¶æ–‡ä»¶å¤¹è·¯å¾„
+            static std::string GetAppTemporaryFolderPath();
         };
     }
 }
