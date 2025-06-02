@@ -19,7 +19,7 @@ namespace WordWiz::Data {
     // Poco::AutoPtr<Poco::Data::Session> SettingsManager::_pSession; // 替换
     std::unique_ptr<Poco::Data::Session> SettingsManager::_pSession; // 使用 std::unique_ptr
 
-    std::string SettingsManager::_dbPath = WordWiz::Data::FilePathProvider::GetAppLocalFolderPath() + "\\AppSettings.db";
+    std::string SettingsManager::_dbPath = WordWiz::Data::FilePathProvider::GetAppLocalFolderPath() + "\\AppData.db";
     Poco::FastMutex SettingsManager::_mutex;
     bool SettingsManager::_isInitialized = false;
 
