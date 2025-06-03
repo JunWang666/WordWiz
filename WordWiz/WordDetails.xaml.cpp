@@ -3,25 +3,16 @@
 #include "WordDetails.xaml.h"
 #include "WordDetails.g.cpp"
 #include "WordItem.h" 
-<<<<<<< HEAD
-#include "DictionaryItemInWordDetail.h" // �����ֵ����
-#include "NavigationService.h" // ����������NavigationServiceʵ��
-=======
 #include "DictionaryItemInWordDetail.h" // 引入字典项定义
 #include "NavigationService.h" // 新增：引入NavigationService实现
->>>>>>> feature_search_1
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls; // For SelectorBar related types
 using namespace Windows::Foundation::Collections;
-<<<<<<< HEAD
-using namespace WordWiz; // ���� DictionaryItemInWordDetal
-using namespace WordWizServices; // ������ʹ��NavigationService�����ռ�
-=======
 using namespace WordWiz; // 用于 DictionaryItemInWordDetal
 using namespace WordWizServices; // 新增：使用NavigationService命名空间
->>>>>>> feature_search_1
+
 
 namespace winrt::WordWiz::implementation
 {
@@ -34,11 +25,7 @@ namespace winrt::WordWiz::implementation
             Microsoft::UI::Xaml::PropertyMetadata{ nullptr, PropertyChangedCallback(&WordDetails::OnItemToDisplayChanged) } // 添加回调
         );
 
-<<<<<<< HEAD
-    // ���� DictionaryItemsProperty
-=======
     // 新增 DictionaryItemsProperty
->>>>>>> feature_search_1
     Microsoft::UI::Xaml::DependencyProperty WordDetails::m_dictionaryItemsProperty =
         Microsoft::UI::Xaml::DependencyProperty::Register(
             L"DictionaryItems",
@@ -59,11 +46,7 @@ namespace winrt::WordWiz::implementation
     WordDetails::WordDetails()
     {
         InitializeComponent();
-<<<<<<< HEAD
-        // ��ʼ�� DictionaryItems
-=======
         // 初始化 DictionaryItems
->>>>>>> feature_search_1
         SetValue(m_dictionaryItemsProperty, winrt::single_threaded_observable_vector<WordWiz::DictionaryItemInWordDetail>());
     }
 
@@ -96,11 +79,7 @@ namespace winrt::WordWiz::implementation
         catch (winrt::hresult_error const& ex)
         {
             winrt::hstring errorMessage = ex.message();
-<<<<<<< HEAD
-            // ��UI����ʾ���󣬻��߽�������������
-=======
             // 在UI上显示错误，或者进行其他错误处理
->>>>>>> feature_search_1
         }
     }
 
@@ -146,52 +125,20 @@ namespace winrt::WordWiz::implementation
                 );
             }
 
-<<<<<<< HEAD
-            // ���� SelectorBar �еľ���Ŀ
-            if (SendersThis->DictionarySelectorBar()) // ���ؼ��Ƿ���Ч
-=======
             // 清理 SelectorBar 中的旧项目
             if (SendersThis->DictionarySelectorBar()) // 检查控件是否有效
->>>>>>> feature_search_1
             {
                 SendersThis->DictionarySelectorBar().Items().Clear();
             }
 
-<<<<<<< HEAD
-            // ������ܴ��ڵľɵ��ֵ����б�
-            if (SendersThis->DictionaryItems())
-                SendersThis->DictionaryItems().Clear();
-
-            if (newItem) // ����µ� WordItem ��Ч
-=======
             // 清理可能存在的旧的字典项列表
             if (SendersThis->DictionaryItems())
                 SendersThis->DictionaryItems().Clear();
 
             if (newItem) // 如果新的 WordItem 有效
->>>>>>> feature_search_1
             {
                 winrt::hstring word = newItem.Word(); // 获取单词
 
-<<<<<<< HEAD
-                // ���� WordSearch �����ȡ���ôʵ��б� (���ڷ���DictionaryItemInWordDetal����)
-                Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> availableDictionaries = WordWiz::WordSearch().GetAvailableDictionaries(word);
-                
-                // �洢�����ֵ���
-                for (auto const& dictItem : availableDictionaries)
-                {
-                    SendersThis->DictionaryItems().Append(dictItem);
-                }
-
-                if (SendersThis->DictionarySelectorBar()) // �ٴμ��
-                {
-                    for (auto const& dictItem : availableDictionaries)
-                    {
-                        SelectorBarItem sbItem;          // �����µ� SelectorBarItem
-                        sbItem.Text(dictItem.DisplayName()); // ��������ʾ����
-                        sbItem.Tag(box_value(dictItem.Id())); // ʹ��Tag�洢�ֵ�ID��hstring��
-                        SendersThis->DictionarySelectorBar().Items().Append(sbItem); // ��ӵ� SelectorBar
-=======
                 // 调用 WordSearch 服务获取可用词典列表 (现在返回DictionaryItemInWordDetal对象)
                 Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> availableDictionaries = WordWiz::WordSearch().GetAvailableDictionaries(word);
                 
@@ -209,17 +156,12 @@ namespace winrt::WordWiz::implementation
                         sbItem.Text(dictItem.DisplayName()); // 设置其显示名称
                         sbItem.Tag(box_value(dictItem.Id())); // 使用Tag存储字典ID（hstring）
                         SendersThis->DictionarySelectorBar().Items().Append(sbItem); // 添加到 SelectorBar
->>>>>>> feature_search_1
                     }
                 }
 
                 if (SendersThis->DictionarySelectorBar() && SendersThis->DictionarySelectorBar().Items().Size() > 0)
                 {
-<<<<<<< HEAD
-                    // �Զ�ѡ�е�һ���ʵ���
-=======
                     // 自动选中第一个词典项
->>>>>>> feature_search_1
                     SendersThis->DictionarySelectorBar().SelectedItem(
                         SendersThis->DictionarySelectorBar().Items().GetAt(0).try_as<SelectorBarItem>()
                     );
@@ -241,22 +183,13 @@ namespace winrt::WordWiz::implementation
         }
     }
 
-<<<<<<< HEAD
-    // ItemToDisplay ���Ը���ʱ�Ļص�
-=======
     // ItemToDisplay 属性更改时的回调
->>>>>>> feature_search_1
     void WordDetails::OnSelectedDictionaryHtmlChanged(DependencyObject const& d, DependencyPropertyChangedEventArgs const& e)
     {
         if (auto SendersThis{ d.try_as<WordDetails>() })
         {
             winrt::hstring actualHtmlString = winrt::unbox_value<winrt::hstring>(e.NewValue());
-
-<<<<<<< HEAD
-            if (SendersThis->DictionaryWebView()) // ȷ�� DictionaryWebView �ؼ�����
-=======
             if (SendersThis->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
->>>>>>> feature_search_1
             {
                 if (SendersThis->m_isCoreWebView2Initialized)
                 {
@@ -270,32 +203,20 @@ namespace winrt::WordWiz::implementation
         }
     }
 
-<<<<<<< HEAD
-    // DictionarySelectorBar_SelectionChanged ������ʹ���ַ���ID��ʶ�ֵ�
-=======
     // DictionarySelectorBar_SelectionChanged 更新以使用字符串ID标识字典
->>>>>>> feature_search_1
     void WordDetails::DictionarySelectorBar_SelectionChanged(SelectorBar const& sender, SelectorBarSelectionChangedEventArgs const& /*args*/)
     {
         auto selectedBarItem = sender.SelectedItem().try_as<SelectorBarItem>();
 
         if (selectedBarItem && ItemToDisplay())
         {
-<<<<<<< HEAD
-            // ��Tag�л�ȡ�ֵ�ID��hstring��
-=======
             // 从Tag中获取字典ID（hstring）
->>>>>>> feature_search_1
             if (selectedBarItem.Tag())
             {
                 auto dictionaryId = unbox_value<winrt::hstring>(selectedBarItem.Tag());
                 winrt::hstring word = ItemToDisplay().Word();
                 
-<<<<<<< HEAD
-                // ʹ���ַ���ID���û�ȡ�ֵ�����
-=======
                 // 使用字符串ID调用获取字典内容
->>>>>>> feature_search_1
                 winrt::hstring htmlContent = WordWiz::WordSearch().GetDictionaryHtmlContent(word, dictionaryId);
                 SelectedDictionaryHtml(htmlContent);
             }
