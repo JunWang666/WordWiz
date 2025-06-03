@@ -99,6 +99,9 @@
     <ClInclude Include="DictionaryItemInWordDetail.h">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClInclude>
+    <ClInclude Include="database.h">
+      <Filter>services\Database</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\ArtWorks\df6b6a852f2d0e5ee1e264236e82b9d2_385285744710158316.jpg">
