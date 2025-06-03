@@ -68,7 +68,8 @@ namespace winrt::WordWiz::implementation
             "    ELSE 3 "
             "END, "
             "LENGTH(keyword) ASC, "
-            "keyword COLLATE NOCASE ASC";
+            "keyword COLLATE NOCASE ASC "
+            "LIMIT 100";
 
         // 3. 调用没有 bind 的 executeQuery 版本
         try {
