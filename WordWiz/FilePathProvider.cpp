@@ -29,7 +29,7 @@ std::string WideStringToString_UTF8(const std::wstring& wstr)
 }
 
 
-namespace WordWiz
+namespace WordWizServices
 {
     namespace Data 
     {        std::string FilePathProvider::GetAppLocalFolderPath()
