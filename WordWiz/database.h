@@ -12,26 +12,32 @@ namespace WordWizServices::Database
     class DatabaseManager
     {
     public:
-        static DatabaseManager& getInstance();
+        // Constructor with custom database path
+        explicit DatabaseManager(const std::string& dbPath = "");
+        ~DatabaseManager();
+        
+        // Disable copy constructor and assignment operator
+        DatabaseManager(const DatabaseManager&) = delete;
+        DatabaseManager& operator=(const DatabaseManager&) = delete;
+        
+        // Enable move constructor and assignment operator
+        DatabaseManager(DatabaseManager&&) = default;
+        DatabaseManager& operator=(DatabaseManager&&) = default;
         
         // Database lifecycle
         void initialize();
         void shutdown();
         bool isInitialized();
+       
         
         // Basic database query operations
         Poco::Data::RecordSet executeQuery(const std::string& sql, const std::vector<std::string>& params = {});
-        std::string executeScalarQuery(const std::string& sql, const std::vector<std::string>& params = {});
-
+        std::string executeScalarQuery(const std::string& sql, const std::vector<std::string>& params = {});    
+    
     private:
-        DatabaseManager() = default;
-        ~DatabaseManager() = default;
-        DatabaseManager(const DatabaseManager&) = delete;
-        DatabaseManager& operator=(const DatabaseManager&) = delete;
-
         std::unique_ptr<Poco::Data::Session> _pSession;
         std::string _dbPath;
-        Poco::FastMutex _mutex;
+        mutable Poco::FastMutex _mutex;
         bool _isInitialized = false;
     };
 }

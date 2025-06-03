@@ -6,36 +6,38 @@
 #include "DictionaryItemInWordDetail.h"
 #include "database.h"
 #include "logger.h"
+#include "FilePathProvider.h"
 
 using namespace winrt;
 using namespace Windows::Foundation::Collections;
 
 namespace winrt::WordWiz::implementation
-{    WordSearch::WordSearch()
+{   
+    WordSearch::WordSearch()
     {
-        WordWizServices::Database::DatabaseManager::getInstance().initialize();
+
     }
 
     WordSearch::~WordSearch()
     {
-        // Destructor doesn't need to explicitly call shutdown
-        // DatabaseManager will handle cleanup
+        
     }
     
-    void WordSearch::shutdown() {
-        WordWizServices::Database::DatabaseManager::getInstance().shutdown();
-    }Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
+    Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
     {
         auto results = winrt::single_threaded_observable_vector<WordWiz::WordItem>();
         if (query.empty())
         {
             return results;
-        }        std::string sQuery = winrt::to_string(query);
-        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
+        }        
+          
+        std::string sQuery = winrt::to_string(query);
         
+        auto main_db = WordWizServices::Database::DatabaseManager(WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\words.sqlite");
+
         try {
             std::string searchQuery = "%" + sQuery + "%";
-            auto rs = dbManager.executeQuery("SELECT keyword, definition_html FROM word WHERE keyword LIKE ?", {searchQuery});
+            auto rs = main_db.executeQuery("SELECT keyword, definition_html FROM word WHERE keyword LIKE ?", {searchQuery});
             
             if (rs.rowCount() == 0) {
                 WordWizServices::Log::LogMessage(L"Search for '" + query + L"': No records found in database.");
@@ -88,32 +90,29 @@ namespace winrt::WordWiz::implementation
         WordWizServices::Log::LogMessage(logMessage);
 
         return results;
-    }
-      Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> WordSearch::GetAvailableDictionaries(winrt::hstring const& word)
+    }      
+    
+    Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> WordSearch::GetAvailableDictionaries(winrt::hstring const& word)
     {
         auto dictionaries = winrt::single_threaded_vector<WordWiz::DictionaryItemInWordDetail>();
-        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
         
         try {
             // Query to get available dictionaries for a word
             std::string sWord = winrt::to_string(word);
-            auto rs = dbManager.executeQuery("SELECT DISTINCT uuid FROM info WHERE keyword = ?", {sWord});
+
+			auto dict_db = WordWizServices::Database::DatabaseManager(WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\dictionaries\\output.db");
+
+			auto uuid = dict_db.executeScalarQuery("SELECT AttributeValue FROM info Where AttributeName = 'ID'");
+            auto title = dict_db.executeScalarQuery("SELECT AttributeValue FROM info Where AttributeName = 'Title'");
+
+            auto rs = dict_db.executeQuery("SELECT definition_html FROM word WHERE keyword = ?", { sWord });
             
             if (rs.rowCount() > 0) {
-                bool more = rs.moveFirst();
-                while (more) {
-                    if (!rs["uuid"].isEmpty()) {
-                        std::string uuid = rs["uuid"].convert<std::string>();
-                        std::string title = getDictionaryTitle(uuid);
-                        
-                        dictionaries.Append(WordWiz::DictionaryItemInWordDetail{ 
-                            winrt::to_hstring(uuid),      
+                dictionaries.Append(WordWiz::DictionaryItemInWordDetail{
+                            winrt::to_hstring(uuid),
                             winrt::to_hstring(title),
-                            winrt::to_hstring(title)      
-                        });
-                    }
-                    more = rs.moveNext();
-                }
+                            winrt::to_hstring(title)
+                    });
             }
         }
         catch (const std::exception& e) {
@@ -123,9 +122,23 @@ namespace winrt::WordWiz::implementation
             WordWizServices::Log::LogMessage(L"Unknown exception in GetAvailableDictionaries");
         }
         
+        // Log search results
+        winrt::hstring logMessage = L"Search for '" + word + L"': ";
+        if (dictionaries.Size() > 0)
+        {
+            logMessage = logMessage + L" dictionaries: [";
+            for (auto const& item : dictionaries)
+            {
+                logMessage = logMessage + item.DisplayName() + L",";
+            }
+            logMessage = logMessage + L"]";
+        }
+        WordWizServices::Log::LogMessage(logMessage);
+
         return dictionaries;
     }
-      winrt::hstring WordSearch::GetDictionaryHtmlContent(winrt::hstring const& word, winrt::hstring const& dictionaryId)
+      
+    winrt::hstring WordSearch::GetDictionaryHtmlContent(winrt::hstring const& word, winrt::hstring const& dictionaryId)
     {
         if (word.empty() || dictionaryId.empty()) {
             return L"Error: Invalid parameters.";
@@ -133,28 +146,70 @@ namespace winrt::WordWiz::implementation
 
         std::string sWord = winrt::to_string(word);
         std::string sDictionaryId = winrt::to_string(dictionaryId);
-        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
-        
+
         try {
+            auto dict_db = WordWizServices::Database::DatabaseManager(WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\Dictionaries\\output.db");
+
             // Get the definition HTML content from the database
-            auto rs = dbManager.executeQuery("SELECT definition_html FROM entry WHERE keyword = ? AND uuid = ?", {sWord, sDictionaryId});
-            
+            auto rs = dict_db.executeQuery("SELECT definition_html FROM word WHERE keyword = ?", { sWord });
+
             if (rs.rowCount() == 0 || !rs.moveFirst()) {
                 return L"<p>Definition not found for this dictionary.</p>";
             }
-            
+
             std::string htmlContent = rs["definition_html"].convert<std::string>();
-            
-            // Apply CSS replacements
-            auto cssReplacement = getCssReplacement(sDictionaryId);
-            if (!cssReplacement.first.empty() && !cssReplacement.second.empty()) {
-                // Replace CSS in HTML content
-                size_t pos = htmlContent.find(cssReplacement.first);
-                if (pos != std::string::npos) {
-                    htmlContent.replace(pos, cssReplacement.first.length(), cssReplacement.second);
+
+            // 检查是否包含重定向链接
+            std::string redirectPattern = "@@@LINK=";
+            size_t redirectPos = htmlContent.find(redirectPattern);
+            if (redirectPos != std::string::npos) {
+                // 提取重定向的目标单词
+                size_t startPos = redirectPos + redirectPattern.length();
+                size_t endPos = htmlContent.find(' ', startPos);
+                if (endPos == std::string::npos) {
+                    endPos = htmlContent.length();
+                }
+
+                std::string targetWord = htmlContent.substr(startPos, endPos - startPos);
+                // 删除可能存在的HTML标签或其他特殊字符
+                targetWord.erase(std::remove(targetWord.begin(), targetWord.end(), '\r'), targetWord.end());
+                targetWord.erase(std::remove(targetWord.begin(), targetWord.end(), '\n'), targetWord.end());
+
+                // 递归调用以获取目标单词的内容
+                winrt::hstring redirectContent = GetDictionaryHtmlContent(winrt::to_hstring(targetWord), dictionaryId);
+
+                // 在结果前添加重定向标记
+                return L"<div class=\"redirect-notice\">从 <strong>"+ 
+                    winrt::to_hstring(word) + 
+                    L"</strong> 重定向到 <strong>" +
+                    winrt::to_hstring(targetWord) +
+                    L"</strong></div>" + redirectContent;
+            }
+
+            // Apply CSS replacements directly within this method
+            try {
+                auto old_css = dict_db.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'CSS_TARGET_HREF'");
+                auto new_css = dict_db.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'CSS_REPLACEMENT_CONTENT'");
+
+                // 检查是否获取到了有效的CSS路径
+                if (!old_css.empty() && !new_css.empty()) {
+                    // 在HTML内容中查找和替换CSS引用
+                    std::string searchStr = old_css;
+                    std::string replaceStr = new_css;
+
+                    size_t pos = 0;
+                    while ((pos = htmlContent.find(searchStr, pos)) != std::string::npos) {
+                        htmlContent.replace(pos, searchStr.length(), replaceStr);
+                        pos += replaceStr.length();
+                    }
+
+                    WordWizServices::Log::LogMessage(L"CSS replacement applied: " +
+                        winrt::to_hstring(old_css) + L" -> " + winrt::to_hstring(new_css));
                 }
             }
-            
+            catch (...) {
+                WordWizServices::Log::LogMessage(L"Warning: Unable to apply CSS replacements for dictionary: " + dictionaryId);
+            }
             return winrt::to_hstring(htmlContent);
         }
         catch (const std::exception& e) {
@@ -163,38 +218,7 @@ namespace winrt::WordWiz::implementation
         }
         catch (...) {
             WordWizServices::Log::LogMessage(L"Unknown exception in GetDictionaryHtmlContent");
-            return L"<p>Unknown error retrieving definition</p>";        }
-    }
-
-    // Private helper methods
-    std::string WordSearch::getDictionaryTitle(const std::string& uuid)
-    {
-        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
-        try {
-            std::string title = dbManager.executeScalarQuery("SELECT title FROM dictionary WHERE uuid = ?", {uuid});
-            return title.empty() ? "Unknown Dictionary" : title;
-        }
-        catch (...) {
-            return "Unknown Dictionary";
+            return L"<p>Unknown error retrieving definition</p>";
         }
     }
-
-    std::pair<std::string, std::string> WordSearch::getCssReplacement(const std::string& uuid)
-    {
-        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
-        try {
-            auto rs = dbManager.executeQuery("SELECT old_css, new_css FROM css_replacement WHERE uuid = ?", {uuid});
-            
-            if (rs.rowCount() > 0 && rs.moveFirst()) {
-                std::string oldCss = rs["old_css"].convert<std::string>();
-                std::string newCss = rs["new_css"].convert<std::string>();
-                return std::make_pair(oldCss, newCss);
-            }
-        }
-        catch (...) {
-            // Return empty if no CSS replacement found or error occurs
-        }
-        return std::make_pair("", "");
-    }
-
 }

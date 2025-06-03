@@ -6,7 +6,8 @@
 namespace WordWizServices
 {
     namespace Data
-    {        class FilePathProvider
+    {        
+        class FilePathProvider
         {
         public:
             // 获取应用的本地数据文件夹路径

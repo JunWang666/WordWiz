@@ -4,6 +4,7 @@ import re
 import base64
 import os
 from pathlib import Path
+import hashlib  # 新增导入
 
 # 尝试导入 readmdict 的核心组件
 try:
@@ -56,7 +57,23 @@ def get_mime_type(filename_or_path):
         if ext == '.otf': return 'font/otf'
         if ext == '.woff': return 'font/woff'
         if ext == '.woff2': return 'font/woff2'
+    # Add SVG MIME type
+    elif ext == '.svg':
+        return 'image/svg+xml'
     return 'application/octet-stream'
+
+
+def calculate_file_hash(file_path):
+    """计算文件的 SHA256 哈希值"""
+    sha256_hash = hashlib.sha256()
+    try:
+        with open(file_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
+    except Exception as e:
+        print(f"错误: 计算文件 '{file_path}' 的哈希值失败: {e}")
+        return None
 
 
 # --- 嵌入逻辑 ---
@@ -68,6 +85,8 @@ class ResourceEmbedder:
         if mdd_objects_list:
             for i, mdd_obj in enumerate(mdd_objects_list):
                 try:
+                    # For MDD objects, keys are typically byte strings.
+                    # We store the original byte key after decoding for lookup.
                     keys_cache = {key.decode('utf-8', errors='replace').lower(): key for key in mdd_obj.keys()}
                     self.mdd_providers.append({'obj': mdd_obj, 'keys_cache': keys_cache, 'id': f"MDD_{i + 1}"})
                 except Exception as e:
@@ -81,27 +100,46 @@ class ResourceEmbedder:
         if not resource_name_cleaned.strip():
             return None, None, None, None
 
-        possible_key_forms = [
+        # Normalize path separators and remove leading slashes for consistent lookup
+        possible_key_forms_decoded = [
             resource_name_cleaned,
             resource_name_cleaned.lstrip('/\\'),
             '/' + resource_name_cleaned.lstrip('/\\'),
-            '\\' + resource_name_cleaned.lstrip('/\\').replace('/', '\\')
+            '\\' + resource_name_cleaned.lstrip('/\\').replace('/', '\\')  # For keys stored with backslashes
         ]
+
         for provider in self.mdd_providers:
             mdd_obj = provider['obj']
-            keys_cache = provider['keys_cache']
-            for pk_form_str in possible_key_forms:
-                lookup_key_str_lower = pk_form_str.lower()
-                if lookup_key_str_lower in keys_cache:
-                    original_byte_key = keys_cache[lookup_key_str_lower]
+            keys_cache = provider['keys_cache']  # This maps decoded lowercased key to original byte key
+
+            for pk_form_decoded_str in possible_key_forms_decoded:
+                lookup_key_decoded_lower = pk_form_decoded_str.lower()
+
+                if lookup_key_decoded_lower in keys_cache:
+                    original_byte_key = keys_cache[lookup_key_decoded_lower]  # Get the original byte key
                     try:
-                        data_bytes = mdd_obj.get_bytestring(original_byte_key)
+                        # Debugging print statements
+                        print(f"DEBUG: Attempting to get resource for key: {original_byte_key!r}")
+                        print(f"DEBUG: Type of mdd_obj: {type(mdd_obj)}")
+                        has_get_by_key = hasattr(mdd_obj, 'get_by_key')
+                        print(f"DEBUG: mdd_obj has 'get_by_key' method: {has_get_by_key}")
+                        if has_get_by_key:
+                            print(f"DEBUG: 'get_by_key' is callable: {callable(mdd_obj.get_by_key)}")
+
+                        # Correct way to get data from readmdict.MDD object
+                        # Use get_by_key method
+                        data_bytes = mdd_obj.get_by_key(original_byte_key)
                         if data_bytes:
+                            # Determine MIME type based on the original resource name, not the (potentially altered) key
                             mime_type = get_mime_type(resource_name_cleaned)
                             return data_bytes, mime_type, provider['id'], original_byte_key
+                    except KeyError:
+                        print(
+                            f"警告：键 '{lookup_key_decoded_lower}' (原始字节键: {original_byte_key!r}) 在缓存中但无法通过 get_by_key 从 {provider['id']} 中获取 (KeyError)。")
+                        continue
                     except Exception as e_get:
                         print(
-                            f"警告：从 {provider['id']} 获取资源 '{pk_form_str}' (原始键: {original_byte_key}) 失败: {e_get}")
+                            f"警告：从 {provider['id']} 获取资源 '{pk_form_decoded_str}' (原始字节键: {original_byte_key!r}) 失败: {e_get}")  # This will print the "not subscriptable" error
                         continue
         return None, None, None, None
 
@@ -110,8 +148,7 @@ class ResourceEmbedder:
             return html_content
 
         def replace_js_link(match):
-            js_src_attr = match.group(1) if len(match.groups()) > 0 and match.group(1) else "未知JS源"
-            return f'<script type="text/javascript">\n{self.js_content_str}\n</script>'
+            return f'<script type="text/javascript">\n// Embedded JavaScript\n{self.js_content_str}\n</script>'
 
         html_content = re.sub(r'<script[^>]*?src\s*=\s*["\']([^"\']+)["\'][^>]*?>\s*</script>',
                               replace_js_link, html_content, flags=re.IGNORECASE | re.DOTALL)
@@ -128,14 +165,12 @@ class ResourceEmbedder:
             if data_bytes:
                 b64_data = base64.b64encode(data_bytes).decode('utf-8')
                 new_src = f'data:{mime_type};base64,{b64_data}'
-
-                def escape_for_regex_replace(s): return s.replace('\\', r'\\')
-
                 return re.sub(r'src\s*=\s*["\']' + re.escape(img_src_from_html) + r'["\']',
-                              f'src="{escape_for_regex_replace(new_src)}"', original_tag, count=1, flags=re.IGNORECASE)
+                              f'src="{new_src}"', original_tag, count=1, flags=re.IGNORECASE)
             return original_tag
 
-        html_content = re.sub(r'<img[^>]*?src\s*=\s*["\']([^"\':]+)["\'][^>]*?>', replace_img_src, html_content,
+        html_content = re.sub(r'<img[^>]*?src\s*=\s*["\']([^"\':]+(?<!data:))["\'][^>]*?>', replace_img_src,
+                              html_content,
                               flags=re.IGNORECASE)
 
         def replace_snd_link(match):
@@ -144,7 +179,7 @@ class ResourceEmbedder:
             if data_bytes:
                 b64_data = base64.b64encode(data_bytes).decode('utf-8')
                 if mime_type == 'audio/x-speex': print("警告: SPX 音频已嵌入，但浏览器可能无法直接播放。")
-                return f'<audio controls src="data:{mime_type};base64,{b64_data}">{link_content} (音频)</audio>'
+                return f'<audio controls src="data:{mime_type};base64,{b64_data}">{link_content if link_content else "播放音频"}</audio>'
             return original_tag
 
         html_content = re.sub(r'<a[^>]*?href\s*=\s*["\']snd://([^"\']+)["\'][^>]*?>(.*?)</a>', replace_snd_link,
@@ -157,15 +192,12 @@ class ResourceEmbedder:
                 b64_data = base64.b64encode(data_bytes).decode('utf-8')
                 new_src = f'data:{mime_type};base64,{b64_data}'
                 if mime_type == 'audio/x-speex': print("警告: SPX 音频已嵌入，但浏览器可能无法直接播放。")
-
-                def escape_for_regex_replace(s):
-                    return s.replace('\\', r'\\')
-
                 return re.sub(r'src\s*=\s*["\']' + re.escape(audio_src_from_html) + r'["\']',
-                              f'src="{escape_for_regex_replace(new_src)}"', original_tag, count=1, flags=re.IGNORECASE)
+                              f'src="{new_src}"', original_tag, count=1, flags=re.IGNORECASE)
             return original_tag
 
-        html_content = re.sub(r'<audio[^>]*?src\s*=\s*["\']([^"\':]+)["\'][^>]*?>', replace_audio_src, html_content,
+        html_content = re.sub(r'<audio[^>]*?src\s*=\s*["\']([^"\':]+(?<!data:))["\'][^>]*?>', replace_audio_src,
+                              html_content,
                               flags=re.IGNORECASE)
         return html_content
 
@@ -175,7 +207,7 @@ class ResourceEmbedder:
         return html_content
 
 
-# --- 文件路径获取 (修改以支持独立封面) ---
+# --- 文件路径获取 ---
 def get_file_paths():
     while True:
         mdx_file_path_str = input("请输入源 MDX 文件路径: ").strip()
@@ -186,26 +218,6 @@ def get_file_paths():
             break
         else:
             print("错误：MDX 文件路径无效或文件不存在。请确保路径正确且以 .mdx 结尾。")
-
-    while True:
-        sqlite_file_path_str = input("请输入目标 SQLite 数据库文件路径 (例如 output.db): ").strip()
-        if sqlite_file_path_str.startswith('"') and sqlite_file_path_str.endswith('"'):
-            sqlite_file_path_str = sqlite_file_path_str[1:-1]
-        sqlite_file_path = Path(sqlite_file_path_str)
-        if not sqlite_file_path.name:
-            print("错误: SQLite 文件名不能为空。")
-            continue
-        if sqlite_file_path.suffix.lower() not in ['.db', '.sqlite', '.sqlite3']:
-            print(
-                f"提示：输出文件名 '{sqlite_file_path.name}' 没有标准 SQLite 后缀，将使用 '{sqlite_file_path.with_suffix('.db').name}'。")
-            sqlite_file_path = sqlite_file_path.with_suffix(".db")
-        try:
-            sqlite_file_path.parent.mkdir(parents=True, exist_ok=True)
-            break
-        except OSError as e:
-            print(f"错误：无法创建 SQLite 文件的输出目录 '{sqlite_file_path.parent}': {e}")
-        except Exception as e:
-            print(f"输入 SQLite 文件路径时发生未知错误: {e}")
 
     css_path_str = input("请输入可选的 CSS 文件路径 (直接回车跳过): ").strip()
     if css_path_str.startswith('"') and css_path_str.endswith('"'):
@@ -225,6 +237,7 @@ def get_file_paths():
         mdd_path_str = input(f"MDD 文件 {len(mdd_paths_list) + 1}: ").strip()
         if not mdd_path_str:
             break
+        # Corrected typo here:
         if mdd_path_str.startswith('"') and mdd_path_str.endswith('"'):
             mdd_path_str = mdd_path_str[1:-1]
         mdd_path_candidate = Path(mdd_path_str)
@@ -234,7 +247,6 @@ def get_file_paths():
         else:
             print(f"警告: 输入的 MDD 文件 '{mdd_path_str}' 无效或不存在，已忽略。")
 
-    # 新增：获取独立封面图片路径
     standalone_cover_path_str = input("请输入可选的独立封面图片文件路径 (PNG, JPG, GIF, WEBP) (直接回车跳过): ").strip()
     if standalone_cover_path_str.startswith('"') and standalone_cover_path_str.endswith('"'):
         standalone_cover_path_str = standalone_cover_path_str[1:-1]
@@ -247,7 +259,7 @@ def get_file_paths():
         else:
             print(f"警告: 输入的独立封面图片文件 '{standalone_cover_path_str}' 无效、不存在或格式不支持，将忽略。")
 
-    return mdx_file_path, sqlite_file_path, css_path, js_path, mdd_paths_list, standalone_cover_path
+    return mdx_file_path, css_path, js_path, mdd_paths_list, standalone_cover_path
 
 
 # --- SQLite 操作 ---
@@ -266,7 +278,7 @@ def populate_info_table(cursor, mdx_header, other_info_to_add=None):
                 value = value_bytes.decode('utf-8', errors='replace')
                 all_info_to_insert.append((key, value))
             except Exception as e:
-                print(f"处理元数据时发生未知错误 - Key: {key_bytes}, Value: {value_bytes}, Error: {e}")
+                print(f"处理元数据时发生未知错误 - Key: {key_bytes!r}, Value: {value_bytes!r}, Error: {e}")
 
     if other_info_to_add:
         all_info_to_insert.extend(other_info_to_add)
@@ -300,8 +312,13 @@ def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedde
                 definition_html_processed = embedder.process_html(definition_html_original)
                 batch.append((keyword, definition_html_processed))
             except Exception as e:
-                keyword_preview = key_bytes[:30].decode(encoding, errors='ignore')
-                print(f"\n错误：处理词条 '{keyword_preview}...' 数据或嵌入资源时出错: {e}")
+                # Improved error reporting for keyword
+                keyword_preview_bytes = key_bytes[:50]  # Show more bytes for context
+                try:
+                    keyword_preview_str = keyword_preview_bytes.decode(encoding, errors='replace')
+                except:  # Fallback if decode fails for any reason
+                    keyword_preview_str = str(keyword_preview_bytes)
+                print(f"\n错误：处理词条 '{keyword_preview_str}...' 数据或嵌入资源时出错: {e}")
                 continue
 
             if len(batch) >= BATCH_SIZE:
@@ -326,26 +343,38 @@ def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedde
         return False
 
 
-# --- Main 函数 (修改以处理独立封面) ---
+# --- Main 函数 ---
 def main():
-    print("--- MDX 转 SQLite (CSS/Font/Cover信息存入info表, 支持独立封面) ---")
-    mdx_file, sqlite_file, css_path, js_path, mdd_paths, standalone_cover_file_path = get_file_paths()
+    print("--- MDX 转 SQLite (CSS/Font/Cover信息存入info表, 支持独立封面, 输出文件名基于MDX哈希) ---")
+    mdx_file, css_path, js_path, mdd_paths, standalone_cover_file_path = get_file_paths()
 
     print(f"\n源 MDX 文件: {mdx_file}")
-    print(f"目标 SQLite 文件: {sqlite_file}")
+
+    mdx_file_hash_uuid = calculate_file_hash(mdx_file)
+    if not mdx_file_hash_uuid:
+        print("错误: 无法计算 MDX 文件哈希，程序将退出。")
+        return
+
+    sqlite_file_name = f"{mdx_file_hash_uuid}.wordwiz"
+    sqlite_file = Path.cwd() / sqlite_file_name
+    print(f"目标 SQLite 文件将自动生成为: {sqlite_file}")
 
     additional_info_for_db = []
+    additional_info_for_db.append(('ID', mdx_file_hash_uuid))
 
-    # 1. 处理 CSS 和相关字体
     if css_path:
         print(f"处理 CSS 文件: {css_path}")
         try:
             with open(css_path, 'r', encoding='utf-8') as f:
                 css_content_data = f.read()
             print(f"成功读取 CSS 文件内容 (长度: {len(css_content_data)}).")
-            additional_info_for_db.append(('CSS_TARGET_HREF', css_path.name))
-            additional_info_for_db.append(('CSS_REPLACEMENT_CONTENT', css_content_data))
-            print(f"提示: CSS 文件 '{css_path.name}' 的信息将存储在 info 表中。")
+
+            css_link_tag = f'<link rel="stylesheet" type="text/css" href="{css_path.name}" />'
+            additional_info_for_db.append(('CSS_TARGET_HREF', css_link_tag))
+
+            styled_css_content = f'<style type="text/css">\n{css_content_data}\n</style>'
+            additional_info_for_db.append(('CSS_REPLACEMENT_CONTENT', styled_css_content))
+            print(f"提示: CSS 文件 '{css_path.name}' 的信息 (link标签和style包裹内容) 将存储在 info 表中。")
 
             font_face_blocks = re.findall(r"@font-face\s*\{[^{}]*\}", css_content_data, re.IGNORECASE | re.DOTALL)
             if font_face_blocks:
@@ -356,41 +385,44 @@ def main():
                 for mdd_p_font in mdd_paths:
                     try:
                         temp_mdd_reader_list_for_fonts.append(MDD(str(mdd_p_font)))
-                    except:
-                        pass
+                    except Exception as e_mdd_font:
+                        print(f"警告: 打开用于字体查找的 MDD '{mdd_p_font}' 失败: {e_mdd_font}")
 
-            if temp_mdd_reader_list_for_fonts or not font_face_blocks:  # 如果没有font_face，也不需要MDD来找字体
-                font_embedder_helper = ResourceEmbedder(mdd_objects_list=temp_mdd_reader_list_for_fonts)
-                found_font_urls = set()
+            font_embedder_helper = ResourceEmbedder(mdd_objects_list=temp_mdd_reader_list_for_fonts)
+            found_font_urls = set()
 
-                for block in font_face_blocks:
-                    urls_in_block = re.findall(r"url\((['\"]?)([^()\"']+?)\1\)", block, re.IGNORECASE)
-                    for _, font_url in urls_in_block:
-                        font_filename = os.path.basename(font_url.strip())
-                        if not font_filename or font_filename in found_font_urls:
-                            continue
-                        found_font_urls.add(font_filename)
+            for block in font_face_blocks:
+                urls_in_block = re.findall(r"url\((['\"]?)([^()\"']+?)\1\)", block, re.IGNORECASE)
+                for _, font_url in urls_in_block:
+                    font_filename = os.path.basename(font_url.strip())
+                    if not font_filename or font_filename in found_font_urls:
+                        continue
+                    found_font_urls.add(font_filename)
 
-                        print(f"  尝试在MDD中查找字体文件: '{font_filename}' (从CSS URL: '{font_url}')")
-                        font_data_bytes, font_mime, found_in_mdd, _ = font_embedder_helper._find_mdd_resource(
-                            font_filename)
+                    print(f"  尝试在MDD中查找字体文件: '{font_filename}' (从CSS URL: '{font_url}')")
+                    font_data_bytes, font_mime, found_in_mdd, _ = font_embedder_helper._find_mdd_resource(
+                        font_filename)
 
-                        if font_data_bytes:
-                            font_base64_content = base64.b64encode(font_data_bytes).decode('utf-8')
-                            additional_info_for_db.append((f'FONT_TARGET_URL_{font_filename}', font_filename))
-                            additional_info_for_db.append((f'FONT_BASE64_CONTENT_{font_filename}', font_base64_content))
-                            print(
-                                f"    -> 找到并为 '{font_filename}' (MIME: {font_mime}) 生成Base64数据 (来自 {found_in_mdd})。将存入info表。")
-                        else:
-                            print(f"    -> 未在提供的MDD文件中找到字体: '{font_filename}'")
-            elif font_face_blocks:  # 有font_face但没有MDD
-                print("警告: CSS中找到@font-face规则，但未提供MDD文件，无法查找和嵌入字体文件。")
+                    if font_data_bytes:
+                        font_base64_content = base64.b64encode(font_data_bytes).decode('utf-8')
+                        additional_info_for_db.append((f'FONT_TARGET_URL_{font_filename}', font_filename))
+                        additional_info_for_db.append((f'FONT_BASE64_CONTENT_{font_filename}', font_base64_content))
+                        print(
+                            f"    -> 找到并为 '{font_filename}' (MIME: {font_mime}) 生成Base64数据 (来自 {found_in_mdd})。将存入info表。")
+                    else:
+                        print(f"    -> 未在提供的MDD文件中找到字体: '{font_filename}'")
+
+            if font_face_blocks and not temp_mdd_reader_list_for_fonts and mdd_paths:
+                print("警告: CSS中找到@font-face规则，但所有提供的MDD文件都无法用于字体查找。")
+            elif font_face_blocks and not mdd_paths:
+                print("警告: CSS中找到@font-face规则，但未提供MDD文件，无法从MDD查找和嵌入字体文件。")
+
+
         except Exception as e:
             print(f"错误: 无法读取或处理 CSS 文件 '{css_path}': {e}. CSS及字体信息将不会存储。")
     else:
         print("未提供 CSS 文件路径，不处理CSS及相关字体信息存储。")
 
-    # 2. 处理独立封面图片文件
     if standalone_cover_file_path:
         print(f"处理独立封面图片文件: {standalone_cover_file_path}")
         try:
@@ -403,7 +435,6 @@ def main():
         except Exception as e_scover:
             print(f"错误: 无法读取或处理独立封面图片文件 '{standalone_cover_file_path}': {e_scover}")
 
-    # 3. JS 文件处理 (仍然是直接嵌入到词条HTML)
     js_content_data = None
     if js_path:
         print(f"处理 JS 文件: {js_path}")
@@ -414,7 +445,6 @@ def main():
         except Exception as e:
             print(f"错误: 无法读取 JS '{js_path}': {e}. 跳过JS嵌入。")
 
-    # 4. MDD 文件列表和 ResourceEmbedder 初始化 (用于词条内资源)
     mdd_reader_list_main = []
     if mdd_paths:
         print(f"将从以下 MDD 文件中嵌入主要资源 (图片、音频到词条HTML):")
@@ -424,8 +454,6 @@ def main():
                 print(f"  - 成功打开 MDD 文件 ({idx + 1}/{len(mdd_paths)}): {mdd_p}")
             except Exception as e:
                 print(f"错误: 无法打开 MDD '{mdd_p}' 用于主要资源: {e}. 将忽略此MDD文件。")
-    # else: # 保持之前的打印逻辑
-    #     print("未提供 MDD 文件，不进行主要资源嵌入。")
 
     embedder = ResourceEmbedder(js_content_str=js_content_data, mdd_objects_list=mdd_reader_list_main)
 
@@ -438,7 +466,13 @@ def main():
         mdx_instance = MDX(str(mdx_file))
         mdx_header = mdx_instance.header
 
-        # 5. 处理 MDX 头部定义的词典封面图片
+        if mdx_header and b'Title' in mdx_header:
+            try:
+                dict_title = mdx_header[b'Title'].decode('utf-8', errors='replace')
+                print(f"词典标题: {dict_title}")
+            except Exception:  # Fallback for non-UTF-8 titles
+                print(f"词典标题 (bytes): {mdx_header[b'Title']!r}")
+
         if mdx_header and mdd_reader_list_main:
             found_header_cover = False
             for cover_key_bytes in COVER_IMAGE_HEADER_KEYS:
@@ -449,47 +483,51 @@ def main():
                         if not cover_resource_name: continue
 
                         print(
-                            f"在MDX头部找到封面图片引用 (键: {cover_key_bytes.decode()}), 资源名: '{cover_resource_name}'")
-                        cover_data_bytes, cover_mime, found_in_mdd, _ = embedder._find_mdd_resource(cover_resource_name)
+                            f"在MDX头部找到封面图片引用 (键: {cover_key_bytes.decode(errors='ignore')}), 资源名: '{cover_resource_name}'")
+                        cover_data_bytes, cover_mime, found_in_mdd, original_mdd_key = embedder._find_mdd_resource(
+                            cover_resource_name)
 
                         if cover_data_bytes:
                             cover_base64_content = base64.b64encode(cover_data_bytes).decode('utf-8')
-                            additional_info_for_db.append(('MDX_HEADER_COVER_FILENAME', cover_resource_name))  # 使用不同键名
+                            additional_info_for_db.append(('MDX_HEADER_COVER_FILENAME', cover_resource_name))
                             additional_info_for_db.append(('MDX_HEADER_COVER_BASE64_CONTENT', cover_base64_content))
                             print(
-                                f"  -> 找到并为MDX头部封面 '{cover_resource_name}' (MIME: {cover_mime}) 生成Base64数据 (来自 {found_in_mdd})。将存入info表。")
+                                f"  -> 找到并为MDX头部封面 '{cover_resource_name}' (MIME: {cover_mime}, 原始MDD键: {original_mdd_key!r}) 生成Base64数据 (来自 {found_in_mdd})。将存入info表。")
                             found_header_cover = True
                             break
                         else:
                             print(f"  -> 未在提供的MDD文件中找到MDX头部封面图片资源: '{cover_resource_name}'")
                     except Exception as e_cover_decode:
-                        print(f"警告: 解码MDX头部封面图片资源名失败: {e_cover_decode}")
-            if not found_header_cover and any(k in mdx_header for k in COVER_IMAGE_HEADER_KEYS):  # 如果有相关键但没找到文件
+                        print(f"警告: 解码或处理MDX头部封面图片资源名失败: {e_cover_decode}")
+            if not found_header_cover and any(k in mdx_header for k in COVER_IMAGE_HEADER_KEYS):
                 print("MDX头部包含封面引用，但未在MDD中找到对应资源。")
         elif not mdd_reader_list_main and mdx_header and any(k in mdx_header for k in COVER_IMAGE_HEADER_KEYS):
             print("警告: MDX头部可能包含封面信息，但未提供MDD文件，无法查找MDX头部定义的封面图片。")
 
-        # (后续的词条总数获取、编码确定、数据库连接等逻辑不变)
         try:
-            key_list = list(mdx_instance.keys())
+            key_list = mdx_instance.keys()
             num_entries = len(key_list)
             del key_list
             print(f"MDX 文件元数据加载完毕，包含 {num_entries} 个词条。")
             items_iterator = mdx_instance.items()
         except Exception as e_count:
-            print(f"提示: 获取词条总数时出错 ({e_count})，进度条可能不显示百分比。")
+            print(f"提示: 获取词条总数时出错 ({e_count})，进度条可能不显示百分比。将迭代获取词条。")
             items_iterator = mdx_instance.items()
+            num_entries = None
 
         record_encoding = 'UTF-8'
         if mdx_header and b'Encoding' in mdx_header:
             try:
-                enc = mdx_header[b'Encoding'].decode('utf-8', 'replace').strip().upper()
-                if enc:
-                    "".encode(enc)
-                    record_encoding = enc
+                enc_from_header_bytes = mdx_header[b'Encoding']
+                enc_from_header = enc_from_header_bytes.decode('utf-8', 'replace').strip().upper()
+                if enc_from_header:
+                    "".encode(enc_from_header)
+                    record_encoding = enc_from_header
                 print(f"从MDX元数据获取到词条编码: {record_encoding}")
             except Exception as e_enc:
-                print(f"警告：解析编码失败 ({e_enc})，使用默认 UTF-8。")
+                print(f"警告：解析MDX头部声明的编码 '{enc_from_header_bytes!r}' 失败 ({e_enc})，将使用默认 UTF-8。")
+        else:
+            print("MDX头部未声明编码，将使用默认 UTF-8。")
 
         conn = sqlite3.connect(sqlite_file)
         cursor = conn.cursor()
@@ -504,25 +542,37 @@ def main():
             print("词条数据填充成功。")
         else:
             print("词条数据填充过程中发生错误或被中止。")
-        print("转换过程完成。")
+        print(f"转换过程完成。输出文件: {sqlite_file.resolve()}")
 
-    except FileNotFoundError:
-        print(f"错误：MDX 文件 '{mdx_file}' 未找到。")
-    except sqlite3.Error as e:
-        print(f"错误：SQLite 操作: {e}")
-    except Exception as e:
-        print(f"发生未知错误 (可能来自MDX/MDD处理或其它): {e}")
+    except FileNotFoundError as e_fnf:
+        print(f"错误：文件未找到: {e_fnf}")
+    except sqlite3.Error as e_sql:
+        print(f"错误：SQLite 操作: {e_sql}")
+    except Exception as e_main:
+        print(f"发生未知主错误: {e_main}")
+        import traceback
+        traceback.print_exc()
     finally:
         if conn:
             try:
-                cursor = conn.cursor()
-                cursor.execute("PRAGMA synchronous = FULL")
-                cursor.execute("PRAGMA journal_mode = DELETE")
-                conn.commit()
+                # cursor = conn.cursor() # Not needed if only closing
+                # cursor.execute("PRAGMA synchronous = FULL")
+                # cursor.execute("PRAGMA journal_mode = DELETE")
+                # conn.commit() # Commit any final changes if necessary, though usually done before closing
                 conn.close()
                 print("数据库连接已关闭。")
-            except sqlite3.Error as e:
-                print(f"关闭数据库时出错: {e}")
+            except sqlite3.Error as e_close_sql:
+                print(f"关闭数据库时发生SQLite错误: {e_close_sql}")
+            except Exception as e_close_generic:
+                print(f"关闭数据库时发生未知错误: {e_close_generic}")
+
+        if mdx_instance:
+            if hasattr(mdx_instance, 'close') and callable(mdx_instance.close):
+                try:
+                    mdx_instance.close()
+                    print("MDX 实例已关闭。")
+                except Exception as e_close_mdx:
+                    print(f"关闭 MDX 实例时出错: {e_close_mdx}")
 
 
 if __name__ == '__main__':

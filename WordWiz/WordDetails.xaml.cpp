@@ -1,30 +1,30 @@
-// WordDetails.xaml.cpp
+ï»¿// WordDetails.xaml.cpp
 #include "pch.h"
 #include "WordDetails.xaml.h"
 #include "WordDetails.g.cpp"
 #include "WordItem.h" 
-#include "DictionaryItemInWordDetail.h" // ÒıÈë×ÖµäÏî¶¨Òå
-#include "NavigationService.h" // ĞÂÔö£ºÒıÈëNavigationServiceÊµÏÖ
+#include "DictionaryItemInWordDetail.h" // å¼•å…¥å­—å…¸é¡¹å®šä¹‰
+#include "NavigationService.h" // æ–°å¢ï¼šå¼•å…¥NavigationServiceå®ç°
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls; // For SelectorBar related types
 using namespace Windows::Foundation::Collections;
-using namespace WordWiz; // ÓÃÓÚ DictionaryItemInWordDetal
-using namespace WordWizServices; // ĞÂÔö£ºÊ¹ÓÃNavigationServiceÃüÃû¿Õ¼ä
+using namespace WordWiz; // ç”¨äº DictionaryItemInWordDetal
+using namespace WordWizServices; // æ–°å¢ï¼šä½¿ç”¨NavigationServiceå‘½åç©ºé—´
 
 namespace winrt::WordWiz::implementation
 {
-    // ItemToDisplayProperty (ÒÑ´æÔÚ)
+    // ItemToDisplayProperty (å·²å­˜åœ¨)
     Microsoft::UI::Xaml::DependencyProperty WordDetails::m_itemToDisplayProperty =
         Microsoft::UI::Xaml::DependencyProperty::Register(
             L"ItemToDisplay",
             xaml_typename<WordWiz::WordItem>(),
             xaml_typename<WordWiz::WordDetails>(),
-            Microsoft::UI::Xaml::PropertyMetadata{ nullptr, PropertyChangedCallback(&WordDetails::OnItemToDisplayChanged) } // Ìí¼Ó»Øµ÷
+            Microsoft::UI::Xaml::PropertyMetadata{ nullptr, PropertyChangedCallback(&WordDetails::OnItemToDisplayChanged) } // æ·»åŠ å›è°ƒ
         );
 
-    // ĞÂÔö DictionaryItemsProperty
+    // æ–°å¢ DictionaryItemsProperty
     Microsoft::UI::Xaml::DependencyProperty WordDetails::m_dictionaryItemsProperty =
         Microsoft::UI::Xaml::DependencyProperty::Register(
             L"DictionaryItems",
@@ -33,56 +33,56 @@ namespace winrt::WordWiz::implementation
             Microsoft::UI::Xaml::PropertyMetadata{ nullptr }
         );
 
-    // ĞÂÔö SelectedDictionaryHtmlProperty
+    // æ–°å¢ SelectedDictionaryHtmlProperty
     Microsoft::UI::Xaml::DependencyProperty WordDetails::m_selectedDictionaryHtmlProperty =
         Microsoft::UI::Xaml::DependencyProperty::Register(
             L"SelectedDictionaryHtml",
             xaml_typename<winrt::hstring>(),
             xaml_typename<WordWiz::WordDetails>(),
-            Microsoft::UI::Xaml::PropertyMetadata{ winrt::box_value(L""), PropertyChangedCallback(&WordDetails::OnSelectedDictionaryHtmlChanged) } // ³õÊ¼ÖµÎª¿Õ×Ö·û´®£¬²¢Ìí¼Ó»Øµ÷
+            Microsoft::UI::Xaml::PropertyMetadata{ winrt::box_value(L""), PropertyChangedCallback(&WordDetails::OnSelectedDictionaryHtmlChanged) } // åˆå§‹å€¼ä¸ºç©ºå­—ç¬¦ä¸²ï¼Œå¹¶æ·»åŠ å›è°ƒ
         );
 
     WordDetails::WordDetails()
     {
         InitializeComponent();
-        // ³õÊ¼»¯ DictionaryItems
+        // åˆå§‹åŒ– DictionaryItems
         SetValue(m_dictionaryItemsProperty, winrt::single_threaded_observable_vector<WordWiz::DictionaryItemInWordDetail>());
     }
 
     void WordDetails::OnLoaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
     {
-        InitializeWebView2Async(); // ¿Ø¼ş¼ÓÔØºó¿ªÊ¼³õÊ¼»¯ WebView2
-        UpdateDetailVisibility(); // ¸üĞÂ¿É¼ûĞÔ
+        InitializeWebView2Async(); // æ§ä»¶åŠ è½½åå¼€å§‹åˆå§‹åŒ– WebView2
+        UpdateDetailVisibility(); // æ›´æ–°å¯è§æ€§
     }
 
-    // ĞÂÔö£ºÒì²½³õÊ¼»¯ WebView2 µÄ·½·¨
+    // æ–°å¢ï¼šå¼‚æ­¥åˆå§‹åŒ– WebView2 çš„æ–¹æ³•
     winrt::fire_and_forget WordDetails::InitializeWebView2Async()
     {
-        auto strong_this{ get_strong() }; // ÔÚĞ­³ÌÖĞ°²È«Ê¹ÓÃ this
+        auto strong_this{ get_strong() }; // åœ¨åç¨‹ä¸­å®‰å…¨ä½¿ç”¨ this
         try
         {
-            if (strong_this->DictionaryWebView()) // È·±£ DictionaryWebView ¿Ø¼ş´æÔÚ
+            if (strong_this->DictionaryWebView()) // ç¡®ä¿ DictionaryWebView æ§ä»¶å­˜åœ¨
             {
                 co_await strong_this->DictionaryWebView().EnsureCoreWebView2Async();
                 
                 strong_this->m_isCoreWebView2Initialized = true;
 
-                // Èç¹ûÓĞ´ı´¦ÀíµÄHTML£¬ÏÖÔÚ¼ÓÔØËü
+                // å¦‚æœæœ‰å¾…å¤„ç†çš„HTMLï¼Œç°åœ¨åŠ è½½å®ƒ
                 if (strong_this->m_isCoreWebView2Initialized && !strong_this->m_pendingHtmlToNavigate.empty())
                 {
                     strong_this->DictionaryWebView().NavigateToString(strong_this->m_pendingHtmlToNavigate);
-                    strong_this->m_pendingHtmlToNavigate = L""; // Çå³ı´ı´¦ÀíµÄHTML
+                    strong_this->m_pendingHtmlToNavigate = L""; // æ¸…é™¤å¾…å¤„ç†çš„HTML
                 }
             }
         }
         catch (winrt::hresult_error const& ex)
         {
             winrt::hstring errorMessage = ex.message();
-            // ÔÚUIÉÏÏÔÊ¾´íÎó£¬»òÕß½øĞĞÆäËû´íÎó´¦Àí
+            // åœ¨UIä¸Šæ˜¾ç¤ºé”™è¯¯ï¼Œæˆ–è€…è¿›è¡Œå…¶ä»–é”™è¯¯å¤„ç†
         }
     }
 
-    // ItemToDisplay Getter/Setter (ÒÑ´æÔÚ)
+    // ItemToDisplay Getter/Setter (å·²å­˜åœ¨)
     WordWiz::WordItem WordDetails::ItemToDisplay()
     {
         return GetValue(m_itemToDisplayProperty).try_as<WordWiz::WordItem>();
@@ -110,86 +110,86 @@ namespace winrt::WordWiz::implementation
 
     void WordDetails::OnItemToDisplayChanged(Microsoft::UI::Xaml::DependencyObject const& d, Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs const& e)
     {
-        if (auto SendersThis{ d.try_as<WordDetails>() }) // ½« d ×ª»»Îª WordDetails ÊµÀıÖ¸Õë
+        if (auto SendersThis{ d.try_as<WordDetails>() }) // å°† d è½¬æ¢ä¸º WordDetails å®ä¾‹æŒ‡é’ˆ
         {
-            auto newItem = e.NewValue().try_as<WordWiz::WordItem>(); // »ñÈ¡ĞÂµÄ WordItem
+            auto newItem = e.NewValue().try_as<WordWiz::WordItem>(); // è·å–æ–°çš„ WordItem
 
-            // ĞÂÔö£ºÍ¨¹ıNavigationService¼ÇÂ¼ÀúÊ·
+            // æ–°å¢ï¼šé€šè¿‡NavigationServiceè®°å½•å†å²
             if (SendersThis->m_hostFrame && newItem && !newItem.Word().empty())
             {
                 NavigationService::AddCurrentPageToHistoryWithData(
                     SendersThis->m_hostFrame,
                     newItem,
-                    nullptr // ¿É¸ù¾İĞèÒª´«µİNavigationTransitionInfo
+                    nullptr // å¯æ ¹æ®éœ€è¦ä¼ é€’NavigationTransitionInfo
                 );
             }
 
-            // ÇåÀí SelectorBar ÖĞµÄ¾ÉÏîÄ¿
-            if (SendersThis->DictionarySelectorBar()) // ¼ì²é¿Ø¼şÊÇ·ñÓĞĞ§
+            // æ¸…ç† SelectorBar ä¸­çš„æ—§é¡¹ç›®
+            if (SendersThis->DictionarySelectorBar()) // æ£€æŸ¥æ§ä»¶æ˜¯å¦æœ‰æ•ˆ
             {
                 SendersThis->DictionarySelectorBar().Items().Clear();
             }
 
-            // ÇåÀí¿ÉÄÜ´æÔÚµÄ¾ÉµÄ×ÖµäÏîÁĞ±í
+            // æ¸…ç†å¯èƒ½å­˜åœ¨çš„æ—§çš„å­—å…¸é¡¹åˆ—è¡¨
             if (SendersThis->DictionaryItems())
                 SendersThis->DictionaryItems().Clear();
 
-            if (newItem) // Èç¹ûĞÂµÄ WordItem ÓĞĞ§
+            if (newItem) // å¦‚æœæ–°çš„ WordItem æœ‰æ•ˆ
             {
-                winrt::hstring word = newItem.Word(); // »ñÈ¡µ¥´Ê
+                winrt::hstring word = newItem.Word(); // è·å–å•è¯
 
-                // µ÷ÓÃ WordSearch ·şÎñ»ñÈ¡¿ÉÓÃ´ÊµäÁĞ±í (ÏÖÔÚ·µ»ØDictionaryItemInWordDetal¶ÔÏó)
+                // è°ƒç”¨ WordSearch æœåŠ¡è·å–å¯ç”¨è¯å…¸åˆ—è¡¨ (ç°åœ¨è¿”å›DictionaryItemInWordDetalå¯¹è±¡)
                 Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> availableDictionaries = WordWiz::WordSearch().GetAvailableDictionaries(word);
                 
-                // ´æ´¢ËùÓĞ×ÖµäÏî
+                // å­˜å‚¨æ‰€æœ‰å­—å…¸é¡¹
                 for (auto const& dictItem : availableDictionaries)
                 {
                     SendersThis->DictionaryItems().Append(dictItem);
                 }
 
-                if (SendersThis->DictionarySelectorBar()) // ÔÙ´Î¼ì²é
+                if (SendersThis->DictionarySelectorBar()) // å†æ¬¡æ£€æŸ¥
                 {
                     for (auto const& dictItem : availableDictionaries)
                     {
-                        SelectorBarItem sbItem;          // ´´½¨ĞÂµÄ SelectorBarItem
-                        sbItem.Text(dictItem.DisplayName()); // ÉèÖÃÆäÏÔÊ¾Ãû³Æ
-                        sbItem.Tag(box_value(dictItem.Id())); // Ê¹ÓÃTag´æ´¢×ÖµäID£¨hstring£©
-                        SendersThis->DictionarySelectorBar().Items().Append(sbItem); // Ìí¼Óµ½ SelectorBar
+                        SelectorBarItem sbItem;          // åˆ›å»ºæ–°çš„ SelectorBarItem
+                        sbItem.Text(dictItem.DisplayName()); // è®¾ç½®å…¶æ˜¾ç¤ºåç§°
+                        sbItem.Tag(box_value(dictItem.Id())); // ä½¿ç”¨Tagå­˜å‚¨å­—å…¸IDï¼ˆhstringï¼‰
+                        SendersThis->DictionarySelectorBar().Items().Append(sbItem); // æ·»åŠ åˆ° SelectorBar
                     }
                 }
 
                 if (SendersThis->DictionarySelectorBar() && SendersThis->DictionarySelectorBar().Items().Size() > 0)
                 {
-                    // ×Ô¶¯Ñ¡ÖĞµÚÒ»¸ö´ÊµäÏî
+                    // è‡ªåŠ¨é€‰ä¸­ç¬¬ä¸€ä¸ªè¯å…¸é¡¹
                     SendersThis->DictionarySelectorBar().SelectedItem(
                         SendersThis->DictionarySelectorBar().Items().GetAt(0).try_as<SelectorBarItem>()
                     );
                 }
-                else // Ã»ÓĞ¿ÉÓÃ´Êµä
+                else // æ²¡æœ‰å¯ç”¨è¯å…¸
                 {
-                    // ÉèÖÃÒ»¸öÌáÊ¾ĞÅÏ¢µ½ WebView2
-                    SendersThis->SelectedDictionaryHtml(L"<html><body><p>Ã»ÓĞÕÒµ½¸Ã´ÊµÄ´ÊµäĞÅÏ¢¡£</p></body></html>");
+                    // è®¾ç½®ä¸€ä¸ªæç¤ºä¿¡æ¯åˆ° WebView2
+                    SendersThis->SelectedDictionaryHtml(L"<html><body><p>æ²¡æœ‰æ‰¾åˆ°è¯¥è¯çš„è¯å…¸ä¿¡æ¯ã€‚</p></body></html>");
                 }
             }
-            else // Èç¹ûĞÂµÄ WordItem Îª¿Õ (ÀıÈç£¬È¡ÏûÑ¡Ôñ)
+            else // å¦‚æœæ–°çš„ WordItem ä¸ºç©º (ä¾‹å¦‚ï¼Œå–æ¶ˆé€‰æ‹©)
             {
-                // ÇåÀí WebView2 »òÏÔÊ¾ÌáÊ¾ĞÅÏ¢
-                SendersThis->SelectedDictionaryHtml(L"<html><body><p>ÇëÑ¡ÔñÒ»¸öµ¥´Ê²é¿´ÏêÇé¡£</p></body></html>");
+                // æ¸…ç† WebView2 æˆ–æ˜¾ç¤ºæç¤ºä¿¡æ¯
+                SendersThis->SelectedDictionaryHtml(L"<html><body><p>è¯·é€‰æ‹©ä¸€ä¸ªå•è¯æŸ¥çœ‹è¯¦æƒ…ã€‚</p></body></html>");
             }
 
-            // ¸üĞÂ¿É¼ûĞÔ
+            // æ›´æ–°å¯è§æ€§
             SendersThis->UpdateDetailVisibility();
         }
     }
 
-    // ItemToDisplay ÊôĞÔ¸ü¸ÄÊ±µÄ»Øµ÷
+    // ItemToDisplay å±æ€§æ›´æ”¹æ—¶çš„å›è°ƒ
     void WordDetails::OnSelectedDictionaryHtmlChanged(DependencyObject const& d, DependencyPropertyChangedEventArgs const& e)
     {
         if (auto SendersThis{ d.try_as<WordDetails>() })
         {
             winrt::hstring actualHtmlString = winrt::unbox_value<winrt::hstring>(e.NewValue());
 
-            if (SendersThis->DictionaryWebView()) // È·±£ DictionaryWebView ¿Ø¼ş´æÔÚ
+            if (SendersThis->DictionaryWebView()) // ç¡®ä¿ DictionaryWebView æ§ä»¶å­˜åœ¨
             {
                 if (SendersThis->m_isCoreWebView2Initialized)
                 {
@@ -203,27 +203,27 @@ namespace winrt::WordWiz::implementation
         }
     }
 
-    // DictionarySelectorBar_SelectionChanged ¸üĞÂÒÔÊ¹ÓÃ×Ö·û´®ID±êÊ¶×Öµä
+    // DictionarySelectorBar_SelectionChanged æ›´æ–°ä»¥ä½¿ç”¨å­—ç¬¦ä¸²IDæ ‡è¯†å­—å…¸
     void WordDetails::DictionarySelectorBar_SelectionChanged(SelectorBar const& sender, SelectorBarSelectionChangedEventArgs const& /*args*/)
     {
         auto selectedBarItem = sender.SelectedItem().try_as<SelectorBarItem>();
 
         if (selectedBarItem && ItemToDisplay())
         {
-            // ´ÓTagÖĞ»ñÈ¡×ÖµäID£¨hstring£©
+            // ä»Tagä¸­è·å–å­—å…¸IDï¼ˆhstringï¼‰
             if (selectedBarItem.Tag())
             {
                 auto dictionaryId = unbox_value<winrt::hstring>(selectedBarItem.Tag());
                 winrt::hstring word = ItemToDisplay().Word();
                 
-                // Ê¹ÓÃ×Ö·û´®IDµ÷ÓÃ»ñÈ¡×ÖµäÄÚÈİ
+                // ä½¿ç”¨å­—ç¬¦ä¸²IDè°ƒç”¨è·å–å­—å…¸å†…å®¹
                 winrt::hstring htmlContent = WordWiz::WordSearch().GetDictionaryHtmlContent(word, dictionaryId);
                 SelectedDictionaryHtml(htmlContent);
             }
         }
     }
 
-    // ĞÂÔö£º¸üĞÂÏêÇé¿É¼ûĞÔµÄ·½·¨
+    // æ–°å¢ï¼šæ›´æ–°è¯¦æƒ…å¯è§æ€§çš„æ–¹æ³•
     void WordDetails::UpdateDetailVisibility()
     {
         // Assume ItemToDisplay is nullptr or has an empty Word when nothing is selected
