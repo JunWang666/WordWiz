@@ -11,8 +11,7 @@ using namespace winrt;
 using namespace Windows::Foundation::Collections;
 
 namespace winrt::WordWiz::implementation
-{
-    WordSearch::WordSearch()
+{    WordSearch::WordSearch()
     {
         WordWizServices::Database::DatabaseManager::getInstance().initialize();
     }
@@ -22,30 +21,39 @@ namespace winrt::WordWiz::implementation
         // Destructor doesn't need to explicitly call shutdown
         // DatabaseManager will handle cleanup
     }
-      void WordSearch::shutdown() {
-          WordWizServices::Database::DatabaseManager::getInstance().shutdown();
-    }
-
-    Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
+    
+    void WordSearch::shutdown() {
+        WordWizServices::Database::DatabaseManager::getInstance().shutdown();
+    }Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
     {
         auto results = winrt::single_threaded_observable_vector<WordWiz::WordItem>();
         if (query.empty())
         {
             return results;
-        }
-
-        std::string sQuery = winrt::to_string(query);
+        }        std::string sQuery = winrt::to_string(query);
         auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
         
         try {
-            auto searchResults = dbManager.searchWords(sQuery);
+            std::string searchQuery = "%" + sQuery + "%";
+            auto rs = dbManager.executeQuery("SELECT keyword, definition_html FROM word WHERE keyword LIKE ?", {searchQuery});
             
-            for (const auto& result : searchResults) {
-                auto item = winrt::make<WordWiz::implementation::WordItem>(
-                    winrt::to_hstring(result.keyword), 
-                    winrt::to_hstring("Definition for " + result.keyword)
-                );
-                results.Append(item);
+            if (rs.rowCount() == 0) {
+                WordWizServices::Log::LogMessage(L"Search for '" + query + L"': No records found in database.");
+                return results;
+            }
+            
+            bool more = rs.moveFirst();
+            while (more) {
+                if (!rs["keyword"].isEmpty()) {
+                    std::string keyword = rs["keyword"].convert<std::string>();
+                    
+                    auto item = winrt::make<WordWiz::implementation::WordItem>(
+                        winrt::to_hstring(keyword), 
+                        winrt::to_hstring("Definition for " + keyword)
+                    );
+                    results.Append(item);
+                }
+                more = rs.moveNext();
             }
         }
         catch (const std::exception& e) {
@@ -80,20 +88,32 @@ namespace winrt::WordWiz::implementation
         WordWizServices::Log::LogMessage(logMessage);
 
         return results;
-    }     Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> WordSearch::GetAvailableDictionaries(winrt::hstring const& word)
+    }
+      Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> WordSearch::GetAvailableDictionaries(winrt::hstring const& word)
     {
         auto dictionaries = winrt::single_threaded_vector<WordWiz::DictionaryItemInWordDetail>();
         auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
         
         try {
-            auto dictionaryInfos = dbManager.getAvailableDictionaries();
+            // Query to get available dictionaries for a word
+            std::string sWord = winrt::to_string(word);
+            auto rs = dbManager.executeQuery("SELECT DISTINCT uuid FROM info WHERE keyword = ?", {sWord});
             
-            for (const auto& info : dictionaryInfos) {
-                dictionaries.Append(WordWiz::DictionaryItemInWordDetail{ 
-                    winrt::to_hstring(info.uuid),      
-                    winrt::to_hstring(info.uuid),      
-                    winrt::to_hstring(info.title)      
-                });
+            if (rs.rowCount() > 0) {
+                bool more = rs.moveFirst();
+                while (more) {
+                    if (!rs["uuid"].isEmpty()) {
+                        std::string uuid = rs["uuid"].convert<std::string>();
+                        std::string title = getDictionaryTitle(uuid);
+                        
+                        dictionaries.Append(WordWiz::DictionaryItemInWordDetail{ 
+                            winrt::to_hstring(uuid),      
+                            winrt::to_hstring(title),
+                            winrt::to_hstring(title)      
+                        });
+                    }
+                    more = rs.moveNext();
+                }
             }
         }
         catch (const std::exception& e) {
@@ -104,7 +124,8 @@ namespace winrt::WordWiz::implementation
         }
         
         return dictionaries;
-    }     winrt::hstring WordSearch::GetDictionaryHtmlContent(winrt::hstring const& word, winrt::hstring const& dictionaryId)
+    }
+      winrt::hstring WordSearch::GetDictionaryHtmlContent(winrt::hstring const& word, winrt::hstring const& dictionaryId)
     {
         if (word.empty() || dictionaryId.empty()) {
             return L"Error: Invalid parameters.";
@@ -115,7 +136,25 @@ namespace winrt::WordWiz::implementation
         auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
         
         try {
-            std::string htmlContent = dbManager.getDictionaryHtmlContent(sWord, sDictionaryId);
+            // Get the definition HTML content from the database
+            auto rs = dbManager.executeQuery("SELECT definition_html FROM entry WHERE keyword = ? AND uuid = ?", {sWord, sDictionaryId});
+            
+            if (rs.rowCount() == 0 || !rs.moveFirst()) {
+                return L"<p>Definition not found for this dictionary.</p>";
+            }
+            
+            std::string htmlContent = rs["definition_html"].convert<std::string>();
+            
+            // Apply CSS replacements
+            auto cssReplacement = getCssReplacement(sDictionaryId);
+            if (!cssReplacement.first.empty() && !cssReplacement.second.empty()) {
+                // Replace CSS in HTML content
+                size_t pos = htmlContent.find(cssReplacement.first);
+                if (pos != std::string::npos) {
+                    htmlContent.replace(pos, cssReplacement.first.length(), cssReplacement.second);
+                }
+            }
+            
             return winrt::to_hstring(htmlContent);
         }
         catch (const std::exception& e) {
@@ -124,8 +163,38 @@ namespace winrt::WordWiz::implementation
         }
         catch (...) {
             WordWizServices::Log::LogMessage(L"Unknown exception in GetDictionaryHtmlContent");
-            return L"<p>Unknown error retrieving definition</p>";
+            return L"<p>Unknown error retrieving definition</p>";        }
+    }
+
+    // Private helper methods
+    std::string WordSearch::getDictionaryTitle(const std::string& uuid)
+    {
+        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
+        try {
+            std::string title = dbManager.executeScalarQuery("SELECT title FROM dictionary WHERE uuid = ?", {uuid});
+            return title.empty() ? "Unknown Dictionary" : title;
         }
+        catch (...) {
+            return "Unknown Dictionary";
+        }
+    }
+
+    std::pair<std::string, std::string> WordSearch::getCssReplacement(const std::string& uuid)
+    {
+        auto& dbManager = WordWizServices::Database::DatabaseManager::getInstance();
+        try {
+            auto rs = dbManager.executeQuery("SELECT old_css, new_css FROM css_replacement WHERE uuid = ?", {uuid});
+            
+            if (rs.rowCount() > 0 && rs.moveFirst()) {
+                std::string oldCss = rs["old_css"].convert<std::string>();
+                std::string newCss = rs["new_css"].convert<std::string>();
+                return std::make_pair(oldCss, newCss);
+            }
+        }
+        catch (...) {
+            // Return empty if no CSS replacement found or error occurs
+        }
+        return std::make_pair("", "");
     }
 
 }
