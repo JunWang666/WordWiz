@@ -22,7 +22,7 @@ namespace winrt::WordWiz::implementation
     {
         
     }
-    
+
     Windows::Foundation::Collections::IVector<WordWiz::WordItem> WordSearch::Search(winrt::hstring const& query)
     {
         auto results = winrt::single_threaded_observable_vector<WordWiz::WordItem>();
@@ -35,10 +35,45 @@ namespace winrt::WordWiz::implementation
         
         auto main_db = WordWizServices::Database::DatabaseManager(WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\words.sqlite");
 
+        std::string processedContainsQuery = "%"+sQuery+"%";
+        std::string exactMatch = sQuery;
+        std::string startsWith = sQuery+ "%";
+        std::string endsWith = "%"+sQuery;
+
+
+        // 2. 直接将参数值嵌入到 SQL 字符串中 (!!! 注意 SQL 注入风险 !!!)
+        //     如果字符串包含单引号，需要进行额外的转义 (用两个单引号代替一个)
+        //     例如：SQLite 的字符串字面量是单引号包围的，如果参数本身有单引号，则需要 ' -> ''
+        auto escapeSingleQuotes = [](const std::string& s) {
+            std::string result;
+            result.reserve(s.length() * 2); // 预留空间
+            for (char c : s) {
+                if (c == '\'') {
+                    result += "''"; // 双引号转义
+                }
+                else {
+                    result += c;
+                }
+            }
+            return result;
+            };
+
+        std::string sqlQuery =
+            "SELECT keyword, definition_html FROM word "
+            "WHERE keyword LIKE '" + escapeSingleQuotes(processedContainsQuery) + "' ESCAPE '" + "'\'" + "' " // 主查询的模糊匹配
+            "ORDER BY CASE "
+            "    WHEN keyword = '" + escapeSingleQuotes(exactMatch) + "' THEN 0 "                          // 精确匹配
+            "    WHEN keyword LIKE '" + escapeSingleQuotes(startsWith) + "' ESCAPE '" + "'\'" + "' THEN 1 " // 以...开头
+            "    WHEN keyword LIKE '" + escapeSingleQuotes(endsWith) + "' ESCAPE '" + "'\'" + "' THEN 2 " // 以...结尾
+            "    ELSE 3 "
+            "END, "
+            "LENGTH(keyword) ASC, "
+            "keyword COLLATE NOCASE ASC";
+
+        // 3. 调用没有 bind 的 executeQuery 版本
         try {
-            std::string searchQuery = "%" + sQuery + "%";
-            auto rs = main_db.executeQuery("SELECT keyword, definition_html FROM word WHERE keyword LIKE ?", {searchQuery});
-            
+            auto rs = main_db.executeQuery(sqlQuery); // 直接传入完整的 SQL 字符串
+
             if (rs.rowCount() == 0) {
                 WordWizServices::Log::LogMessage(L"Search for '" + query + L"': No records found in database.");
                 return results;

@@ -54,8 +54,8 @@ namespace WordWizServices::Database
                     _isInitialized = true;
                 }
                 catch (const Poco::Exception& e) {
-                    WordWizServices::Log::LogMessage(L"Failed to initialize database: " + 
-                                                   winrt::to_hstring(e.displayText()));
+                    WordWizServices::Log::LogMessage(L"Failed to initialize database: " +
+                        winrt::to_hstring(e.displayText()));
                     throw;
                 }
             }
@@ -70,8 +70,8 @@ namespace WordWizServices::Database
                 _pSession->close();
             }
             catch (const Poco::Exception& e) {
-                WordWizServices::Log::LogMessage(L"Error shutting down database: " + 
-                                               winrt::to_hstring(e.displayText()));
+                WordWizServices::Log::LogMessage(L"Error shutting down database: " +
+                    winrt::to_hstring(e.displayText()));
             }
         }
         _pSession.reset();
@@ -85,16 +85,7 @@ namespace WordWizServices::Database
     }
 
 
-    Poco::Data::RecordSet DatabaseManager::executeQuery(const std::string& sql, const std::vector<std::string>& params)
-    /**
-     * @brief 执行SQL查询并返回结果集
-     *
-     * @param sql 要执行的SQL查询语句
-     * @param params SQL参数列表，用于安全绑定到查询中
-     * @return Poco::Data::RecordSet 查询结果集
-     * @throws std::runtime_error 如果数据库未初始化
-     * @throws Poco::Exception 如果执行查询时发生错误
-     */
+    Poco::Data::RecordSet DatabaseManager::executeQuery(const std::string& sql, std::function<void(Poco::Data::Statement&)> binder)
     {
         Poco::FastMutex::ScopedLock lock(_mutex);
         if (!isInitialized()) {
@@ -103,42 +94,75 @@ namespace WordWizServices::Database
 
         try {
             Poco::Data::Statement select(*_pSession);
+
+            // 这里的 select << sql; 理论上是OK的，它初始化了Statement
             select << sql;
-            
-            // Bind parameters
-            for (const auto& param : params) {
-                select, Poco::Data::Keywords::bind(param);
-            }
-            
+
+            // 接着调用binder，binder负责将后续的参数绑定到select对象上
+            binder(select); // 确保 binder 内部是 select << Poco::Data::Keywords::bind(param);
+
             select.execute();
             return Poco::Data::RecordSet(select);
         }
         catch (const Poco::Exception& e) {
+            // 使用 e.displayText() 获取更详细的错误信息
             WordWizServices::Log::LogMessage(L"Database query error: " + winrt::to_hstring(e.displayText()));
             throw;
         }
     }
 
-    std::string DatabaseManager::executeScalarQuery(const std::string& sql, const std::vector<std::string>& params)
-        /**
-         * @brief 执行SQL查询并返回单个标量值
-         *
-         * @param sql 要执行的SQL查询语句
-         * @param params SQL参数列表，用于安全绑定到查询中
-         * @return std::string 查询结果的第一行第一列值，如果没有结果则返回空字符串
-         * @throws std::runtime_error 如果数据库未初始化
-         * @throws Poco::Exception 如果执行查询时发生错误
-         */
+    Poco::Data::RecordSet DatabaseManager::executeQuery(const std::string& sql)
     {
-        auto rs = executeQuery(sql, params);
-        if (rs.rowCount() == 0 || !rs.moveFirst()) {
-            return "";
+        Poco::FastMutex::ScopedLock lock(_mutex);
+        if (!isInitialized()) {
+            throw std::runtime_error("Database not initialized");
         }
-        
-        if (rs.columnCount() == 0 || rs[0].isEmpty()) {
-            return "";
+
+        try {
+            Poco::Data::Statement select(*_pSession);
+            select << sql; // 只绑定SQL语句，不绑定任何参数
+
+            select.execute();
+            return Poco::Data::RecordSet(select);
         }
-        
-        return rs[0].convert<std::string>();
+        catch (const Poco::Exception& e) {
+            WordWizServices::Log::LogMessage(L"Database query error (no params): " + winrt::to_hstring(e.displayText()));
+            throw;
+        }
     }
+
+	Poco::Data::RecordSet DatabaseManager::executeQuery(const std::string& sql, const std::vector<std::string>& params) {
+	        Poco::FastMutex::ScopedLock lock(_mutex);
+	        if (!isInitialized()) {
+	            throw std::runtime_error("Database not initialized");
+	        }
+	        try {
+	            Poco::Data::Statement select(*_pSession);
+	            select << sql;
+	            // 关键：使用 addBind 进行循环绑定
+	            for (const auto& param : params) {
+	                select.addBind(Poco::Data::Keywords::bind(param));
+	            }
+	            select.execute();
+	            return Poco::Data::RecordSet(select);
+	        }
+	        catch (const Poco::Exception& e) {
+	            WordWizServices::Log::LogMessage(L"Database query error: " + winrt::to_hstring(e.displayText()));
+	            throw;
+	        }
+	    }
+
+	std::string DatabaseManager::executeScalarQuery(const std::string & sql, const std::vector<std::string>&params)
+        {
+            // 直接调用接受 vector<string> 参数的 executeQuery 重载
+            auto rs = executeQuery(sql, params); // 这里会调用我们上面保留的 executeQuery
+
+            if (rs.rowCount() == 0 || !rs.moveFirst()) {
+                return "";
+            }
+            if (rs.columnCount() == 0 || rs[0].isEmpty()) {
+                return "";
+            }
+            return rs[0].convert<std::string>();
+        }
 }
