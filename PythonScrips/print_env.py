@@ -1,4 +1,6 @@
 import sys
+import os
+print(os.getcwd())
 print("--- Python环境诊断信息 ---")
 print(f"Python解释器路径 (sys.executable): {sys.executable}")
 print("Python模块搜索路径 (sys.path):")
