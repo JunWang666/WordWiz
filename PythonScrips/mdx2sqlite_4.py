@@ -1,12 +1,12 @@
-﻿import sqlite3
+import sqlite3
 import sys
 import re
 import base64
 import os
 from pathlib import Path
-import hashlib  # 新增导入
+import hashlib
 
-# 尝试导入 readmdict 的核心组件
+# Try to import readmdict core components
 try:
     from readmdict import MDX, MDD
 except ImportError:
@@ -22,13 +22,13 @@ except ImportError:
     def tqdm(iterable, *args, **kwargs):
         return iterable
 
-# --- 全局设置 ---
+# --- Global Settings ---
 BATCH_SIZE = 1000
-# 常见的 MDX 头部封面图片键名 (字节串形式)
+# Common MDX header cover image key names (byte strings)
 COVER_IMAGE_HEADER_KEYS = [b'Cover', b'CoverImage', b'cover', b'COVER']
 
 
-# --- 辅助函数 ---
+# --- Helper Functions ---
 def get_mime_type(filename_or_path):
     filename_str = str(os.path.basename(str(filename_or_path)))
     ext = os.path.splitext(filename_str)[1].lower()
@@ -57,14 +57,13 @@ def get_mime_type(filename_or_path):
         if ext == '.otf': return 'font/otf'
         if ext == '.woff': return 'font/woff'
         if ext == '.woff2': return 'font/woff2'
-    # Add SVG MIME type
     elif ext == '.svg':
         return 'image/svg+xml'
     return 'application/octet-stream'
 
 
 def calculate_file_hash(file_path):
-    """计算文件的 SHA256 哈希值"""
+    """Calculates the SHA256 hash of a file."""
     sha256_hash = hashlib.sha256()
     try:
         with open(file_path, "rb") as f:
@@ -76,7 +75,7 @@ def calculate_file_hash(file_path):
         return None
 
 
-# --- 嵌入逻辑 ---
+# --- Embedding Logic ---
 class ResourceEmbedder:
     def __init__(self, js_content_str=None, mdd_objects_list=None):
         self.js_content_str = js_content_str
@@ -161,9 +160,6 @@ class ResourceEmbedder:
             if data_bytes:
                 b64_data = base64.b64encode(data_bytes).decode('utf-8')
                 new_src = f'data:{mime_type};base64,{b64_data}'
-
-                def escape_for_regex_replace(s): return s.replace('\\', r'\\')
-
                 return re.sub(r'src\s*=\s*["\']' + re.escape(img_src_from_html) + r'["\']',
                               f'src="{new_src}"', original_tag, count=1, flags=re.IGNORECASE)
             return original_tag
@@ -191,10 +187,6 @@ class ResourceEmbedder:
                 b64_data = base64.b64encode(data_bytes).decode('utf-8')
                 new_src = f'data:{mime_type};base64,{b64_data}'
                 if mime_type == 'audio/x-speex': print("警告: SPX 音频已嵌入，但浏览器可能无法直接播放。")
-
-                def escape_for_regex_replace(s):
-                    return s.replace('\\', r'\\')
-
                 return re.sub(r'src\s*=\s*["\']' + re.escape(audio_src_from_html) + r'["\']',
                               f'src="{new_src}"', original_tag, count=1, flags=re.IGNORECASE)
             return original_tag
@@ -210,7 +202,7 @@ class ResourceEmbedder:
         return html_content
 
 
-# --- 文件路径获取 ---
+# --- File Path Acquisition ---
 def get_file_paths():
     while True:
         mdx_file_path_str = input("请输入源 MDX 文件路径: ").strip()
@@ -222,25 +214,7 @@ def get_file_paths():
         else:
             print("错误：MDX 文件路径无效或文件不存在。请确保路径正确且以 .mdx 结尾。")
 
-    while True:
-        sqlite_file_path_str = input("请输入目标 SQLite 数据库文件路径 (例如 output.db): ").strip()
-        if sqlite_file_path_str.startswith('"') and sqlite_file_path_str.endswith('"'):
-            sqlite_file_path_str = sqlite_file_path_str[1:-1]
-        sqlite_file_path = Path(sqlite_file_path_str)
-        if not sqlite_file_path.name:
-            print("错误: SQLite 文件名不能为空。")
-            continue
-        if sqlite_file_path.suffix.lower() not in ['.db', '.sqlite', '.sqlite3']:
-            print(
-                f"提示：输出文件名 '{sqlite_file_path.name}' 没有标准 SQLite 后缀，将使用 '{sqlite_file_path.with_suffix('.db').name}'。")
-            sqlite_file_path = sqlite_file_path.with_suffix(".db")
-        try:
-            sqlite_file_path.parent.mkdir(parents=True, exist_ok=True)
-            break
-        except OSError as e:
-            print(f"错误：无法创建 SQLite 文件的输出目录 '{sqlite_file_path.parent}': {e}")
-        except Exception as e:
-            print(f"输入 SQLite 文件路径时发生未知错误: {e}")
+    # SQLite file path is now determined by MDX hash, so we don't ask for it here.
 
     css_path_str = input("请输入可选的 CSS 文件路径 (直接回车跳过): ").strip()
     if css_path_str.startswith('"') and css_path_str.endswith('"'):
@@ -260,7 +234,6 @@ def get_file_paths():
         mdd_path_str = input(f"MDD 文件 {len(mdd_paths_list) + 1}: ").strip()
         if not mdd_path_str:
             break
-        # Corrected typo here:
         if mdd_path_str.startswith('"') and mdd_path_str.endswith('"'):
             mdd_path_str = mdd_path_str[1:-1]
         mdd_path_candidate = Path(mdd_path_str)
@@ -270,7 +243,6 @@ def get_file_paths():
         else:
             print(f"警告: 输入的 MDD 文件 '{mdd_path_str}' 无效或不存在，已忽略。")
 
-    # 新增：获取独立封面图片路径
     standalone_cover_path_str = input("请输入可选的独立封面图片文件路径 (PNG, JPG, GIF, WEBP) (直接回车跳过): ").strip()
     if standalone_cover_path_str.startswith('"') and standalone_cover_path_str.endswith('"'):
         standalone_cover_path_str = standalone_cover_path_str[1:-1]
@@ -286,11 +258,39 @@ def get_file_paths():
     return mdx_file_path, css_path, js_path, mdd_paths_list, standalone_cover_path
 
 
-# --- SQLite 操作 ---
+# --- SQLite Operations ---
 def create_tables(cursor):
+    # Create the main table for storing dictionary information
     cursor.execute("CREATE TABLE IF NOT EXISTS info (AttributeName TEXT PRIMARY KEY, AttributeValue TEXT)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS word (keyword TEXT PRIMARY KEY, definition_html TEXT)")
-    print("数据库表 'info' 和 'word' 已创建（如果它们不存在）。")
+    print("数据库表 'info' 已创建（如果它不存在）。")
+
+    # Create the table to store word entries (content table for FTS)
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS word
+                   (
+                       keyword
+                       TEXT
+                       PRIMARY
+                       KEY,
+                       definition_html
+                       TEXT
+                   )
+                   """)
+    print("数据库表 'word' 已创建（如果它不存在）。")
+
+    # Create the FTS5 virtual table that indexes the 'word' table
+    # The FTS table will index 'keyword' and 'definition_html' columns from the 'word' table.
+    # 'content="word"' links this FTS table to the 'word' table.
+    # 'tokenize="unicode61"' is a good general tokenizer for multilingual content.
+    cursor.execute("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS word_fts USING fts5(
+            keyword,
+            definition_html,
+            content='word',
+            tokenize='unicode61'
+        )
+    """)
+    print("数据库虚拟表 'word_fts' (FTS5) 已创建（如果它不存在）。")
 
 
 def populate_info_table(cursor, mdx_header, other_info_to_add=None):
@@ -319,6 +319,8 @@ def populate_info_table(cursor, mdx_header, other_info_to_add=None):
 
 
 def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedder):
+    # This function remains largely the same. It inserts into the 'word' table.
+    # FTS5 will automatically index the content because 'word_fts' is linked to 'word'.
     cursor = conn.cursor()
     batch = []
     processed_count = 0
@@ -336,16 +338,16 @@ def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedde
                 definition_html_processed = embedder.process_html(definition_html_original)
                 batch.append((keyword, definition_html_processed))
             except Exception as e:
-                # Improved error reporting for keyword
-                keyword_preview_bytes = key_bytes[:50]  # Show more bytes for context
+                keyword_preview_bytes = key_bytes[:50]
                 try:
                     keyword_preview_str = keyword_preview_bytes.decode(encoding, errors='replace')
-                except:  # Fallback if decode fails for any reason
+                except:
                     keyword_preview_str = str(keyword_preview_bytes)
                 print(f"\n错误：处理词条 '{keyword_preview_str}...' 数据或嵌入资源时出错: {e}")
                 continue
 
             if len(batch) >= BATCH_SIZE:
+                # Inserts into the main 'word' table. FTS index is updated automatically.
                 cursor.executemany("INSERT OR REPLACE INTO word (keyword, definition_html) VALUES (?, ?)", batch)
                 processed_count += len(batch)
                 batch = []
@@ -355,7 +357,7 @@ def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedde
             processed_count += len(batch)
 
         conn.commit()
-        print(f"词条处理完成。总共处理并尝试写入 {processed_count} 条词条到 'word' 表。")
+        print(f"词条处理完成。总共处理并尝试写入 {processed_count} 条词条到 'word' 表。FTS索引将自动更新。")
         return True
     except sqlite3.Error as e:
         print(f"\n错误：写入词条到 'word' 表时发生 SQLite 错误: {e}")
@@ -367,9 +369,9 @@ def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedde
         return False
 
 
-# --- Main 函数 ---
+# --- Main Function ---
 def main():
-    print("--- MDX 转 SQLite (CSS/Font/Cover信息存入info表, 支持独立封面, 输出文件名基于MDX哈希) ---")
+    print("--- MDX 转 SQLite (FTS5 支持, CSS/Font/Cover信息存入info表, 支持独立封面, 输出文件名基于MDX哈希) ---")
     mdx_file, css_path, js_path, mdd_paths, standalone_cover_file_path = get_file_paths()
 
     print(f"\n源 MDX 文件: {mdx_file}")
@@ -379,14 +381,14 @@ def main():
         print("错误: 无法计算 MDX 文件哈希，程序将退出。")
         return
 
-    sqlite_file_name = f"{mdx_file_hash_uuid}.wordwiz"
+    sqlite_file_name = f"{mdx_file_hash_uuid}.wordwiz"  # Consider a more generic extension like .db or .sqlite
     sqlite_file = Path.cwd() / sqlite_file_name
     print(f"目标 SQLite 文件将自动生成为: {sqlite_file}")
 
     additional_info_for_db = []
     additional_info_for_db.append(('ID', mdx_file_hash_uuid))
 
-    # 1. 处理 CSS 和相关字体
+    # 1. Process CSS and related fonts
     if css_path:
         print(f"处理 CSS 文件: {css_path}")
         try:
@@ -394,12 +396,13 @@ def main():
                 css_content_data = f.read()
             print(f"成功读取 CSS 文件内容 (长度: {len(css_content_data)}).")
 
-            css_link_tag = f'<link rel="stylesheet" type="text/css" href="{css_path.name}" />'
-            additional_info_for_db.append(('CSS_TARGET_HREF', css_link_tag))
+            css_link_tag = f'<link rel="stylesheet" type="text/css" href="{css_path.name}" />'  # This might be less useful if CSS is embedded
+            additional_info_for_db.append(
+                ('CSS_TARGET_HREF_NAME', css_path.name))  # Store only name for potential reconstruction
 
             styled_css_content = f'<style type="text/css">\n{css_content_data}\n</style>'
-            additional_info_for_db.append(('CSS_REPLACEMENT_CONTENT', styled_css_content))
-            print(f"提示: CSS 文件 '{css_path.name}' 的信息 (link标签和style包裹内容) 将存储在 info 表中。")
+            additional_info_for_db.append(('CSS_EMBEDDED_CONTENT', styled_css_content))
+            print(f"提示: CSS 文件 '{css_path.name}' 的嵌入式内容将存储在 info 表中。")
 
             font_face_blocks = re.findall(r"@font-face\s*\{[^{}]*\}", css_content_data, re.IGNORECASE | re.DOTALL)
             if font_face_blocks:
@@ -413,9 +416,8 @@ def main():
                     except Exception as e_mdd_font:
                         print(f"警告: 打开用于字体查找的 MDD '{mdd_p_font}' 失败: {e_mdd_font}")
 
-            if temp_mdd_reader_list_for_fonts or not font_face_blocks:  # 如果没有font_face，也不需要MDD来找字体
-                font_embedder_helper = ResourceEmbedder(mdd_objects_list=temp_mdd_reader_list_for_fonts)
-                found_font_urls = set()
+            font_embedder_helper = ResourceEmbedder(mdd_objects_list=temp_mdd_reader_list_for_fonts)
+            found_font_urls = set()
 
             for block in font_face_blocks:
                 urls_in_block = re.findall(r"url\((['\"]?)([^()\"']+?)\1\)", block, re.IGNORECASE)
@@ -426,13 +428,14 @@ def main():
                     found_font_urls.add(font_filename)
 
                     print(f"  尝试在MDD中查找字体文件: '{font_filename}' (从CSS URL: '{font_url}')")
-                    font_data_bytes, font_mime, found_in_mdd, _ = font_embedder_helper._find_mdd_resource(
-                        font_filename)
+                    font_data_bytes, font_mime, found_in_mdd, _ = font_embedder_helper._find_mdd_resource(font_filename)
 
                     if font_data_bytes:
                         font_base64_content = base64.b64encode(font_data_bytes).decode('utf-8')
-                        additional_info_for_db.append((f'FONT_TARGET_URL_{font_filename}', font_filename))
-                        additional_info_for_db.append((f'FONT_BASE64_CONTENT_{font_filename}', font_base64_content))
+                        additional_info_for_db.append((f'FONT_EMBED_FILENAME_{font_filename}', font_filename))
+                        additional_info_for_db.append((f'FONT_EMBED_BASE64_{font_filename}', font_base64_content))
+                        additional_info_for_db.append((f'FONT_EMBED_MIMETYPE_{font_filename}',
+                                                       font_mime if font_mime else get_mime_type(font_filename)))
                         print(
                             f"    -> 找到并为 '{font_filename}' (MIME: {font_mime}) 生成Base64数据 (来自 {found_in_mdd})。将存入info表。")
                     else:
@@ -443,26 +446,28 @@ def main():
             elif font_face_blocks and not mdd_paths:
                 print("警告: CSS中找到@font-face规则，但未提供MDD文件，无法从MDD查找和嵌入字体文件。")
 
-
         except Exception as e:
             print(f"错误: 无法读取或处理 CSS 文件 '{css_path}': {e}. CSS及字体信息将不会存储。")
     else:
         print("未提供 CSS 文件路径，不处理CSS及相关字体信息存储。")
 
-    # 2. 处理独立封面图片文件
+    # 2. Process standalone cover image file
     if standalone_cover_file_path:
         print(f"处理独立封面图片文件: {standalone_cover_file_path}")
         try:
             with open(standalone_cover_file_path, 'rb') as f_cover:
                 cover_bytes = f_cover.read()
             cover_base64 = base64.b64encode(cover_bytes).decode('utf-8')
+            cover_mime = get_mime_type(standalone_cover_file_path.name)
             additional_info_for_db.append(('STANDALONE_COVER_FILENAME', standalone_cover_file_path.name))
             additional_info_for_db.append(('STANDALONE_COVER_BASE64_CONTENT', cover_base64))
-            print(f"成功读取并为独立封面 '{standalone_cover_file_path.name}' 生成Base64数据。将存入info表。")
+            additional_info_for_db.append(('STANDALONE_COVER_MIMETYPE', cover_mime))
+            print(
+                f"成功读取并为独立封面 '{standalone_cover_file_path.name}' (MIME: {cover_mime}) 生成Base64数据。将存入info表。")
         except Exception as e_scover:
             print(f"错误: 无法读取或处理独立封面图片文件 '{standalone_cover_file_path}': {e_scover}")
 
-    # 3. JS 文件处理 (仍然是直接嵌入到词条HTML)
+    # 3. JS file processing (still embedded directly into entry HTML)
     js_content_data = None
     if js_path:
         print(f"处理 JS 文件: {js_path}")
@@ -473,7 +478,7 @@ def main():
         except Exception as e:
             print(f"错误: 无法读取 JS '{js_path}': {e}. 跳过JS嵌入。")
 
-    # 4. MDD 文件列表和 ResourceEmbedder 初始化 (用于词条内资源)
+    # 4. MDD file list and ResourceEmbedder initialization (for in-entry resources)
     mdd_reader_list_main = []
     if mdd_paths:
         print(f"将从以下 MDD 文件中嵌入主要资源 (图片、音频到词条HTML):")
@@ -483,8 +488,6 @@ def main():
                 print(f"  - 成功打开 MDD 文件 ({idx + 1}/{len(mdd_paths)}): {mdd_p}")
             except Exception as e:
                 print(f"错误: 无法打开 MDD '{mdd_p}' 用于主要资源: {e}. 将忽略此MDD文件。")
-    # else: # 保持之前的打印逻辑
-    #     print("未提供 MDD 文件，不进行主要资源嵌入。")
 
     embedder = ResourceEmbedder(js_content_str=js_content_data, mdd_objects_list=mdd_reader_list_main)
 
@@ -494,17 +497,19 @@ def main():
 
     try:
         print("正在打开和解析 MDX 文件...")
-        mdx_instance = MDX(str(mdx_file))
+        mdx_instance = MDX(str(mdx_file))  # Ensure MDX path is a string
         mdx_header = mdx_instance.header
 
         if mdx_header and b'Title' in mdx_header:
             try:
                 dict_title = mdx_header[b'Title'].decode('utf-8', errors='replace')
                 print(f"词典标题: {dict_title}")
-            except Exception:  # Fallback for non-UTF-8 titles
+                additional_info_for_db.append(('Title', dict_title))  # Add title to info
+            except Exception:
                 print(f"词典标题 (bytes): {mdx_header[b'Title']!r}")
+                additional_info_for_db.append(('Title_bytes', mdx_header[b'Title'].hex()))
 
-        if mdx_header and mdd_reader_list_main:
+        if mdx_header and mdd_reader_list_main:  # Check if MDD readers are available
             found_header_cover = False
             for cover_key_bytes in COVER_IMAGE_HEADER_KEYS:
                 if cover_key_bytes in mdx_header:
@@ -522,6 +527,9 @@ def main():
                             cover_base64_content = base64.b64encode(cover_data_bytes).decode('utf-8')
                             additional_info_for_db.append(('MDX_HEADER_COVER_FILENAME', cover_resource_name))
                             additional_info_for_db.append(('MDX_HEADER_COVER_BASE64_CONTENT', cover_base64_content))
+                            additional_info_for_db.append(('MDX_HEADER_COVER_MIMETYPE',
+                                                           cover_mime if cover_mime else get_mime_type(
+                                                               cover_resource_name)))
                             print(
                                 f"  -> 找到并为MDX头部封面 '{cover_resource_name}' (MIME: {cover_mime}, 原始MDD键: {original_mdd_key!r}) 生成Base64数据 (来自 {found_in_mdd})。将存入info表。")
                             found_header_cover = True
@@ -535,7 +543,6 @@ def main():
         elif not mdd_reader_list_main and mdx_header and any(k in mdx_header for k in COVER_IMAGE_HEADER_KEYS):
             print("警告: MDX头部可能包含封面信息，但未提供MDD文件，无法查找MDX头部定义的封面图片。")
 
-        # (后续的词条总数获取、编码确定、数据库连接等逻辑不变)
         try:
             key_list = mdx_instance.keys()
             num_entries = len(key_list)
@@ -544,7 +551,7 @@ def main():
             items_iterator = mdx_instance.items()
         except Exception as e_count:
             print(f"提示: 获取词条总数时出错 ({e_count})，进度条可能不显示百分比。将迭代获取词条。")
-            items_iterator = mdx_instance.items()
+            items_iterator = mdx_instance.items()  # Fallback to iterator
             num_entries = None
 
         record_encoding = 'UTF-8'
@@ -553,7 +560,7 @@ def main():
                 enc_from_header_bytes = mdx_header[b'Encoding']
                 enc_from_header = enc_from_header_bytes.decode('utf-8', 'replace').strip().upper()
                 if enc_from_header:
-                    "".encode(enc_from_header)
+                    "".encode(enc_from_header)  # Test encoding
                     record_encoding = enc_from_header
                 print(f"从MDX元数据获取到词条编码: {record_encoding}")
             except Exception as e_enc:
@@ -566,14 +573,15 @@ def main():
         cursor.execute("PRAGMA synchronous = OFF")
         cursor.execute("PRAGMA journal_mode = MEMORY")
 
-        create_tables(cursor)
+        create_tables(cursor)  # This now creates word, info, and word_fts
         populate_info_table(cursor, mdx_header, additional_info_for_db)
-        conn.commit()
+        conn.commit()  # Commit info table changes
 
         if populate_word_table(conn, items_iterator, record_encoding, num_entries, embedder):
             print("词条数据填充成功。")
         else:
             print("词条数据填充过程中发生错误或被中止。")
+
         print(f"转换过程完成。输出文件: {sqlite_file.resolve()}")
 
     except FileNotFoundError as e_fnf:
@@ -587,10 +595,6 @@ def main():
     finally:
         if conn:
             try:
-                # cursor = conn.cursor() # Not needed if only closing
-                # cursor.execute("PRAGMA synchronous = FULL")
-                # cursor.execute("PRAGMA journal_mode = DELETE")
-                # conn.commit() # Commit any final changes if necessary, though usually done before closing
                 conn.close()
                 print("数据库连接已关闭。")
             except sqlite3.Error as e_close_sql:
@@ -598,7 +602,7 @@ def main():
             except Exception as e_close_generic:
                 print(f"关闭数据库时发生未知错误: {e_close_generic}")
 
-        if mdx_instance:
+        if mdx_instance:  # Close MDX instance if it was opened
             if hasattr(mdx_instance, 'close') and callable(mdx_instance.close):
                 try:
                     mdx_instance.close()
