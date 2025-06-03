@@ -116,7 +116,7 @@ namespace winrt::WordWiz::implementation
     {
         try {
             // 加载本地数据文件夹路径
-            std::string localPath = ::WordWiz::Data::FilePathProvider::GetAppLocalFolderPath();
+            std::string localPath = ::WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath();
             if (localPath.empty()) {
                 LocalFolderPathText().Text(L"无法获取路径");
                 OpenLocalFolderButton().IsEnabled(false); // 假设按钮名为 OpenLocalFolderButton
@@ -127,7 +127,7 @@ namespace winrt::WordWiz::implementation
             }
 
             // 加载本地缓存文件夹路径
-            std::string cachePath = ::WordWiz::Data::FilePathProvider::GetAppLocalCacheFolderPath();
+            std::string cachePath = ::WordWizServices::Data::FilePathProvider::GetAppLocalCacheFolderPath();
             if (cachePath.empty()) {
                 LocalCacheFolderPathText().Text(L"无法获取路径");
                 OpenLocalCacheFolderButton().IsEnabled(false); // 假设按钮名为 OpenCacheFolderButton
@@ -139,7 +139,7 @@ namespace winrt::WordWiz::implementation
 
             // 加载共享本地文件夹路径
             try {
-                std::string sharedPath = ::WordWiz::Data::FilePathProvider::GetAppSharedLocalFolderPath();
+                std::string sharedPath = ::WordWizServices::Data::FilePathProvider::GetAppSharedLocalFolderPath();
                 if (sharedPath.empty()) {
                     SharedLocalFolderPathText().Text(L"此系统不支持共享本地文件夹");
                     OpenSharedFolderButton().IsEnabled(false); // 假设按钮名为 OpenSharedFolderButton
@@ -155,7 +155,7 @@ namespace winrt::WordWiz::implementation
             }
 
             // 加载临时文件夹路径
-            std::string tempPath = ::WordWiz::Data::FilePathProvider::GetAppTemporaryFolderPath();
+            std::string tempPath = ::WordWizServices::Data::FilePathProvider::GetAppTemporaryFolderPath();
             if (tempPath.empty()) {
                 TemporaryFolderPathText().Text(L"无法获取路径");
                 OpenTemporaryFolderButton().IsEnabled(false); // 假设按钮名为 OpenTempFolderButton
@@ -191,17 +191,17 @@ namespace winrt::WordWiz::implementation
             std::string folderPath;
             
             if (folderType == "local") {
-                folderPath = ::WordWiz::Data::FilePathProvider::GetAppLocalFolderPath();
+                folderPath = ::WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath();
             }
             else if (folderType == "cache") {
-                folderPath = ::WordWiz::Data::FilePathProvider::GetAppLocalCacheFolderPath();
+                folderPath = ::WordWizServices::Data::FilePathProvider::GetAppLocalCacheFolderPath();
             }
             else if (folderType == "settings") {
-                folderPath = ::WordWiz::Data::FilePathProvider::GetAppLocalFolderPath(); // Settings is virtual, open parent folder
+                folderPath = ::WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath(); // Settings is virtual, open parent folder
             }
             else if (folderType == "shared") {
                 try {
-                    folderPath = ::WordWiz::Data::FilePathProvider::GetAppSharedLocalFolderPath();
+                    folderPath = ::WordWizServices::Data::FilePathProvider::GetAppSharedLocalFolderPath();
                 }
                 catch (...) {
                     // 共享文件夹可能不受支持，直接返回
@@ -209,7 +209,7 @@ namespace winrt::WordWiz::implementation
                 }
             }
             else if (folderType == "temp") {
-                folderPath = ::WordWiz::Data::FilePathProvider::GetAppTemporaryFolderPath();
+                folderPath = ::WordWizServices::Data::FilePathProvider::GetAppTemporaryFolderPath();
             }
 
             if (!folderPath.empty()) {

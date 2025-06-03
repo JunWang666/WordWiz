@@ -3,7 +3,7 @@
 #include <string>
 #include <winrt/Windows.Storage.h> // 引入 Windows.Storage 命名空间
 
-namespace WordWiz
+namespace WordWizServices
 {
     namespace Data
     {        class FilePathProvider
