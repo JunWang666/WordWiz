@@ -151,18 +151,37 @@ namespace WordWizServices::Database
 	            throw;
 	        }
 	    }
-
 	std::string DatabaseManager::executeScalarQuery(const std::string & sql, const std::vector<std::string>&params)
         {
-            // 直接调用接受 vector<string> 参数的 executeQuery 重载
-            auto rs = executeQuery(sql, params); // 这里会调用我们上面保留的 executeQuery
+            try {
+                WordWizServices::Log::LogMessage(L"执行标量查询: " + winrt::to_hstring(sql));
+                
+                // 记录参数
+                for (size_t i = 0; i < params.size(); ++i) {
+                    WordWizServices::Log::LogMessage(L"参数 " + winrt::to_hstring(i) + L": " + winrt::to_hstring(params[i]));
+                }
+                
+                // 直接调用接受 vector<string> 参数的 executeQuery 重载
+                auto rs = executeQuery(sql, params); // 这里会调用我们上面保留的 executeQuery
 
-            if (rs.rowCount() == 0 || !rs.moveFirst()) {
-                return "";
+                WordWizServices::Log::LogMessage(L"查询执行完成，行数: " + winrt::to_hstring(rs.rowCount()) + L", 列数: " + winrt::to_hstring(rs.columnCount()));
+
+                if (rs.rowCount() == 0 || !rs.moveFirst()) {
+                    WordWizServices::Log::LogMessage(L"查询结果为空或无法移动到第一行");
+                    return "";
+                }
+                if (rs.columnCount() == 0 || rs[0].isEmpty()) {
+                    WordWizServices::Log::LogMessage(L"第一列为空或不存在");
+                    return "";
+                }
+                
+                std::string result = rs[0].convert<std::string>();
+                WordWizServices::Log::LogMessage(L"查询结果: \"" + winrt::to_hstring(result) + L"\"");
+                return result;
             }
-            if (rs.columnCount() == 0 || rs[0].isEmpty()) {
-                return "";
+            catch (const std::exception& e) {
+                WordWizServices::Log::LogMessage(L"executeScalarQuery 异常: " + winrt::to_hstring(e.what()));
+                throw;
             }
-            return rs[0].convert<std::string>();
         }
 }

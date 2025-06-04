@@ -155,22 +155,25 @@
             
             <!-- 应用信息 -->
             <TextBlock Text="关于" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="SemiBold"/>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Image x:Name="AppLogo" 
-                   Source="ms-appx:///Logo.png"
-                   Width="100" 
-                   Height="100" 
-                   Margin="0,0,12,0"
-                   VerticalAlignment="Top"/>
-                <StackPanel Spacing="12" Margin="0,0,0,0">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="WordWiz" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
-                        <TextBlock x:Name="AppVersionText" Text="版本 加载中..." Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                        <TextBlock Text="一个功能强大的英语词典应用" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                    CornerRadius="8" 
+                    Padding="16">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Image x:Name="AppLogo" 
+                       Source="ms-appx:///Logo.png"
+                       Width="100" 
+                       Height="100" 
+                       Margin="0,0,12,0"
+                       VerticalAlignment="Top"/>
+                    <StackPanel Spacing="12" Margin="0,0,0,0">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="WordWiz" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock x:Name="AppVersionText" Text="版本 加载中..." Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock Text="一个功能强大的英语词典应用" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </StackPanel>
-
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>
