@@ -3,6 +3,8 @@
 #include "WordSearchResultList.xaml.h"
 #include "WordSearchResultList.g.cpp" // 由 MIDL 生成
 #include "WordItem.h"                 // 创建 WordItem 实例需要
+#include <winrt/Microsoft.UI.Dispatching.h> // 添加此头文件以支持 Microsoft::UI::Dispatching::DispatcherQueue
+#include <vector> // 添加 std::vector 支持
 // #include "WordSearch.h" // 已经在 pch.h 或 WordSearchResultList.xaml.h 中包含了
 
 using namespace winrt;
@@ -10,6 +12,7 @@ using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::System; // For VirtualKey
+using namespace Microsoft::UI::Dispatching; // For DispatcherQueue
 
 namespace winrt::WordWiz::implementation
 {
@@ -75,8 +78,7 @@ namespace winrt::WordWiz::implementation
         // else (如果 selectedListViewItem 是 nullptr，例如列表被清空或用户取消选择)
         // {
         //     我们不执行任何操作，CurrentDetailItem 保持其之前的值。
-        //     这样 WordDetails 控件就不会“复原”。
-        // }
+        //     这样 WordDetails 控件就不会“复原”。        // }
     }
 
     // SearchTextBox 的 TextChanged 事件处理函数 (防抖逻辑)
@@ -84,16 +86,15 @@ namespace winrt::WordWiz::implementation
     {
         //m_debounceTimer.Stop(); // 每次输入变化时，重置计时器
         m_debounceTimer.Start();
-    }
-
-    // SearchTextBox 的 KeyDown 事件处理函数 (回车立即搜索)
+    }    // SearchTextBox 的 KeyDown 事件处理函数 (回车立即搜索)
     void WordSearchResultList::SearchTextBox_KeyDown(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e)
     {
         if (e.Key() == VirtualKey::Enter)
         {
             m_debounceTimer.Stop(); // 停止可能正在计时的防抖操作
             auto textBox = sender.as<Controls::TextBox>();
-            ExecuteSearch(textBox.Text());
+            // 使用 fire-and-forget 调用异步方法
+            ExecuteSearchAsync(textBox.Text());
         }
     }
 
@@ -101,45 +102,154 @@ namespace winrt::WordWiz::implementation
     void WordSearchResultList::OnDebounceTimerTick(Windows::Foundation::IInspectable const& /*sender*/, Windows::Foundation::IInspectable const& /*e*/)
     {
         m_debounceTimer.Stop(); // 计时器触发后先停止
-        // 假设 SearchTextBox 的 x:Name 是 "SearchTextBox"
-        // 你需要确保在 XAML 中 SearchTextBox 有一个 x:Name，或者通过其他方式获取它
-        // 如果 SearchTextBox 是此用户控件的 XAML 内容的一部分，可以直接使用其成员变量名
-        ExecuteSearch(SearchTextBox().Text()); // SearchTextBox() 是 XAML 中定义的控件
+        // 使用 fire-and-forget 调用异步方法
+        ExecuteSearchAsync(SearchTextBox().Text());
+    }    // 执行搜索的异步方法 - 使用值传递确保协程安全
+    winrt::Windows::Foundation::IAsyncAction WordSearchResultList::ExecuteSearchAsync(winrt::hstring query)
+    {
+        // 如果查询为空，显示无输入状态并清空列表
+        if (query.empty())
+        {
+            HideLoadingState();
+            HideNoResultsState();
+            ShowNoInputState();
+            m_items.Clear();
+            co_return;
+        }
+
+        // 显示加载状态
+        ShowLoadingState();
+        HideNoResultsState();
+        HideNoInputState();
+
+        // 获取强引用，确保对象生命周期
+        auto strongThis = get_strong();
+        
+        try
+        {
+            // 在后台线程执行搜索
+            co_await winrt::resume_background();
+            
+            // 执行搜索（在后台线程）
+            auto results = strongThis->m_wordSearchService.Search(query);
+            
+            // 简化的UI更新方式 - 使用简单的调度队列调用
+            strongThis->DispatcherQueue().TryEnqueue([strongThis, results]() {
+                try
+                {
+                    // 隐藏加载状态
+                    strongThis->HideLoadingState();
+                    
+                    // 清空现有列表项
+                    strongThis->m_items.Clear();
+                    
+                    if (results != nullptr && results.Size() > 0)
+                    {
+                        // 有搜索结果，添加到列表
+                        for (auto const& item : results)
+                        {
+                            if (item != nullptr)
+                            {
+                                strongThis->m_items.Append(item);
+                            }
+                        }
+                        strongThis->HideNoResultsState();
+                    }
+                    else
+                    {
+                        // 没有搜索结果，显示无结果状态
+                        strongThis->ShowNoResultsState();
+                    }
+                }
+                catch (...)
+                {
+                    // UI线程中的异常处理
+                    strongThis->HideLoadingState();
+                    strongThis->ShowNoResultsState();
+                }
+            });
+        }
+        catch (...)
+        {
+            // 后台线程异常处理
+            strongThis->DispatcherQueue().TryEnqueue([strongThis]() {
+                strongThis->HideLoadingState();
+                strongThis->ShowNoResultsState();
+            });
+        }
+    }    // 显示加载状态
+    void WordSearchResultList::ShowLoadingState()
+    {
+        if (LoadingProgressBar())
+        {
+            LoadingProgressBar().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+        }
+        HideNoInputState();
+        HideNoResultsState();
     }
 
-    // 执行搜索的辅助方法
-    void WordSearchResultList::ExecuteSearch(winrt::hstring const& query)
+    // 隐藏加载状态
+    void WordSearchResultList::HideLoadingState()
     {
-        // 调用 WordSearch 服务执行搜索
-        auto searchResults = m_wordSearchService.Search(query);
-
-        m_items.Clear(); // 清空现有列表项
-        if (searchResults != nullptr) // 确保 searchResults 不是 nullptr
+        if (LoadingProgressBar())
         {
-            for (auto const& item : searchResults)
-            {
-                m_items.Append(item);
-            }
+            LoadingProgressBar().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
         }
-        // 你可以在这里添加逻辑，比如当 searchResults 为空或 m_items 为空时显示 "无结果" 的提示
+    }
+
+    // 显示无结果状态
+    void WordSearchResultList::ShowNoResultsState()
+    {
+        if (NoResultsPanel())
+        {
+            NoResultsPanel().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+        }
+        HideNoInputState();
+    }
+
+    // 隐藏无结果状态
+    void WordSearchResultList::HideNoResultsState()
+    {
+        if (NoResultsPanel())
+        {
+            NoResultsPanel().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+        }
+    }
+
+    // 显示无输入状态
+    void WordSearchResultList::ShowNoInputState()
+    {
+        if (NoInputPanel())
+        {
+            NoInputPanel().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+        }
+        HideNoResultsState();
+    }
+
+    // 隐藏无输入状态
+    void WordSearchResultList::HideNoInputState()
+    {
+        if (NoInputPanel())
+        {
+            NoInputPanel().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+        }
     }
 
 
     // 你已有的辅助方法
     void WordSearchResultList::AddSampleItems()
     {
-        AddNewEntry(L"WinUI 3 Sample", L"Native UX platform from Microsoft.");
-        AddNewEntry(L"C++/WinRT Sample", L"Standard C++ language projection aaaaaaaaaaa.");
+        AddNewEntry(L"WinUI 3 Sample", L"Native UX platform from Microsoft.");        AddNewEntry(L"C++/WinRT Sample", L"Standard C++ language projection aaaaaaaaaaa.");
     }
 
     void WordSearchResultList::AddNewEntry(winrt::hstring const& word, winrt::hstring const& explanation)
     {
         auto newItem = winrt::make<WordWiz::implementation::WordItem>(word, explanation);
         m_items.Append(newItem);
-    }
-    void WordSearchResultList::searchWord(winrt::hstring const& query)
+    }    void WordSearchResultList::searchWord(winrt::hstring const& query)
     {
-		SearchTextBox().Text(query); // 更新搜索框文本
-        ExecuteSearch(query); // 执行搜索
+        SearchTextBox().Text(query); // 更新搜索框文本
+        // 使用 fire-and-forget 调用异步方法
+        ExecuteSearchAsync(query);
     }
 }

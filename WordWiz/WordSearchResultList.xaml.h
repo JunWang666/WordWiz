@@ -7,6 +7,7 @@
 // 新增包含
 #include <winrt/Microsoft.UI.Xaml.Input.h> // For KeyRoutedEventArgs
 #include <winrt/Windows.System.h>          // For VirtualKey
+#include <winrt/Windows.Foundation.h>      // For IAsyncAction
 
 namespace winrt::WordWiz::implementation
 {
@@ -47,11 +48,15 @@ namespace winrt::WordWiz::implementation
 
         // 新增成员
         Microsoft::UI::Xaml::DispatcherTimer m_debounceTimer{ nullptr };
-        WordWiz::WordSearch m_wordSearchService{ nullptr }; // WordSearch 服务实例
-
-        // 新增私有方法
+        WordWiz::WordSearch m_wordSearchService{ nullptr }; // WordSearch 服务实例        // 新增私有方法
         void OnDebounceTimerTick(Windows::Foundation::IInspectable const& sender, Windows::Foundation::IInspectable const& e);
-        void ExecuteSearch(winrt::hstring const& query);
+        winrt::Windows::Foundation::IAsyncAction ExecuteSearchAsync(winrt::hstring query);
+        void ShowLoadingState();
+        void HideLoadingState();
+        void ShowNoResultsState();
+        void HideNoResultsState();
+        void ShowNoInputState();
+        void HideNoInputState();
     };
 }
 

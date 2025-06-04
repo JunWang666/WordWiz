@@ -42,8 +42,7 @@ namespace winrt::WordWiz::implementation // 确保命名空间正确
         if (param)
         {
             // Try to extract a map parameter
-            auto map = param.try_as<winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Foundation::IInspectable>>();
-            if (map && map.HasKey(L"search_word"))
+            auto map = param.try_as<winrt::Windows::Foundation::Collections::IMap<winrt::hstring, winrt::Windows::Foundation::IInspectable>>();            if (map && map.HasKey(L"search_word"))
             {
                 auto boxed = map.Lookup(L"search_word");
                 if (auto searchWord = boxed.try_as<winrt::hstring>())

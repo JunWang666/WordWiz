@@ -5,9 +5,7 @@
     xmlns:local="using:WordWiz"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-
-    <Grid Padding="10" RowSpacing="10">
+    mc:Ignorable="d">    <Grid Padding="10" RowSpacing="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,17 +17,24 @@
                  TextChanged="SearchTextBox_TextChanged"
                  KeyDown="SearchTextBox_KeyDown"
                  Margin="0,0,0,10"/>
-
-        <ListView x:Name="ResultsListView"
-                  Grid.Row="1" Grid.ColumnSpan="2"
-                  ItemsSource="{x:Bind Items, Mode=OneWay}"
-                  SelectionMode="Single"
-                  BorderBrush="Transparent"
-                  BorderThickness="0"
-                  ShowsScrollingPlaceholders="True"
-                  HorizontalAlignment="Stretch"
-                  SelectionChanged="ResultsListView_SelectionChanged"
-                >
+        
+        <!-- 顶部条状进度条 -->
+        <ProgressBar x:Name="LoadingProgressBar" 
+                     Grid.Row="0"
+                     Height="3"
+                     IsIndeterminate="True"
+                     Visibility="Collapsed"
+                     Margin="0,0,0,-20"/>
+          <Grid Grid.Row="1">
+            <ListView x:Name="ResultsListView"
+                      ItemsSource="{x:Bind Items, Mode=OneWay}"
+                      SelectionMode="Single"
+                      BorderBrush="Transparent"
+                      BorderThickness="0"
+                      ShowsScrollingPlaceholders="True"
+                      HorizontalAlignment="Stretch"
+                      SelectionChanged="ResultsListView_SelectionChanged"
+                    >
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:WordItem">
@@ -59,11 +64,41 @@
                                     FontWeight="Light"
                                     FontSize="10"
                                     MaxLines="1"/>
-                    </Grid>
-                </DataTemplate>
+                    </Grid>                </DataTemplate>
             </ListView.ItemTemplate>
 
-        </ListView>
+            </ListView>
 
+            <!-- 无结果提示 -->
+            <StackPanel x:Name="NoResultsPanel" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed">
+                <FontIcon Glyph="&#xE7C3;" FontSize="24" Margin="0,0,0,10"
+                          Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                <TextBlock Text="未找到匹配的结果" 
+                           HorizontalAlignment="Center"
+                           Style="{ThemeResource BodyTextBlockStyle}"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                <TextBlock Text="请尝试使用其他关键词" 
+                           HorizontalAlignment="Center"
+                           Style="{ThemeResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- 无输入提示 -->
+            <StackPanel x:Name="NoInputPanel" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        Visibility="Visible">
+                <FontIcon Glyph="&#xE721;" FontSize="32" Margin="0,0,0,15"
+                          Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                <TextBlock Text="在上方输入关键词开始搜索" 
+                           HorizontalAlignment="Center"
+                           Style="{ThemeResource BodyTextBlockStyle}"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
