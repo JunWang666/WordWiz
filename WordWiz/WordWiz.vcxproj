@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="database.h" />
+    <ClInclude Include="DictionaryImpoter.h" />
     <ClInclude Include="DictionaryItemInWordDetail.h" />
     <ClInclude Include="DictionarySettingsPage.xaml.h">
       <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
@@ -210,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="database.cpp" />
+    <ClCompile Include="DictionaryImpoter.cpp" />
     <ClCompile Include="DictionaryItemInWordDetail.cpp" />
     <ClCompile Include="DictionarySettingsPage.xaml.cpp">
       <DependentUpon>DictionarySettingsPage.xaml</DependentUpon>
