@@ -203,7 +203,9 @@ namespace winrt::WordWiz::implementation
             });
             timer.Start();
         }
-    }    void DictionarySettingsPage::OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+    }
+	
+    void DictionarySettingsPage::OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
     {
         try {
             ShowOpenFolderFlyout(L"正在打开词典文件夹...");

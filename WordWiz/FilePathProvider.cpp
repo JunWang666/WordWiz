@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "FilePathProvider.h"
 #include <winrt/Windows.Storage.h>
+#include <winrt/Windows.ApplicationModel.h>
 #include <winrt/base.h>
 #include <locale> // 用于 wstring_convert
 #include <codecvt> // 用于 wstring_convert
@@ -237,6 +238,88 @@ namespace WordWizServices
             {
                 WordWizServices::Log::LogMessage(L"获取应用临时文件夹路径失败。请检查应用权限或文件夹是否存在。");
                 return std::string();
+            }
+        }        
+          
+        std::string FilePathProvider::GetAppPackageInstallPath()
+        {
+            try
+            {
+                // 获取当前应用包对象
+                auto package = winrt::Windows::ApplicationModel::Package::Current();
+                if (!package)
+                {
+                    WordWizServices::Log::LogMessage(L"无法获取当前应用包对象。");
+                    return std::string();
+                }
+
+                // 获取应用包的安装文件夹
+                winrt::Windows::Storage::StorageFolder installedLocation = package.InstalledLocation();
+                if (!installedLocation)
+                {
+                    WordWizServices::Log::LogMessage(L"InstalledLocation不可用。");
+                    return std::string();
+                }
+
+                // 获取安装路径（注意：此路径仅用于显示目的，不能直接用于文件访问）
+                winrt::hstring path_hstring = installedLocation.Path();
+                if (path_hstring.empty())
+                {
+                    WordWizServices::Log::LogMessage(L"应用包安装路径为空。");
+                    return std::string();
+                }
+
+                // 将 winrt::hstring 转换为 std::wstring，然后转换为 UTF-8 std::string
+                std::wstring wide_path(path_hstring.c_str());
+                return WideStringToString_UTF8(wide_path);
+            }
+            catch (const winrt::hresult_error& e)
+            {
+                std::wstring errorMsg = L"获取应用包安装路径失败，错误代码: 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return std::string();
+            }
+            catch (...)
+            {
+                WordWizServices::Log::LogMessage(L"获取应用软件包安装路径失败。请检查应用权限或包信息。");
+                return std::string();
+            }
+        }
+        
+        winrt::Windows::Storage::StorageFolder FilePathProvider::GetAppPackageInstallFolder()
+        {
+            try
+            {
+                // 获取当前应用包对象
+                auto package = winrt::Windows::ApplicationModel::Package::Current();
+                if (!package)
+                {
+                    WordWizServices::Log::LogMessage(L"无法获取当前应用包对象。");
+                    return nullptr;
+                }
+
+                // 直接返回应用包的安装文件夹对象
+                winrt::Windows::Storage::StorageFolder installedLocation = package.InstalledLocation();
+                if (!installedLocation)
+                {
+                    WordWizServices::Log::LogMessage(L"InstalledLocation不可用。");
+                    return nullptr;
+                }
+
+                return installedLocation;
+            }
+            catch (const winrt::hresult_error& e)
+            {
+                std::wstring errorMsg = L"获取应用包安装文件夹对象失败，错误代码: 0x" + 
+                    std::to_wstring(static_cast<uint32_t>(e.code())) + L" - " + e.message().c_str();
+                WordWizServices::Log::LogMessage(errorMsg);
+                return nullptr;
+            }
+            catch (...)
+            {
+                WordWizServices::Log::LogMessage(L"获取应用软件包安装文件夹对象失败。请检查应用权限或包信息。");
+                return nullptr;
             }
         }
     }

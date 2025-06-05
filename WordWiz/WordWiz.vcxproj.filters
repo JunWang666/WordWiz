@@ -75,7 +75,10 @@
     <ClCompile Include="DictionaryItemInWordDetail.cpp">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClCompile>
-    <ClCompile Include="FileOperator.cpp">
+    <ClCompile Include="DictionaryManager.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DictionaryImpoter.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,7 +108,10 @@
     <ClInclude Include="database.h">
       <Filter>services\Database</Filter>
     </ClInclude>
-    <ClInclude Include="FileOperator.h">
+    <ClInclude Include="DictionaryManager.h">
+      <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DictionaryImpoter.h">
       <Filter>services\Database</Filter>
     </ClInclude>
   </ItemGroup>
@@ -346,6 +352,9 @@
     <Filter Include="modules\AI">
       <UniqueIdentifier>{9d1c8ce1-edc3-4cfd-a37b-ff8d8bf7ecc3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets\db">
+      <UniqueIdentifier>{4848f14e-8280-42fb-83b1-3132281d4558}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
@@ -359,6 +368,9 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="WordWiz_TemporaryKey.pfx" />
+    <None Include="..\BuildInDataBase\englishwords.wordwiz">
+      <Filter>Assets\db</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />

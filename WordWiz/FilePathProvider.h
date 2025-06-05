@@ -20,8 +20,14 @@ namespace WordWizServices
             // 获取应用的共享本地文件夹路径
             static std::string GetAppSharedLocalFolderPath();
 
-            // 获取应用的临时文件夹路径
+        	// 获取应用的临时文件夹路径
             static std::string GetAppTemporaryFolderPath();
+
+            // 获取应用软件包的安装路径（字符串形式，仅供显示用）
+            static std::string GetAppPackageInstallPath();
+
+            // 获取应用软件包的安装文件夹对象（用于实际文件访问）
+            static winrt::Windows::Storage::StorageFolder GetAppPackageInstallFolder();
         };
     }
 }

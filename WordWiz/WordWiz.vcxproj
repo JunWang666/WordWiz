@@ -108,6 +108,10 @@
       <PreprocessorDefinitions>NDEBUG;POCO_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MultiThreaded</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">MultiThreaded</RuntimeLibrary>
+      <SupportJustMyCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</SupportJustMyCode>
+      <UseDynamicDebugging Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</UseDynamicDebugging>
+      <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsWinRT>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -389,6 +393,10 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\BuildInDataBase\englishwords.wordwiz">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </None>
     <None Include="packages.config" />
     <None Include="WordWiz_TemporaryKey.pfx" />
   </ItemGroup>

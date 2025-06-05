@@ -6,6 +6,7 @@
 #include "Poco/Data/SQLite/Connector.h"
 #include "Poco/Mutex.h"
 #include "Poco/Data/RecordSet.h"
+#include <winrt/Windows.Storage.h>
 
 namespace WordWizServices::Database
 {
@@ -15,15 +16,14 @@ namespace WordWizServices::Database
         // Constructor with custom database path
         explicit DatabaseManager(const std::string& dbPath = "");
         ~DatabaseManager();
-        
+
         // Disable copy constructor and assignment operator
         DatabaseManager(const DatabaseManager&) = delete;
         DatabaseManager& operator=(const DatabaseManager&) = delete;
         
         // Enable move constructor and assignment operator
         DatabaseManager(DatabaseManager&&) = default;
-        DatabaseManager& operator=(DatabaseManager&&) = default;
-        
+        DatabaseManager& operator=(DatabaseManager&&) = default;        
         // Database lifecycle
         void initialize();
         void shutdown();
