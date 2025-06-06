@@ -13,7 +13,9 @@ namespace WordWizServices::Dictionary
     {
         // 确保词典目录存在
         EnsureDictionariesFolderExists();
-    }	std::future<bool> DictionaryImporter::ImportDictionaryAsync(const std::string& sourceFilePath)
+    }	
+    
+    std::future<bool> DictionaryImporter::ImportDictionaryAsync(const std::string& sourceFilePath)
     {
         return std::async(std::launch::async, [this, sourceFilePath]() -> bool {
             try {
@@ -189,7 +191,8 @@ namespace WordWizServices::Dictionary
     }    
     
     std::string DictionaryImporter::GetDictionaryIdFromDatabase(const std::string& filePath)
-    {        try {            // 处理文件路径，去除可能的引号
+    {        
+        try {            // 处理文件路径，去除可能的引号
             std::string cleanFilePath = filePath;
             
             

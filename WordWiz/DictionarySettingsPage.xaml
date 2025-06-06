@@ -46,7 +46,9 @@
                                          Grid.Column="0"
                                          PlaceholderText="请输入词典文件完整路径 (例如: C:\path\to\dictionary.db)"
                                          TextWrapping="NoWrap"
-                                         Margin="0,0,8,0"/>                                <Button Name="ImportSingleFileButton"
+                                         Margin="0,0,8,0"/>                                
+                                
+                                <Button Name="ImportSingleFileButton"
                                         Grid.Column="1"
                                         Style="{ThemeResource AccentButtonStyle}"
                                         Click="ImportSingleFileButton_Click">

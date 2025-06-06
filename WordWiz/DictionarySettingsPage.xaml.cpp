@@ -13,6 +13,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+#include "CombineData.h" 
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -27,10 +28,13 @@ namespace winrt::WordWiz::implementation
     {
         m_dictionaryImporter = std::make_unique<WordWizServices::Dictionary::DictionaryImporter>();
     }
-	void DictionarySettingsPage::ImportSingleFileButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+	
+    void DictionarySettingsPage::ImportSingleFileButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
     {
         ImportSingleFileAsync();
-    }    winrt::fire_and_forget DictionarySettingsPage::ImportSingleFileAsync()
+    }    
+    
+    winrt::fire_and_forget DictionarySettingsPage::ImportSingleFileAsync()
     {
         auto strongThis = get_strong();
         
@@ -84,7 +88,8 @@ namespace winrt::WordWiz::implementation
 
             strongThis->ShowSingleFileFlyout(L"开始导入词典文件...");
             std::vector<std::string> filePaths = { filePath };
-            strongThis->ImportFilesAsync(filePaths);        }
+            strongThis->ImportFilesAsync(filePaths);        
+        }
         catch (const std::exception& ex) {
             std::string errorMsg = "处理文件路径失败: " + std::string(ex.what());
             WordWizServices::Log::LogMessage(winrt::to_hstring(errorMsg));
@@ -113,10 +118,13 @@ namespace winrt::WordWiz::implementation
             timer.Start();
         }
     }
-      void DictionarySettingsPage::ImportMultipleFilesButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+      
+    void DictionarySettingsPage::ImportMultipleFilesButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
     {
         ImportMultipleFilesAsync();
-    }    winrt::fire_and_forget DictionarySettingsPage::ImportMultipleFilesAsync()
+    }    
+      
+      winrt::fire_and_forget DictionarySettingsPage::ImportMultipleFilesAsync()
     {
         auto strongThis = get_strong();
         
@@ -175,7 +183,8 @@ namespace winrt::WordWiz::implementation
             }
 
             strongThis->ShowMultipleFilesFlyout(L"开始导入词典文件...", L"找到 " + winrt::to_hstring(filePaths.size()) + L" 个有效文件");
-            strongThis->ImportFilesAsync(filePaths);        }
+            strongThis->ImportFilesAsync(filePaths);        
+        }
         catch (const std::exception& ex) {
             std::string errorMsg = "处理文件路径失败: " + std::string(ex.what());
             WordWizServices::Log::LogMessage(winrt::to_hstring(errorMsg));
@@ -203,7 +212,9 @@ namespace winrt::WordWiz::implementation
             });
             timer.Start();
         }
-    }    void DictionarySettingsPage::OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+    }    
+      
+      void DictionarySettingsPage::OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
     {
         try {
             ShowOpenFolderFlyout(L"正在打开词典文件夹...");
@@ -293,6 +304,16 @@ namespace winrt::WordWiz::implementation
                     WordWizServices::Log::LogMessage(L"导入统计：成功 " + winrt::to_hstring(successCount) + 
                                                     L"/" + winrt::to_hstring(totalCount) + L" 个文件");
                     
+                    // 导入完成后，融合所有词典到主库
+                    try {
+                        std::string mainDbPath = WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\main.db";
+                        std::string dictFolderPath = WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\Dictionaries";
+                        combine_all_dictionaries_to_main_db(mainDbPath, dictFolderPath);
+                        WordWizServices::Log::LogMessage(L"词典融合到主库完成。");
+                    } catch (const std::exception& e) {
+                        WordWizServices::Log::LogMessage(L"融合词典到主库时发生异常: " + winrt::to_hstring(e.what()));
+                    }
+
                     // 显示结果
                     winrt::hstring statusMessage;
                     winrt::hstring detailMessage;
@@ -471,3 +492,4 @@ namespace winrt::WordWiz::implementation
         }
     }
 }
+#include "CombineData.h" // 假设combine_all_dictionaries_to_main_db声明在此头文件

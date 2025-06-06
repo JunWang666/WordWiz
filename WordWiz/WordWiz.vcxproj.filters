@@ -75,7 +75,10 @@
     <ClCompile Include="DictionaryItemInWordDetail.cpp">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClCompile>
-    <ClCompile Include="FileOperator.cpp">
+    <ClCompile Include="C:\Users\kongming\AppData\Local\Temp\CombineData.cpp">
+      <Filter>services\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DictionaryImpoter.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,7 +108,10 @@
     <ClInclude Include="database.h">
       <Filter>services\Database</Filter>
     </ClInclude>
-    <ClInclude Include="FileOperator.h">
+    <ClInclude Include="DictionaryImpoter.h">
+      <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="CombineData.h">
       <Filter>services\Database</Filter>
     </ClInclude>
   </ItemGroup>
