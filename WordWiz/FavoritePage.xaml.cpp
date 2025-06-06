@@ -12,18 +12,18 @@ using namespace Microsoft::UI::Xaml;
 
 namespace winrt::WordWiz::implementation
 {
-	int32_t FavoritePage::MyProperty()
-	{
-		throw hresult_not_implemented();
-	}
+    int32_t FavoritePage::MyProperty()
+    {
+        throw hresult_not_implemented();
+    }
 
-	void FavoritePage::MyProperty(int32_t /* value */)
-	{
-		throw hresult_not_implemented();
-	}
+    void FavoritePage::MyProperty(int32_t /* value */)
+    {
+        throw hresult_not_implemented();
+    }
 
-	void FavoritePage::myButton_Click(const IInspectable&, const RoutedEventArgs&)
-	{
-		myButton().Content(box_value(L"Clicked"));
-	}
+    void FavoritePage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
+    {
+        myButton().Content(box_value(L"Clicked"));
+    }
 }

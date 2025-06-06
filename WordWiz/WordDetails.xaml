@@ -1,50 +1,50 @@
 ﻿<UserControl
-	x:Class="WordWiz.WordDetails"
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:local="using:WordWiz"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	mc:Ignorable="d"
-	Loaded="OnLoaded">
-	<Grid Padding="0" RowSpacing="0">
-		<Grid Grid.Row="0" x:Name="PlaceholderPanel" Visibility="Collapsed" HorizontalAlignment="Center"
-		      VerticalAlignment="Center">
-			<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
-				<!-- Replace the Source with your illustration path if needed -->
-				<Image Source="https://bing.img.run/rand_uhd.php" Width="600" Height="Auto" Stretch="Uniform" />
-				<TextBlock Text="请选择一个单词以查看详细信息"
-				           FontSize="18"
-				           Foreground="{ThemeResource TextControlPlaceholderForeground}"
-				           HorizontalAlignment="Center" />
-			</StackPanel>
-		</Grid>
+    x:Class="WordWiz.WordDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WordWiz"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="OnLoaded"
+    >
+    <Grid Padding="0" RowSpacing="0">
+        <Grid Grid.Row="0" x:Name="PlaceholderPanel" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+                <!-- Replace the Source with your illustration path if needed -->
+                <Image Source="https://bing.img.run/rand_uhd.php" Width="600" Height="Auto" Stretch="Uniform"/>
+                <TextBlock Text="请选择一个单词以查看详细信息" 
+                           FontSize="18" 
+                           Foreground="{ThemeResource TextControlPlaceholderForeground}" 
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
 
-		<Grid RowSpacing="0" Grid.Row="0" x:Name="DetalPanel">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
-				<RowDefinition Height="*" />
-			</Grid.RowDefinitions>
+        <Grid RowSpacing="0" Grid.Row="0" x:Name="DetalPanel">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-			<TextBlock x:Name="WordTextBlock"
-			           Grid.Row="0"
-			           Text="{x:Bind ItemToDisplay.Word, Mode=OneWay, FallbackValue='单词'}"
-			           Style="{ThemeResource TitleTextBlockStyle}"
-			           Margin="0,0,0,8" />
+            <TextBlock x:Name="WordTextBlock"
+                    Grid.Row="0" 
+                   Text="{x:Bind ItemToDisplay.Word, Mode=OneWay, FallbackValue='单词'}" 
+                   Style="{ThemeResource TitleTextBlockStyle}" 
+                   Margin="0,0,0,8"/>
 
-			<SelectorBar Grid.Row="1" x:Name="DictionarySelectorBar"
-			             SelectionChanged="DictionarySelectorBar_SelectionChanged">
-			</SelectorBar>
+            <SelectorBar Grid.Row="1" x:Name="DictionarySelectorBar"
+                     SelectionChanged="DictionarySelectorBar_SelectionChanged">
+            </SelectorBar>
 
 
-			<WebView2 Grid.Row="2"
-			          x:Name="DictionaryWebView"
-			          DefaultBackgroundColor="Transparent">
-				<WebView2.OpacityTransition>
-					<ScalarTransition Duration="0:0:0.200" />
-				</WebView2.OpacityTransition>
-			</WebView2>
-		</Grid>
-	</Grid>
+            <WebView2 Grid.Row="2" 
+                  x:Name="DictionaryWebView"
+                  DefaultBackgroundColor="Transparent">
+                <WebView2.OpacityTransition>
+                    <ScalarTransition Duration="0:0:0.200" />
+                </WebView2.OpacityTransition>
+            </WebView2>
+        </Grid>
+    </Grid>
 </UserControl>

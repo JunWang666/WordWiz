@@ -3,19 +3,18 @@
 #include "App.xaml.g.h"
 
 namespace winrt::WordWiz::implementation
-{
-	struct App : AppT<App>
-	{
-		App();
+{    struct App : AppT<App>
+    {
+        App();
 
-		void OnLaunched(const LaunchActivatedEventArgs&);
-		// 全局主题管理方法
-		static void SetGlobalTheme(bool isDarkMode);
-		static Window GetMainWindow();
-		static void LoadAndApplySavedTheme();
+        void OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&);
+          // 全局主题管理方法
+        static void SetGlobalTheme(bool isDarkMode);
+        static winrt::Microsoft::UI::Xaml::Window GetMainWindow();
+        static void LoadAndApplySavedTheme();
 
-	private:
-		Window window{nullptr};
-		static Window s_mainWindow;
-	};
+    private:
+        winrt::Microsoft::UI::Xaml::Window window{ nullptr };
+        static winrt::Microsoft::UI::Xaml::Window s_mainWindow;
+    };
 }

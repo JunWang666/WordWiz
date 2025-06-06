@@ -75,7 +75,7 @@
     <ClCompile Include="DictionaryItemInWordDetail.cpp">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClCompile>
-    <ClCompile Include="DictionaryImpoter.cpp">
+    <ClCompile Include="FileOperator.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,7 +105,7 @@
     <ClInclude Include="database.h">
       <Filter>services\Database</Filter>
     </ClInclude>
-    <ClInclude Include="DictionaryImpoter.h">
+    <ClInclude Include="FileOperator.h">
       <Filter>services\Database</Filter>
     </ClInclude>
   </ItemGroup>

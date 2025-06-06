@@ -36,12 +36,12 @@
 
 namespace winrt
 {
-	using namespace Microsoft::UI;
-	using namespace Microsoft::UI::Xaml;
-	using namespace Microsoft::UI::Xaml::Controls;
-	using namespace Microsoft::UI::Xaml::Navigation;
-	using namespace Microsoft::UI::Windowing;
-	using namespace Windows::Graphics;
-	using namespace Windows::Foundation;
-	using namespace Windows::Foundation::Collections;
+    using namespace Microsoft::UI;
+    using namespace Microsoft::UI::Xaml;
+    using namespace Microsoft::UI::Xaml::Controls;
+    using namespace Microsoft::UI::Xaml::Navigation;
+    using namespace Microsoft::UI::Windowing;
+    using namespace Windows::Graphics;
+    using namespace Windows::Foundation;
+    using namespace Windows::Foundation::Collections;
 }
