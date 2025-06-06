@@ -11,58 +11,63 @@
 
 namespace winrt::WordWiz::implementation
 {
-    struct WordSearchResultList : WordSearchResultListT<WordSearchResultList>
-    {
-        WordSearchResultList();
+	struct WordSearchResultList : WordSearchResultListT<WordSearchResultList>
+	{
+		WordSearchResultList();
 
-        // Items 属性的 getter
-        Windows::Foundation::Collections::IObservableVector<WordWiz::WordItem> Items();
+		// Items 属性的 getter
+		IObservableVector<WordWiz::WordItem> Items();
 
-        // CurrentDetailItem 依赖属性的 getter 和 setter
-        WordWiz::WordItem CurrentDetailItem();
-        void CurrentDetailItem(WordWiz::WordItem const& value);
+		// CurrentDetailItem 依赖属性的 getter 和 setter
+		WordWiz::WordItem CurrentDetailItem();
+		void CurrentDetailItem(const WordWiz::WordItem& value);
 
-        // CurrentDetailItemProperty 依赖属性的静态 getter
-		static Microsoft::UI::Xaml::DependencyProperty CurrentDetailItemProperty() {
+		// CurrentDetailItemProperty 依赖属性的静态 getter
+		static Xaml::DependencyProperty CurrentDetailItemProperty()
+		{
 			return m_currentDetailItemProperty;
 		}
 
-        // 事件处理函数
-        void ResultsListView_SelectionChanged(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
-        void SearchTextBox_TextChanged(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Controls::TextChangedEventArgs const& args);
-        // 新增 KeyDown 事件处理函数 for Enter key
-        void SearchTextBox_KeyDown(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e);
+		// 事件处理函数
+		void ResultsListView_SelectionChanged(const Windows::Foundation::IInspectable& sender,
+		                                      const SelectionChangedEventArgs& args);
+		void SearchTextBox_TextChanged(const Windows::Foundation::IInspectable& sender,
+		                               const TextChangedEventArgs& args);
+		// 新增 KeyDown 事件处理函数 for Enter key
+		void SearchTextBox_KeyDown(const Windows::Foundation::IInspectable& sender, const Input::KeyRoutedEventArgs& e);
 
 
-        // 辅助方法 (如果需要)
-        void AddSampleItems(); // 你已有的方法
-        void AddNewEntry(winrt::hstring const& word, winrt::hstring const& explanation); // 你已有的方法
+		// 辅助方法 (如果需要)
+		void AddSampleItems(); // 你已有的方法
+		void AddNewEntry(const hstring& word, const hstring& explanation); // 你已有的方法
 
-        void searchWord(winrt::hstring const& query);
-    private:
-        // 存储 WordItem 对象的列表
-        Windows::Foundation::Collections::IObservableVector<WordWiz::WordItem> m_items;
+		void searchWord(const hstring& query);
 
-        // CurrentDetailItem 依赖属性的静态实例
-        static Microsoft::UI::Xaml::DependencyProperty m_currentDetailItemProperty;
+	private:
+		// 存储 WordItem 对象的列表
+		IObservableVector<WordWiz::WordItem> m_items;
 
-        // 新增成员
-        Microsoft::UI::Xaml::DispatcherTimer m_debounceTimer{ nullptr };
-        WordWiz::WordSearch m_wordSearchService{ nullptr }; // WordSearch 服务实例        // 新增私有方法
-        void OnDebounceTimerTick(Windows::Foundation::IInspectable const& sender, Windows::Foundation::IInspectable const& e);
-        winrt::Windows::Foundation::IAsyncAction ExecuteSearchAsync(winrt::hstring query);
-        void ShowLoadingState();
-        void HideLoadingState();
-        void ShowNoResultsState();
-        void HideNoResultsState();
-        void ShowNoInputState();
-        void HideNoInputState();
-    };
+		// CurrentDetailItem 依赖属性的静态实例
+		static Xaml::DependencyProperty m_currentDetailItemProperty;
+
+		// 新增成员
+		DispatcherTimer m_debounceTimer{nullptr};
+		WordWiz::WordSearch m_wordSearchService{nullptr}; // WordSearch 服务实例        // 新增私有方法
+		void OnDebounceTimerTick(const Windows::Foundation::IInspectable& sender,
+		                         const Windows::Foundation::IInspectable& e);
+		IAsyncAction ExecuteSearchAsync(hstring query);
+		void ShowLoadingState();
+		void HideLoadingState();
+		void ShowNoResultsState();
+		void HideNoResultsState();
+		void ShowNoInputState();
+		void HideNoInputState();
+	};
 }
 
 namespace winrt::WordWiz::factory_implementation
 {
-    struct WordSearchResultList : WordSearchResultListT<WordSearchResultList, implementation::WordSearchResultList>
-    {
-    };
+	struct WordSearchResultList : WordSearchResultListT<WordSearchResultList, implementation::WordSearchResultList>
+	{
+	};
 }

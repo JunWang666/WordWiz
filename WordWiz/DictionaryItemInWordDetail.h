@@ -4,25 +4,26 @@
 
 namespace winrt::WordWiz::implementation
 {
-    struct DictionaryItemInWordDetail : DictionaryItemInWordDetailT<DictionaryItemInWordDetail>
-    {
-      DictionaryItemInWordDetail(winrt::hstring const& id, winrt::hstring const& name, winrt::hstring const& displayName);
+	struct DictionaryItemInWordDetail : DictionaryItemInWordDetailT<DictionaryItemInWordDetail>
+	{
+		DictionaryItemInWordDetail(const hstring& id, const hstring& name, const hstring& displayName);
 
-        winrt::hstring Id();
-        winrt::hstring Name();
-        winrt::hstring DisplayName();
-        bool IsEqual(WordWiz::DictionaryItemInWordDetail const& other);
+		hstring Id();
+		hstring Name();
+		hstring DisplayName();
+		bool IsEqual(const WordWiz::DictionaryItemInWordDetail& other);
 
-    private:
-        winrt::hstring m_id;
-        winrt::hstring m_name;
-        winrt::hstring m_displayName;
-    };
+	private:
+		hstring m_id;
+		hstring m_name;
+		hstring m_displayName;
+	};
 }
 
 namespace winrt::WordWiz::factory_implementation
 {
-    struct DictionaryItemInWordDetail : DictionaryItemInWordDetailT<DictionaryItemInWordDetail, implementation::DictionaryItemInWordDetail>
-    {
-    };
+	struct DictionaryItemInWordDetail : DictionaryItemInWordDetailT<
+			DictionaryItemInWordDetail, implementation::DictionaryItemInWordDetail>
+	{
+	};
 }

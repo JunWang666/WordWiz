@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "WordDetails.xaml.h"
 #include "WordDetails.g.cpp"
-#include "WordItem.h" 
+#include "WordItem.h"
 #include "DictionaryItemInWordDetail.h" // 引入字典项定义
 #include "NavigationService.h" // 新增：引入NavigationService实现
 
@@ -16,228 +16,237 @@ using namespace WordWizServices; // 新增：使用NavigationService命名空间
 
 namespace winrt::WordWiz::implementation
 {
-    // ItemToDisplayProperty (已存在)
-    Microsoft::UI::Xaml::DependencyProperty WordDetails::m_itemToDisplayProperty =
-        Microsoft::UI::Xaml::DependencyProperty::Register(
-            L"ItemToDisplay",
-            xaml_typename<WordWiz::WordItem>(),
-            xaml_typename<WordWiz::WordDetails>(),
-            Microsoft::UI::Xaml::PropertyMetadata{ nullptr, PropertyChangedCallback(&WordDetails::OnItemToDisplayChanged) } // 添加回调
-        );
+	// ItemToDisplayProperty (已存在)
+	Xaml::DependencyProperty WordDetails::m_itemToDisplayProperty =
+		Xaml::DependencyProperty::Register(
+			L"ItemToDisplay",
+			xaml_typename<WordWiz::WordItem>(),
+			xaml_typename<WordWiz::WordDetails>(),
+			PropertyMetadata{nullptr, PropertyChangedCallback(&WordDetails::OnItemToDisplayChanged)} // 添加回调
+		);
 
-    // 新增 DictionaryItemsProperty
-    Microsoft::UI::Xaml::DependencyProperty WordDetails::m_dictionaryItemsProperty =
-        Microsoft::UI::Xaml::DependencyProperty::Register(
-            L"DictionaryItems",
-            xaml_typename<IObservableVector<WordWiz::DictionaryItemInWordDetail>>(),
-            xaml_typename<WordWiz::WordDetails>(),
-            Microsoft::UI::Xaml::PropertyMetadata{ nullptr }
-        );
+	// 新增 DictionaryItemsProperty
+	Xaml::DependencyProperty WordDetails::m_dictionaryItemsProperty =
+		Xaml::DependencyProperty::Register(
+			L"DictionaryItems",
+			xaml_typename<IObservableVector<WordWiz::DictionaryItemInWordDetail>>(),
+			xaml_typename<WordWiz::WordDetails>(),
+			PropertyMetadata{nullptr}
+		);
 
-    // 新增 SelectedDictionaryHtmlProperty
-    Microsoft::UI::Xaml::DependencyProperty WordDetails::m_selectedDictionaryHtmlProperty =
-        Microsoft::UI::Xaml::DependencyProperty::Register(
-            L"SelectedDictionaryHtml",
-            xaml_typename<winrt::hstring>(),
-            xaml_typename<WordWiz::WordDetails>(),
-            Microsoft::UI::Xaml::PropertyMetadata{ winrt::box_value(L""), PropertyChangedCallback(&WordDetails::OnSelectedDictionaryHtmlChanged) } // 初始值为空字符串，并添加回调
-        );
+	// 新增 SelectedDictionaryHtmlProperty
+	Xaml::DependencyProperty WordDetails::m_selectedDictionaryHtmlProperty =
+		Xaml::DependencyProperty::Register(
+			L"SelectedDictionaryHtml",
+			xaml_typename<hstring>(),
+			xaml_typename<WordWiz::WordDetails>(),
+			PropertyMetadata{
+				box_value(L""), PropertyChangedCallback(&WordDetails::OnSelectedDictionaryHtmlChanged)
+			} // 初始值为空字符串，并添加回调
+		);
 
-    WordDetails::WordDetails()
-    {
-        InitializeComponent();
-        // 初始化 DictionaryItems
-        SetValue(m_dictionaryItemsProperty, winrt::single_threaded_observable_vector<WordWiz::DictionaryItemInWordDetail>());
-    }
+	WordDetails::WordDetails()
+	{
+		InitializeComponent();
+		// 初始化 DictionaryItems
+		SetValue(m_dictionaryItemsProperty,
+		         winrt::single_threaded_observable_vector<WordWiz::DictionaryItemInWordDetail>());
+	}
 
-    void WordDetails::OnLoaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-    {
-        InitializeWebView2Async(); // 控件加载后开始初始化 WebView2
-        UpdateDetailVisibility(); // 更新可见性
-    }
+	void WordDetails::OnLoaded(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
+	{
+		InitializeWebView2Async(); // 控件加载后开始初始化 WebView2
+		UpdateDetailVisibility(); // 更新可见性
+	}
 
-    // 新增：异步初始化 WebView2 的方法
-    winrt::fire_and_forget WordDetails::InitializeWebView2Async()
-    {
-        auto strong_this{ get_strong() }; // 在协程中安全使用 this
-        try
-        {
-            if (strong_this->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
-            {
-                co_await strong_this->DictionaryWebView().EnsureCoreWebView2Async();
-                
-                strong_this->m_isCoreWebView2Initialized = true;
+	// 新增：异步初始化 WebView2 的方法
+	fire_and_forget WordDetails::InitializeWebView2Async()
+	{
+		auto strong_this{get_strong()}; // 在协程中安全使用 this
+		try
+		{
+			if (strong_this->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
+			{
+				co_await strong_this->DictionaryWebView().EnsureCoreWebView2Async();
 
-                // 如果有待处理的HTML，现在加载它
-                if (strong_this->m_isCoreWebView2Initialized && !strong_this->m_pendingHtmlToNavigate.empty())
-                {
-                    strong_this->DictionaryWebView().NavigateToString(strong_this->m_pendingHtmlToNavigate);
-                    strong_this->m_pendingHtmlToNavigate = L""; // 清除待处理的HTML
-                }
-            }
-        }
-        catch (winrt::hresult_error const& ex)
-        {
-            winrt::hstring errorMessage = ex.message();
-            // 在UI上显示错误，或者进行其他错误处理
-        }
-    }
+				strong_this->m_isCoreWebView2Initialized = true;
 
-    // ItemToDisplay Getter/Setter (已存在)
-    WordWiz::WordItem WordDetails::ItemToDisplay()
-    {
-        return GetValue(m_itemToDisplayProperty).try_as<WordWiz::WordItem>();
-    }
-    void WordDetails::ItemToDisplay(WordWiz::WordItem const& value)
-    {
-        SetValue(m_itemToDisplayProperty, value);
-    }
+				// 如果有待处理的HTML，现在加载它
+				if (strong_this->m_isCoreWebView2Initialized && !strong_this->m_pendingHtmlToNavigate.empty())
+				{
+					strong_this->DictionaryWebView().NavigateToString(strong_this->m_pendingHtmlToNavigate);
+					strong_this->m_pendingHtmlToNavigate = L""; // 清除待处理的HTML
+				}
+			}
+		}
+		catch (const hresult_error& ex)
+		{
+			hstring errorMessage = ex.message();
+			// 在UI上显示错误，或者进行其他错误处理
+		}
+	}
 
-    // DictionaryItems Getter
-    IObservableVector<WordWiz::DictionaryItemInWordDetail> WordDetails::DictionaryItems()
-    {
-        return GetValue(m_dictionaryItemsProperty).try_as<IObservableVector<WordWiz::DictionaryItemInWordDetail>>();
-    }
+	// ItemToDisplay Getter/Setter (已存在)
+	WordWiz::WordItem WordDetails::ItemToDisplay()
+	{
+		return GetValue(m_itemToDisplayProperty).try_as<WordWiz::WordItem>();
+	}
 
-    // SelectedDictionaryHtml Getter/Setter
-    winrt::hstring WordDetails::SelectedDictionaryHtml()
-    {
-        return unbox_value<winrt::hstring>(GetValue(m_selectedDictionaryHtmlProperty));
-    }
-    void WordDetails::SelectedDictionaryHtml(winrt::hstring const& value)
-    {
-        SetValue(m_selectedDictionaryHtmlProperty, box_value(value));
-    }
+	void WordDetails::ItemToDisplay(const WordWiz::WordItem& value)
+	{
+		SetValue(m_itemToDisplayProperty, value);
+	}
 
-    void WordDetails::OnItemToDisplayChanged(Microsoft::UI::Xaml::DependencyObject const& d, Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs const& e)
-    {
-        if (auto SendersThis{ d.try_as<WordDetails>() }) // 将 d 转换为 WordDetails 实例指针
-        {
-            auto newItem = e.NewValue().try_as<WordWiz::WordItem>(); // 获取新的 WordItem
+	// DictionaryItems Getter
+	IObservableVector<WordWiz::DictionaryItemInWordDetail> WordDetails::DictionaryItems()
+	{
+		return GetValue(m_dictionaryItemsProperty).try_as<IObservableVector<WordWiz::DictionaryItemInWordDetail>>();
+	}
 
-            // 新增：通过NavigationService记录历史
-            if (SendersThis->m_hostFrame && newItem && !newItem.Word().empty())
-            {
-                NavigationService::AddCurrentPageToHistoryWithData(
-                    SendersThis->m_hostFrame,
-                    newItem,
-                    nullptr // 可根据需要传递NavigationTransitionInfo
-                );
-            }
+	// SelectedDictionaryHtml Getter/Setter
+	hstring WordDetails::SelectedDictionaryHtml()
+	{
+		return unbox_value<hstring>(GetValue(m_selectedDictionaryHtmlProperty));
+	}
 
-            // 清理 SelectorBar 中的旧项目
-            if (SendersThis->DictionarySelectorBar()) // 检查控件是否有效
-            {
-                SendersThis->DictionarySelectorBar().Items().Clear();
-            }
+	void WordDetails::SelectedDictionaryHtml(const hstring& value)
+	{
+		SetValue(m_selectedDictionaryHtmlProperty, box_value(value));
+	}
 
-            // 清理可能存在的旧的字典项列表
-            if (SendersThis->DictionaryItems())
-                SendersThis->DictionaryItems().Clear();
+	void WordDetails::OnItemToDisplayChanged(const Xaml::DependencyObject& d,
+	                                         const DependencyPropertyChangedEventArgs& e)
+	{
+		if (auto SendersThis{d.try_as<WordDetails>()}) // 将 d 转换为 WordDetails 实例指针
+		{
+			auto newItem = e.NewValue().try_as<WordWiz::WordItem>(); // 获取新的 WordItem
 
-            if (newItem) // 如果新的 WordItem 有效
-            {
-                winrt::hstring word = newItem.Word(); // 获取单词
+			// 新增：通过NavigationService记录历史
+			if (SendersThis->m_hostFrame && newItem && !newItem.Word().empty())
+			{
+				NavigationService::AddCurrentPageToHistoryWithData(
+					SendersThis->m_hostFrame,
+					newItem,
+					nullptr // 可根据需要传递NavigationTransitionInfo
+				);
+			}
 
-                // 调用 WordSearch 服务获取可用词典列表 (现在返回DictionaryItemInWordDetal对象)
-                Windows::Foundation::Collections::IVector<WordWiz::DictionaryItemInWordDetail> availableDictionaries = WordWiz::WordSearch().GetAvailableDictionaries(word);
-                
-                // 存储所有字典项
-                for (auto const& dictItem : availableDictionaries)
-                {
-                    SendersThis->DictionaryItems().Append(dictItem);
-                }
+			// 清理 SelectorBar 中的旧项目
+			if (SendersThis->DictionarySelectorBar()) // 检查控件是否有效
+			{
+				SendersThis->DictionarySelectorBar().Items().Clear();
+			}
 
-                if (SendersThis->DictionarySelectorBar()) // 再次检查
-                {
-                    for (auto const& dictItem : availableDictionaries)
-                    {
-                        SelectorBarItem sbItem;          // 创建新的 SelectorBarItem
-                        sbItem.Text(dictItem.DisplayName()); // 设置其显示名称
-                        sbItem.Tag(box_value(dictItem.Id())); // 使用Tag存储字典ID（hstring）
-                        SendersThis->DictionarySelectorBar().Items().Append(sbItem); // 添加到 SelectorBar
-                    }
-                }
+			// 清理可能存在的旧的字典项列表
+			if (SendersThis->DictionaryItems())
+				SendersThis->DictionaryItems().Clear();
 
-                if (SendersThis->DictionarySelectorBar() && SendersThis->DictionarySelectorBar().Items().Size() > 0)
-                {
-                    // 自动选中第一个词典项
-                    SendersThis->DictionarySelectorBar().SelectedItem(
-                        SendersThis->DictionarySelectorBar().Items().GetAt(0).try_as<SelectorBarItem>()
-                    );
-                }
-                else // 没有可用词典
-                {
-                    // 设置一个提示信息到 WebView2
-                    SendersThis->SelectedDictionaryHtml(L"<html><body><p>没有找到该词的词典信息。</p></body></html>");
-                }
-            }
-            else // 如果新的 WordItem 为空 (例如，取消选择)
-            {
-                // 清理 WebView2 或显示提示信息
-                SendersThis->SelectedDictionaryHtml(L"<html><body><p>请选择一个单词查看详情。</p></body></html>");
-            }
+			if (newItem) // 如果新的 WordItem 有效
+			{
+				hstring word = newItem.Word(); // 获取单词
 
-            // 更新可见性
-            SendersThis->UpdateDetailVisibility();
-        }
-    }
+				// 调用 WordSearch 服务获取可用词典列表 (现在返回DictionaryItemInWordDetal对象)
+				IVector<WordWiz::DictionaryItemInWordDetail> availableDictionaries = WordWiz::WordSearch().
+					GetAvailableDictionaries(word);
 
-    // ItemToDisplay 属性更改时的回调
-    void WordDetails::OnSelectedDictionaryHtmlChanged(DependencyObject const& d, DependencyPropertyChangedEventArgs const& e)
-    {
-        if (auto SendersThis{ d.try_as<WordDetails>() })
-        {
-            winrt::hstring actualHtmlString = winrt::unbox_value<winrt::hstring>(e.NewValue());
-            if (SendersThis->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
-            {
-                if (SendersThis->m_isCoreWebView2Initialized)
-                {
-                    SendersThis->DictionaryWebView().NavigateToString(actualHtmlString);
-                }
-                else
-                {
-                    SendersThis->m_pendingHtmlToNavigate = actualHtmlString;
-                }
-            }
-        }
-    }
+				// 存储所有字典项
+				for (const auto& dictItem : availableDictionaries)
+				{
+					SendersThis->DictionaryItems().Append(dictItem);
+				}
 
-    // DictionarySelectorBar_SelectionChanged 更新以使用字符串ID标识字典
-    void WordDetails::DictionarySelectorBar_SelectionChanged(SelectorBar const& sender, SelectorBarSelectionChangedEventArgs const& /*args*/)
-    {
-        auto selectedBarItem = sender.SelectedItem().try_as<SelectorBarItem>();
+				if (SendersThis->DictionarySelectorBar()) // 再次检查
+				{
+					for (const auto& dictItem : availableDictionaries)
+					{
+						SelectorBarItem sbItem; // 创建新的 SelectorBarItem
+						sbItem.Text(dictItem.DisplayName()); // 设置其显示名称
+						sbItem.Tag(box_value(dictItem.Id())); // 使用Tag存储字典ID（hstring）
+						SendersThis->DictionarySelectorBar().Items().Append(sbItem); // 添加到 SelectorBar
+					}
+				}
 
-        if (selectedBarItem && ItemToDisplay())
-        {
-            // 从Tag中获取字典ID（hstring）
-            if (selectedBarItem.Tag())
-            {
-                auto dictionaryId = unbox_value<winrt::hstring>(selectedBarItem.Tag());
-                winrt::hstring word = ItemToDisplay().Word();
-                
-                // 使用字符串ID调用获取字典内容
-                winrt::hstring htmlContent = WordWiz::WordSearch().GetDictionaryHtmlContent(word, dictionaryId);
-                SelectedDictionaryHtml(htmlContent);
-            }
-        }
-    }
+				if (SendersThis->DictionarySelectorBar() && SendersThis->DictionarySelectorBar().Items().Size() > 0)
+				{
+					// 自动选中第一个词典项
+					SendersThis->DictionarySelectorBar().SelectedItem(
+						SendersThis->DictionarySelectorBar().Items().GetAt(0).try_as<SelectorBarItem>()
+					);
+				}
+				else // 没有可用词典
+				{
+					// 设置一个提示信息到 WebView2
+					SendersThis->SelectedDictionaryHtml(L"<html><body><p>没有找到该词的词典信息。</p></body></html>");
+				}
+			}
+			else // 如果新的 WordItem 为空 (例如，取消选择)
+			{
+				// 清理 WebView2 或显示提示信息
+				SendersThis->SelectedDictionaryHtml(L"<html><body><p>请选择一个单词查看详情。</p></body></html>");
+			}
 
-    // 新增：更新详情可见性的方法
-    void WordDetails::UpdateDetailVisibility()
-    {
-        // Assume ItemToDisplay is nullptr or has an empty Word when nothing is selected
-        bool hasWord = (ItemToDisplay() != nullptr) && !ItemToDisplay().Word().empty();
+			// 更新可见性
+			SendersThis->UpdateDetailVisibility();
+		}
+	}
 
-        if (hasWord)
-        {
-            DetalPanel().Visibility(Visibility::Visible);
-            PlaceholderPanel().Visibility(Visibility::Collapsed);
-        }
-        else
-        {
-            DetalPanel().Visibility(Visibility::Collapsed);
-            PlaceholderPanel().Visibility(Visibility::Visible);
-        }
-    }
+	// ItemToDisplay 属性更改时的回调
+	void WordDetails::OnSelectedDictionaryHtmlChanged(const DependencyObject& d,
+	                                                  const DependencyPropertyChangedEventArgs& e)
+	{
+		if (auto SendersThis{d.try_as<WordDetails>()})
+		{
+			auto actualHtmlString = winrt::unbox_value<hstring>(e.NewValue());
+			if (SendersThis->DictionaryWebView()) // 确保 DictionaryWebView 控件存在
+			{
+				if (SendersThis->m_isCoreWebView2Initialized)
+				{
+					SendersThis->DictionaryWebView().NavigateToString(actualHtmlString);
+				}
+				else
+				{
+					SendersThis->m_pendingHtmlToNavigate = actualHtmlString;
+				}
+			}
+		}
+	}
+
+	// DictionarySelectorBar_SelectionChanged 更新以使用字符串ID标识字典
+	void WordDetails::DictionarySelectorBar_SelectionChanged(const SelectorBar& sender,
+	                                                         const SelectorBarSelectionChangedEventArgs& /*args*/)
+	{
+		auto selectedBarItem = sender.SelectedItem().try_as<SelectorBarItem>();
+
+		if (selectedBarItem && ItemToDisplay())
+		{
+			// 从Tag中获取字典ID（hstring）
+			if (selectedBarItem.Tag())
+			{
+				auto dictionaryId = unbox_value<hstring>(selectedBarItem.Tag());
+				hstring word = ItemToDisplay().Word();
+
+				// 使用字符串ID调用获取字典内容
+				hstring htmlContent = WordWiz::WordSearch().GetDictionaryHtmlContent(word, dictionaryId);
+				SelectedDictionaryHtml(htmlContent);
+			}
+		}
+	}
+
+	// 新增：更新详情可见性的方法
+	void WordDetails::UpdateDetailVisibility()
+	{
+		// Assume ItemToDisplay is nullptr or has an empty Word when nothing is selected
+		bool hasWord = (ItemToDisplay() != nullptr) && !ItemToDisplay().Word().empty();
+
+		if (hasWord)
+		{
+			DetalPanel().Visibility(Visibility::Visible);
+			PlaceholderPanel().Visibility(Visibility::Collapsed);
+		}
+		else
+		{
+			DetalPanel().Visibility(Visibility::Collapsed);
+			PlaceholderPanel().Visibility(Visibility::Visible);
+		}
+	}
 }
