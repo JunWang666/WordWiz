@@ -12,18 +12,18 @@ using namespace Microsoft::UI::Xaml;
 
 namespace winrt::WordWiz::implementation
 {
-    int32_t HistoryPage::MyProperty()
-    {
-        throw hresult_not_implemented();
-    }
+	int32_t HistoryPage::MyProperty()
+	{
+		throw hresult_not_implemented();
+	}
 
-    void HistoryPage::MyProperty(int32_t /* value */)
-    {
-        throw hresult_not_implemented();
-    }
+	void HistoryPage::MyProperty(int32_t /* value */)
+	{
+		throw hresult_not_implemented();
+	}
 
-    void HistoryPage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
-    {
-        myButton().Content(box_value(L"Clicked"));
-    }
+	void HistoryPage::myButton_Click(IInspectable const&, RoutedEventArgs const&)
+	{
+		myButton().Content(box_value(L"Clicked"));
+	}
 }
