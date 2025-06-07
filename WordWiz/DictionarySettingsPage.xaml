@@ -213,6 +213,210 @@
 				</Border>
 			</StackPanel>
 
-		</StackPanel>
-	</ScrollViewer>
+    <ScrollViewer>
+        <StackPanel Padding="24" Spacing="16">
+            
+            <!-- 词典设置 -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="词典" Style="{ThemeResource SubtitleTextBlockStyle}" FontWeight="SemiBold"/>
+                
+                <!-- 词典导入 -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                        CornerRadius="8" 
+                        Padding="20"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                    <StackPanel Spacing="16">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE896;" FontSize="20" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                            <TextBlock Text="词典导入" 
+                                       Style="{ThemeResource SubtitleTextBlockStyle}"
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+                          <TextBlock Text="输入词典文件路径导入到应用中。支持的格式：.db, .sqlite (SQLite 数据库)" 
+                                   Style="{ThemeResource BodyTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"/>
+                        
+                        <!-- 单个文件导入 -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="单个文件导入" 
+                                       Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Name="SingleFilePathTextBox"
+                                         Grid.Column="0"
+                                         PlaceholderText="请输入词典文件完整路径 (例如: C:\path\to\dictionary.db)"
+                                         TextWrapping="NoWrap"
+                                         Margin="0,0,8,0"/>                                
+                                
+                                <Button Name="ImportSingleFileButton"
+                                        Grid.Column="1"
+                                        Style="{ThemeResource AccentButtonStyle}"
+                                        Click="ImportSingleFileButton_Click">
+                                    <Button.Content>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="&#xE8E5;"/>
+                                            <TextBlock Text="导入"/>
+                                        </StackPanel>
+                                    </Button.Content>
+                                    <Button.Flyout>
+                                        <Flyout x:Name="SingleFileImportFlyout" Placement="Bottom">
+                                            <StackPanel Spacing="8" Width="300">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <FontIcon Name="SingleFileStatusIcon" 
+                                                              Glyph="&#xE946;" 
+                                                              Foreground="{ThemeResource SystemAccentColor}"
+                                                              FontSize="16"/>
+                                                    <TextBlock Name="SingleFileStatusText" 
+                                                               Text="正在导入词典文件..."
+                                                               Style="{ThemeResource BodyTextBlockStyle}"/>
+                                                </StackPanel>
+                                                <ProgressBar Name="SingleFileProgressBar" 
+                                                           IsIndeterminate="True" 
+                                                           Height="4"/>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <!-- 多个文件导入 -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="多个文件导入" 
+                                       Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBox Name="MultipleFilePathsTextBox"
+                                         Grid.Row="0"
+                                         PlaceholderText="请输入多个词典文件路径，每行一个路径"
+                                         TextWrapping="Wrap"
+                                         AcceptsReturn="True"
+                                         Height="100"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                <StackPanel Grid.Row="1" 
+                                           Orientation="Horizontal" 
+                                           Spacing="12" 
+                                           Margin="0,8,0,0">                                    <Button Name="ImportMultipleFilesButton"
+                                            Click="ImportMultipleFilesButton_Click">
+                                        <Button.Content>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE8B7;"/>
+                                                <TextBlock Text="导入多个文件"/>
+                                            </StackPanel>
+                                        </Button.Content>
+                                        <Button.Flyout>
+                                            <Flyout x:Name="MultipleFilesImportFlyout" Placement="Bottom">
+                                                <StackPanel Spacing="8" Width="300">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <FontIcon Name="MultipleFilesStatusIcon" 
+                                                                  Glyph="&#xE946;" 
+                                                                  Foreground="{ThemeResource SystemAccentColor}"
+                                                                  FontSize="16"/>
+                                                        <TextBlock Name="MultipleFilesStatusText" 
+                                                                   Text="正在导入多个词典文件..."
+                                                                   Style="{ThemeResource BodyTextBlockStyle}"/>
+                                                    </StackPanel>
+                                                    <ProgressBar Name="MultipleFilesProgressBar" 
+                                                               IsIndeterminate="True" 
+                                                               Height="4"/>
+                                                    <TextBlock Name="MultipleFilesDetailText"
+                                                               Text=""
+                                                               Style="{ThemeResource CaptionTextBlockStyle}"
+                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                      <Button Name="OpenDictionariesFolderButton"
+                                            Click="OpenDictionariesFolderButton_Click">
+                                        <Button.Content>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE838;"/>
+                                                <TextBlock Text="打开词典文件夹"/>
+                                            </StackPanel>
+                                        </Button.Content>
+                                        <Button.Flyout>
+                                            <Flyout x:Name="OpenFolderFlyout" Placement="Bottom">
+                                                <StackPanel Spacing="8" Width="250">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <FontIcon Name="OpenFolderStatusIcon" 
+                                                                  Glyph="&#xE73E;" 
+                                                                  Foreground="{ThemeResource SystemAccentColor}"
+                                                                  FontSize="16"/>
+                                                        <TextBlock Name="OpenFolderStatusText" 
+                                                                   Text="正在打开词典文件夹..."
+                                                                   Style="{ThemeResource BodyTextBlockStyle}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <!-- 导入进度和状态 -->
+                        <StackPanel Name="ImportStatusPanel" Spacing="8" Visibility="Collapsed">
+                            <ProgressBar Name="ImportProgressBar" 
+                                         IsIndeterminate="True" 
+                                         Height="4"/>
+                            <TextBlock Name="ImportStatusText" 
+                                       Text="正在导入..."
+                                       Style="{ThemeResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 更多功能占位内容 -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                        CornerRadius="8" 
+                        Padding="20"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE8F1;" FontSize="20" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                            <TextBlock Text="更多词典功能开发中..." 
+                                       Style="{ThemeResource SubtitleTextBlockStyle}"
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <TextBlock Text="即将支持以下功能：" 
+                                   Style="{ThemeResource BodyTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,8,0,16"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,4">
+                                <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="词典数据源选择" Style="{ThemeResource BodyTextBlockStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,4">
+                                <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="离线词典管理" Style="{ThemeResource BodyTextBlockStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,4">
+                                <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="词典优先级设置" Style="{ThemeResource BodyTextBlockStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+      
+        </StackPanel>
+    </ScrollViewer>
 </Page>

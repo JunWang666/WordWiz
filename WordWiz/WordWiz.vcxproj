@@ -124,6 +124,7 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CombineData.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="DictionaryImpoter.h" />
     <ClInclude Include="DictionaryItemInWordDetail.h" />
@@ -210,6 +211,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CombineData.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="DictionaryImpoter.cpp" />
     <ClCompile Include="DictionaryItemInWordDetail.cpp" />
