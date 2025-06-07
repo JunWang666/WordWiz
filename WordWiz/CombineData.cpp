@@ -90,11 +90,6 @@ void ensure_main_db_schema(const std::string& mainDbPath) {
         "long_id TEXT)"
     );
 
-    // 在 ensure_main_db_schema 末尾插入如下代码
-    //mainDb.executeQuery(
-    //    "INSERT OR IGNORE INTO dict_info (short_id, long_id) VALUES (?, ?)",
-    //    { "00", "latest" }
-    //);
 
     mainDb.executeQuery(
         "INSERT OR IGNORE INTO dict_info (short_id, long_id) VALUES ('latest', '0')"
@@ -166,5 +161,71 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
             // 分离子库
             mainDb.executeQuery("DETACH DATABASE subdict");
         }
+    }
+}
+
+// 只合并新导入的词典到 main.db
+void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const std::vector<std::string>& newDictPaths) {
+    // 确保 main.db 存在且有表结构
+    ensure_main_db_schema(mainDbPath);
+
+    WordWizServices::Database::DatabaseManager mainDb(mainDbPath);
+
+    for (const auto& dictPath : newDictPaths) {
+        if (!(dictPath.size() > 3 && 
+            (dictPath.substr(dictPath.size() - 3) == ".db" || dictPath.substr(dictPath.size() - 7) == ".sqlite"))) {
+            continue; // 只处理 .db 或 .sqlite 文件
+        }
+
+        WordWizServices::Database::DatabaseManager dictDb(dictPath);
+
+        // 获取词典ID
+        std::string dictId = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'ID'");
+        if (dictId.empty()) continue;
+
+        // 在插入前先查找是否已存在
+        std::string existShortId = mainDb.executeScalarQuery(
+            "SELECT short_id FROM dict_info WHERE long_id = ?",
+            { dictId }
+        );
+
+        std::string newShortId;
+        if (!existShortId.empty()) {
+            newShortId = existShortId;
+        }
+        else {
+            newShortId = getAndUpdateNextShortId(mainDb);
+            mainDb.executeQuery(
+                "INSERT INTO dict_info (short_id, long_id) VALUES (?, ?)",
+                { newShortId, dictId }
+            );
+        }
+
+        // 使用ATTACH将子库附加到主库
+        std::string attachSql = "ATTACH DATABASE ? AS subdict";
+        mainDb.executeQuery(attachSql, { dictPath });
+
+        // 1. 插入新词
+        mainDb.executeQuery(
+            "INSERT INTO words (keyword, source_dicts) "
+            "SELECT keyword, ? FROM subdict.word "
+            "WHERE keyword NOT IN (SELECT keyword FROM words)",
+            { newShortId }
+        );
+
+        // 2. 已有词，追加ID
+        mainDb.executeQuery(
+            "UPDATE words SET source_dicts = "
+            "CASE "
+            "  WHEN instr(',' || source_dicts || ',', ',' || ? || ',') = 0 "
+            "  THEN source_dicts || ',' || ? "
+            "  ELSE source_dicts "
+            "END "
+            "WHERE keyword IN (SELECT keyword FROM subdict.word)",
+            { newShortId, newShortId }
+        );
+
+        // 分离子库
+        mainDb.executeQuery("DETACH DATABASE subdict");
     }
 }

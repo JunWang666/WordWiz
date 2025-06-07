@@ -271,6 +271,19 @@ namespace winrt::WordWiz::implementation
 
     winrt::fire_and_forget DictionarySettingsPage::ImportFilesAsync(std::vector<std::string> filePaths)
     {
+        // 检查 main.db 是否存在，不存在则重建，抛弃先前全部扫描
+        try {
+            std::string mainDbPath = WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\main.db";
+            std::string dictFolderPath = WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\Dictionaries";
+            if (!std::filesystem::exists(mainDbPath)) {
+                WordWizServices::Log::LogMessage(L"main.db 不存在，自动重建...");
+                combine_all_dictionaries_to_main_db(mainDbPath, dictFolderPath);
+                WordWizServices::Log::LogMessage(L"main.db 重建完成。");
+            }
+        } catch (const std::exception& e) {
+            WordWizServices::Log::LogMessage(L"检测或重建 main.db 时发生异常: " + winrt::to_hstring(e.what()));
+        }
+
         ShowImportStatus(L"正在导入词典文件...");
         
         // 获取强引用，确保对象生命周期
@@ -307,8 +320,7 @@ namespace winrt::WordWiz::implementation
                     // 导入完成后，融合所有词典到主库
                     try {
                         std::string mainDbPath = WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\main.db";
-                        std::string dictFolderPath = WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\Dictionaries";
-                        combine_all_dictionaries_to_main_db(mainDbPath, dictFolderPath);
+                        combine_new_dictionaries_to_main_db(mainDbPath, filePaths);
                         WordWizServices::Log::LogMessage(L"词典融合到主库完成。");
                     } catch (const std::exception& e) {
                         WordWizServices::Log::LogMessage(L"融合词典到主库时发生异常: " + winrt::to_hstring(e.what()));
@@ -492,4 +504,4 @@ namespace winrt::WordWiz::implementation
         }
     }
 }
-#include "CombineData.h" // 假设combine_all_dictionaries_to_main_db声明在此头文件
+
