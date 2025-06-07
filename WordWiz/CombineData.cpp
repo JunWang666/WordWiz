@@ -1,4 +1,4 @@
-#include"pch.h"
+ï»¿#include"pch.h"
 #include "database.h"
 #include <filesystem>
 #include <set>
@@ -9,11 +9,11 @@
 #include <fstream>
 #include <stdexcept>
 
-// 62½øÖÆ×Ö·û±í
+// 62è¿›åˆ¶å­—ç¬¦è¡¨
 const char kShortIdAlphabet[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const int kShortIdBase = 62;
 
-// ½«ÕûÊı×ªÎªÁ½Î»62½øÖÆ×Ö·û´®
+// å°†æ•´æ•°è½¬ä¸ºä¸¤ä½62è¿›åˆ¶å­—ç¬¦ä¸²
 std::string intToShortId(int n) {
     std::string res(2, '0');
     res[0] = kShortIdAlphabet[(n / kShortIdBase) % kShortIdBase];
@@ -21,7 +21,7 @@ std::string intToShortId(int n) {
     return res;
 }
 
-// ½«Á½Î»62½øÖÆ×Ö·û´®×ªÎªÕûÊı
+// å°†ä¸¤ä½62è¿›åˆ¶å­—ç¬¦ä¸²è½¬ä¸ºæ•´æ•°
 int shortIdToInt(const std::string& sid) {
     if (sid.size() != 2) return 0;
     auto pos0 = std::find(std::begin(kShortIdAlphabet), std::end(kShortIdAlphabet), sid[0]);
@@ -31,10 +31,10 @@ int shortIdToInt(const std::string& sid) {
     return idx0 * kShortIdBase + idx1;
 }
 
-// »ñÈ¡ÏÂÒ»¸ö¿ÉÓÃ¶ÌID£¬²¢¸üĞÂlatest
+// è·å–ä¸‹ä¸€ä¸ªå¯ç”¨çŸ­IDï¼Œå¹¶æ›´æ–°latest
 std::string getAndUpdateNextShortId(WordWizServices::Database::DatabaseManager& mainDb)
 {
-    // ¶ÁÈ¡latest
+    // è¯»å–latest
     std::string latest = mainDb.executeScalarQuery(
         "SELECT long_id FROM dict_info WHERE short_id = 'latest'"
     );
@@ -45,7 +45,7 @@ std::string getAndUpdateNextShortId(WordWizServices::Database::DatabaseManager& 
     int nextInt = latestInt + 1;
     std::string nextShortId = intToShortId(nextInt);
 
-    // ¸üĞÂlatest
+    // æ›´æ–°latest
     mainDb.executeQuery(
         "INSERT OR REPLACE INTO dict_info (short_id, long_id) VALUES ('latest', ?)",
         { std::to_string(nextInt) }
@@ -53,7 +53,7 @@ std::string getAndUpdateNextShortId(WordWizServices::Database::DatabaseManager& 
     return nextShortId;
 }
 
-// ¹¤¾ßº¯Êı£ººÏ²¢source_dicts×Ö·û´®£¬×Ô¶¯È¥ÖØ
+// å·¥å…·å‡½æ•°ï¼šåˆå¹¶source_dictså­—ç¬¦ä¸²ï¼Œè‡ªåŠ¨å»é‡
 std::string mergeSourceDicts(const std::string& oldDicts, const std::string& newId) {
     std::set<std::string> dictSet;
     if (!oldDicts.empty()) {
@@ -72,18 +72,18 @@ std::string mergeSourceDicts(const std::string& oldDicts, const std::string& new
     return result;
 }
 
-// ĞÂÔö£º¼ì²â²¢³õÊ¼»¯ main.db
+// æ–°å¢ï¼šæ£€æµ‹å¹¶åˆå§‹åŒ– main.db
 void ensure_main_db_schema(const std::string& mainDbPath) {
     WordWizServices::Database::DatabaseManager mainDb(mainDbPath);
 
-    // ´´½¨ words ±í£¨keyword Î¨Ò»£¬source_dicts ´æ¶ÌIDÁĞ±í£©
+    // åˆ›å»º words è¡¨ï¼ˆkeyword å”¯ä¸€ï¼Œsource_dicts å­˜çŸ­IDåˆ—è¡¨ï¼‰
     mainDb.executeQuery(
         "CREATE TABLE IF NOT EXISTS words ("
         "keyword TEXT PRIMARY KEY,"
         "source_dicts TEXT NOT NULL)"
     );
 
-    // ´´½¨ dict_info ±í£¨º¬ Title ÁĞ£©
+    // åˆ›å»º dict_info è¡¨ï¼ˆå« Title åˆ—ï¼‰
     mainDb.executeQuery(
         "CREATE TABLE IF NOT EXISTS dict_info ("
         "short_id TEXT PRIMARY KEY,"
@@ -109,7 +109,7 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
             std::string dictTitle = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'Title'");
             if (dictId.empty()) continue;
 
-            // ²éÖØ£ºlong_id ÒÑ´æÔÚÔò¸´ÓÃ short_id£¬·ñÔòĞÂ½¨
+            // æŸ¥é‡ï¼šlong_id å·²å­˜åœ¨åˆ™å¤ç”¨ short_idï¼Œå¦åˆ™æ–°å»º
             std::string existShortId = mainDb.executeScalarQuery(
                 "SELECT short_id FROM dict_info WHERE long_id = ?",
                 { dictId }
@@ -117,7 +117,7 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
             std::string newShortId;
             if (!existShortId.empty()) {
                 newShortId = existShortId;
-                // ¿ÉÑ¡£º¸üĞÂ Title
+                // å¯é€‰ï¼šæ›´æ–° Title
                 mainDb.executeQuery(
                     "UPDATE dict_info SET Title = ? WHERE short_id = ?",
                     { dictTitle, newShortId }
@@ -130,12 +130,12 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
                 );
             }
 
-            // Ê¹ÓÃATTACH½«×Ó¿â¸½¼Óµ½Ö÷¿â
+            // ä½¿ç”¨ATTACHå°†å­åº“é™„åŠ åˆ°ä¸»åº“
             std::string attachSql = "ATTACH DATABASE ? AS subdict";
             mainDb.executeQuery(attachSql, { dictPath });
 
-            // ÓÃµ¥ÌõSQLÍê³ÉºÏ²¢£¨×Ô¶¯È¥ÖØ£¬×·¼ÓID£©
-            // 1. ²åÈëĞÂ´Ê
+            // ç”¨å•æ¡SQLå®Œæˆåˆå¹¶ï¼ˆè‡ªåŠ¨å»é‡ï¼Œè¿½åŠ IDï¼‰
+            // 1. æ’å…¥æ–°è¯
             mainDb.executeQuery(
                 "INSERT INTO words (keyword, source_dicts) "
                 "SELECT keyword, ? FROM subdict.word "
@@ -143,8 +143,8 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
                 { newShortId }
             );
 
-            // 2. ÒÑÓĞ´Ê£¬×·¼ÓID£¨Èç¹ûÃ»ÓĞÔòÖ±½Ó¸³Öµ£¬ÓĞÔò×·¼Ó£¬È¥ÖØ¿ÉÓÃ×Ô¶¨Òåº¯Êı»ò¼òµ¥Æ´½Ó£©
-            // ÕâÀï¼òµ¥Æ´½Ó£¬ºóĞø¿ÉÓÃÕıÔò»ò×Ô¶¨Òåº¯ÊıÈ¥ÖØ
+            // 2. å·²æœ‰è¯ï¼Œè¿½åŠ IDï¼ˆå¦‚æœæ²¡æœ‰åˆ™ç›´æ¥èµ‹å€¼ï¼Œæœ‰åˆ™è¿½åŠ ï¼Œå»é‡å¯ç”¨è‡ªå®šä¹‰å‡½æ•°æˆ–ç®€å•æ‹¼æ¥ï¼‰
+            // è¿™é‡Œç®€å•æ‹¼æ¥ï¼Œåç»­å¯ç”¨æ­£åˆ™æˆ–è‡ªå®šä¹‰å‡½æ•°å»é‡
             mainDb.executeQuery(
                 "UPDATE words SET source_dicts = "
                 "CASE "
@@ -156,13 +156,13 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
                 { newShortId, newShortId }
             );
 
-            // ·ÖÀë×Ó¿â
+            // åˆ†ç¦»å­åº“
             mainDb.executeQuery("DETACH DATABASE subdict");
         }
     }
 }
 
-// Ö»ºÏ²¢ĞÂµ¼ÈëµÄ´Êµäµ½ main.db
+// åªåˆå¹¶æ–°å¯¼å…¥çš„è¯å…¸åˆ° main.db
 void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const std::vector<std::string>& newDictPaths) {
     ensure_main_db_schema(mainDbPath);
 
@@ -171,17 +171,17 @@ void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const st
     for (const auto& dictPath : newDictPaths) {
         if (!(dictPath.size() > 3 &&
             (dictPath.substr(dictPath.size() - 3) == ".db" || dictPath.substr(dictPath.size() - 7) == ".sqlite"))) {
-            continue; // Ö»´¦Àí .db »ò .sqlite ÎÄ¼ş
+            continue; // åªå¤„ç† .db æˆ– .sqlite æ–‡ä»¶
         }
 
         WordWizServices::Database::DatabaseManager dictDb(dictPath);
 
-        // »ñÈ¡´ÊµäIDºÍTitle
+        // è·å–è¯å…¸IDå’ŒTitle
         std::string dictId = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'ID'");
         std::string dictTitle = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'Title'");
         if (dictId.empty()) continue;
 
-        // ²éÖØ£ºlong_id ÒÑ´æÔÚÔò¸´ÓÃ short_id£¬·ñÔòĞÂ½¨
+        // æŸ¥é‡ï¼šlong_id å·²å­˜åœ¨åˆ™å¤ç”¨ short_idï¼Œå¦åˆ™æ–°å»º
         std::string existShortId = mainDb.executeScalarQuery(
             "SELECT short_id FROM dict_info WHERE long_id = ?",
             { dictId }
@@ -189,7 +189,7 @@ void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const st
         std::string newShortId;
         if (!existShortId.empty()) {
             newShortId = existShortId;
-            // ¿ÉÑ¡£º¸üĞÂ Title
+            // å¯é€‰ï¼šæ›´æ–° Title
             mainDb.executeQuery(
                 "UPDATE dict_info SET Title = ? WHERE short_id = ?",
                 { dictTitle, newShortId }
@@ -202,11 +202,11 @@ void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const st
             );
         }
 
-        // Ê¹ÓÃATTACH½«×Ó¿â¸½¼Óµ½Ö÷¿â
+        // ä½¿ç”¨ATTACHå°†å­åº“é™„åŠ åˆ°ä¸»åº“
         std::string attachSql = "ATTACH DATABASE ? AS subdict";
         mainDb.executeQuery(attachSql, { dictPath });
 
-        // 1. ²åÈëĞÂ´Ê
+        // 1. æ’å…¥æ–°è¯
         mainDb.executeQuery(
             "INSERT INTO words (keyword, source_dicts) "
             "SELECT keyword, ? FROM subdict.word "
@@ -214,7 +214,7 @@ void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const st
             { newShortId }
         );
 
-        // 2. ÒÑÓĞ´Ê£¬×·¼ÓID
+        // 2. å·²æœ‰è¯ï¼Œè¿½åŠ ID
         mainDb.executeQuery(
             "UPDATE words SET source_dicts = "
             "CASE "
@@ -226,7 +226,7 @@ void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const st
             { newShortId, newShortId }
         );
 
-        // ·ÖÀë×Ó¿â
+        // åˆ†ç¦»å­åº“
         mainDb.executeQuery("DETACH DATABASE subdict");
     }
 }
