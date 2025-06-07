@@ -211,7 +211,9 @@
 						</Grid>
 					</StackPanel>
 				</Border>
-			</StackPanel></StackPanel></ScrollViewer>
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
 
-   
+
 </Page>
