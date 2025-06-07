@@ -4,24 +4,24 @@
 
 namespace winrt::WordWiz::implementation
 {
-    struct FavoritePage : FavoritePageT<FavoritePage>
-    {
-        FavoritePage()
-        {
-            // Xaml objects should not call InitializeComponent during construction.
-            // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
-        }
+	struct FavoritePage : FavoritePageT<FavoritePage>
+	{
+		FavoritePage()
+		{
+			// Xaml objects should not call InitializeComponent during construction.
+			// See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
+		}
 
-        int32_t MyProperty();
-        void MyProperty(int32_t value);
+		int32_t MyProperty();
+		void MyProperty(int32_t value);
 
-        void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
-    };
+		void myButton_Click(IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
+	};
 }
 
 namespace winrt::WordWiz::factory_implementation
 {
-    struct FavoritePage : FavoritePageT<FavoritePage, implementation::FavoritePage>
-    {
-    };
+	struct FavoritePage : FavoritePageT<FavoritePage, implementation::FavoritePage>
+	{
+	};
 }

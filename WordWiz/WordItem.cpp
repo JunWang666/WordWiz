@@ -6,8 +6,8 @@
 
 namespace winrt::WordWiz::implementation
 {
-    WordItem::WordItem(hstring const& word, hstring const& explanation)
-        : m_word(word), m_explanation(explanation)
-    {
-    }
+	WordItem::WordItem(hstring const& word, hstring const& explanation)
+		: m_word(word), m_explanation(explanation)
+	{
+	}
 }
