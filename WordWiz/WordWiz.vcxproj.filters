@@ -75,10 +75,10 @@
     <ClCompile Include="DictionaryItemInWordDetail.cpp">
       <Filter>dataModels\DictionaryItemInWordDetail</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\kongming\AppData\Local\Temp\CombineData.cpp">
+    <ClCompile Include="DictionaryImpoter.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
-    <ClCompile Include="DictionaryImpoter.cpp">
+    <ClCompile Include="CombineData.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
   </ItemGroup>

@@ -278,20 +278,6 @@ def create_tables(cursor):
                    """)
     print("数据库表 'word' 已创建（如果它不存在）。")
 
-    # Create the FTS5 virtual table that indexes the 'word' table
-    # The FTS table will index 'keyword' and 'definition_html' columns from the 'word' table.
-    # 'content="word"' links this FTS table to the 'word' table.
-    # 'tokenize="unicode61"' is a good general tokenizer for multilingual content.
-    cursor.execute("""
-        CREATE VIRTUAL TABLE IF NOT EXISTS word_fts USING fts5(
-            keyword,
-            definition_html,
-            content='word',
-            tokenize='unicode61'
-        )
-    """)
-    print("数据库虚拟表 'word_fts' (FTS5) 已创建（如果它不存在）。")
-
 
 def populate_info_table(cursor, mdx_header, other_info_to_add=None):
     all_info_to_insert = []
@@ -371,7 +357,7 @@ def populate_word_table(conn, mdx_items_iterator, encoding, total_items, embedde
 
 # --- Main Function ---
 def main():
-    print("--- MDX 转 SQLite (FTS5 支持, CSS/Font/Cover信息存入info表, 支持独立封面, 输出文件名基于MDX哈希) ---")
+    print("--- MDX 转 SQLite (CSS/Font/Cover信息存入info表, 支持独立封面, 输出文件名基于MDX哈希) ---")
     mdx_file, css_path, js_path, mdd_paths, standalone_cover_file_path = get_file_paths()
 
     print(f"\n源 MDX 文件: {mdx_file}")
@@ -398,10 +384,10 @@ def main():
 
             css_link_tag = f'<link rel="stylesheet" type="text/css" href="{css_path.name}" />'  # This might be less useful if CSS is embedded
             additional_info_for_db.append(
-                ('CSS_TARGET_HREF_NAME', css_path.name))  # Store only name for potential reconstruction
+                ('CSS_TARGET_HREF', css_path.name))  # Store only name for potential reconstruction
 
             styled_css_content = f'<style type="text/css">\n{css_content_data}\n</style>'
-            additional_info_for_db.append(('CSS_EMBEDDED_CONTENT', styled_css_content))
+            additional_info_for_db.append(('CSS_REPLACEMENT_CONTENT', styled_css_content))
             print(f"提示: CSS 文件 '{css_path.name}' 的嵌入式内容将存储在 info 表中。")
 
             font_face_blocks = re.findall(r"@font-face\s*\{[^{}]*\}", css_content_data, re.IGNORECASE | re.DOTALL)

@@ -92,10 +92,10 @@ namespace winrt::WordWiz::implementation
 				if (!rs["keyword"].isEmpty())
 				{
 					std::string keyword = rs["keyword"].convert<std::string>();
-
+					std::string short_definition = rs["definition_html"].convert<std::string>();
 					auto item = winrt::make<WordWiz::implementation::WordItem>(
 						winrt::to_hstring(keyword),
-						winrt::to_hstring("Definition for " + keyword)
+						winrt::to_hstring(short_definition)
 					);
 					results.Append(item);
 				}
@@ -149,21 +149,53 @@ namespace winrt::WordWiz::implementation
 			// Query to get available dictionaries for a word
 			std::string sWord = winrt::to_string(word);
 
-			auto dict_db = WordWizServices::Database::DatabaseManager(
-				WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\dictionaries\\output.db");
+			auto main_db = WordWizServices::Database::DatabaseManager(
+				WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\main.db");
 
-			auto uuid = dict_db.executeScalarQuery("SELECT AttributeValue FROM info Where AttributeName = 'ID'");
-			auto title = dict_db.executeScalarQuery("SELECT AttributeValue FROM info Where AttributeName = 'Title'");
+			auto source_dicts = main_db.executeScalarQuery("SELECT source_dicts FROM words Where keyword = '" + winrt::to_string(word) + "'");
+			// 解析逗号分隔的字典ID列表
+			std::string dict_id;
+			std::istringstream dict_stream(source_dicts);
 
-			auto rs = dict_db.executeQuery("SELECT definition_html FROM word WHERE keyword = ?", {sWord});
-
-			if (rs.rowCount() > 0)
+			// 对每个字典ID进行处理
+			while (std::getline(dict_stream, dict_id, ','))
 			{
-				dictionaries.Append(WordWiz::DictionaryItemInWordDetail{
-					winrt::to_hstring(uuid),
-					winrt::to_hstring(title),
-					winrt::to_hstring(title)
-				});
+				// 去除可能的空格
+				dict_id.erase(std::remove_if(dict_id.begin(), dict_id.end(), ::isspace), dict_id.end());
+
+				if (!dict_id.empty())
+				{
+					try
+					{
+						// 查询该字典的详细信息
+						auto long_id = main_db.executeScalarQuery(
+							"SELECT long_id FROM dict_info WHERE short_id = '" + dict_id + "'");
+						auto title = main_db.executeScalarQuery(
+							"SELECT title FROM dict_info WHERE short_id = '" + dict_id + "'");
+						auto DisplayName = main_db.executeScalarQuery(
+							"SELECT Title FROM dict_info WHERE short_id = '" + dict_id + "'");
+
+						// 如果description为空，使用title
+						if (DisplayName.empty()) {
+							DisplayName = title;
+						}
+
+						// 添加到结果列表
+						dictionaries.Append(WordWiz::DictionaryItemInWordDetail{
+							winrt::to_hstring(long_id),
+							winrt::to_hstring(title),
+							winrt::to_hstring(DisplayName)
+							});
+
+						WordWizServices::Log::LogMessage(L"Added dictionary: " + winrt::to_hstring(dict_id) +
+							L" - " + winrt::to_hstring(title));
+					}
+					catch (const std::exception& e)
+					{
+						WordWizServices::Log::LogMessage(L"Error processing dictionary " +
+							winrt::to_hstring(dict_id) + L": " + winrt::to_hstring(e.what()));
+					}
+				}
 			}
 		}
 		catch (const std::exception& e)
@@ -204,7 +236,7 @@ namespace winrt::WordWiz::implementation
 		try
 		{
 			auto dict_db = WordWizServices::Database::DatabaseManager(
-				WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\Dictionaries\\output.db");
+				WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\Dictionaries\\"+winrt::to_string(dictionaryId)+".db");
 
 			// Get the definition HTML content from the database
 			auto rs = dict_db.executeQuery("SELECT definition_html FROM word WHERE keyword = ?", {sWord});
@@ -249,9 +281,9 @@ namespace winrt::WordWiz::implementation
 			try
 			{
 				auto old_css = dict_db.executeScalarQuery(
-					"SELECT AttributeValue FROM info WHERE AttributeName = 'CSS_TARGET_HREF'");
+					"SELECT AttributeValue FROM info WHERE AttributeName = ?",{"CSS_TARGET_HREF"});
 				auto new_css = dict_db.executeScalarQuery(
-					"SELECT AttributeValue FROM info WHERE AttributeName = 'CSS_REPLACEMENT_CONTENT'");
+					"SELECT AttributeValue FROM info WHERE AttributeName = ?",{"CSS_REPLACEMENT_CONTENT"});
 
 				// 检查是否获取到了有效的CSS路径
 				if (!old_css.empty() && !new_css.empty())
