@@ -83,52 +83,50 @@ void ensure_main_db_schema(const std::string& mainDbPath) {
         "source_dicts TEXT NOT NULL)"
     );
 
-    // 创建 dict_info 表（short_id 唯一，long_id 可选）
+    // 创建 dict_info 表（含 Title 列）
     mainDb.executeQuery(
         "CREATE TABLE IF NOT EXISTS dict_info ("
         "short_id TEXT PRIMARY KEY,"
-        "long_id TEXT)"
+        "long_id TEXT,"
+        "Title TEXT)"
     );
-
 
     mainDb.executeQuery(
         "INSERT OR IGNORE INTO dict_info (short_id, long_id) VALUES ('latest', '0')"
     );
 }
 
-
-
 void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const std::string& dictFolderPath) {
-    // 新增：确保 main.db 存在且有表结构
     ensure_main_db_schema(mainDbPath);
-
     WordWizServices::Database::DatabaseManager mainDb(mainDbPath);
 
-    // 遍历统一目录下所有.db文件
     for (const auto& entry : std::filesystem::directory_iterator(dictFolderPath)) {
         if (entry.path().extension() == ".db" || entry.path().extension() == ".sqlite") {
             std::string dictPath = entry.path().string();
             WordWizServices::Database::DatabaseManager dictDb(dictPath);
 
-            // 获取词典ID
             std::string dictId = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'ID'");
+            std::string dictTitle = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'Title'");
             if (dictId.empty()) continue;
 
-            // 在插入前先查找是否已存在
+            // 查重：long_id 已存在则复用 short_id，否则新建
             std::string existShortId = mainDb.executeScalarQuery(
                 "SELECT short_id FROM dict_info WHERE long_id = ?",
                 { dictId }
             );
-
             std::string newShortId;
             if (!existShortId.empty()) {
                 newShortId = existShortId;
-            }
-            else {
+                // 可选：更新 Title
+                mainDb.executeQuery(
+                    "UPDATE dict_info SET Title = ? WHERE short_id = ?",
+                    { dictTitle, newShortId }
+                );
+            } else {
                 newShortId = getAndUpdateNextShortId(mainDb);
                 mainDb.executeQuery(
-                    "INSERT INTO dict_info (short_id, long_id) VALUES (?, ?)",
-                    { newShortId, dictId }
+                    "INSERT INTO dict_info (short_id, long_id, Title) VALUES (?, ?, ?)",
+                    { newShortId, dictId, dictTitle }
                 );
             }
 
@@ -166,38 +164,41 @@ void combine_all_dictionaries_to_main_db(const std::string& mainDbPath, const st
 
 // 只合并新导入的词典到 main.db
 void combine_new_dictionaries_to_main_db(const std::string& mainDbPath, const std::vector<std::string>& newDictPaths) {
-    // 确保 main.db 存在且有表结构
     ensure_main_db_schema(mainDbPath);
 
     WordWizServices::Database::DatabaseManager mainDb(mainDbPath);
 
     for (const auto& dictPath : newDictPaths) {
-        if (!(dictPath.size() > 3 && 
+        if (!(dictPath.size() > 3 &&
             (dictPath.substr(dictPath.size() - 3) == ".db" || dictPath.substr(dictPath.size() - 7) == ".sqlite"))) {
             continue; // 只处理 .db 或 .sqlite 文件
         }
 
         WordWizServices::Database::DatabaseManager dictDb(dictPath);
 
-        // 获取词典ID
+        // 获取词典ID和Title
         std::string dictId = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'ID'");
+        std::string dictTitle = dictDb.executeScalarQuery("SELECT AttributeValue FROM info WHERE AttributeName = 'Title'");
         if (dictId.empty()) continue;
 
-        // 在插入前先查找是否已存在
+        // 查重：long_id 已存在则复用 short_id，否则新建
         std::string existShortId = mainDb.executeScalarQuery(
             "SELECT short_id FROM dict_info WHERE long_id = ?",
             { dictId }
         );
-
         std::string newShortId;
         if (!existShortId.empty()) {
             newShortId = existShortId;
-        }
-        else {
+            // 可选：更新 Title
+            mainDb.executeQuery(
+                "UPDATE dict_info SET Title = ? WHERE short_id = ?",
+                { dictTitle, newShortId }
+            );
+        } else {
             newShortId = getAndUpdateNextShortId(mainDb);
             mainDb.executeQuery(
-                "INSERT INTO dict_info (short_id, long_id) VALUES (?, ?)",
-                { newShortId, dictId }
+                "INSERT INTO dict_info (short_id, long_id, Title) VALUES (?, ?, ?)",
+                { newShortId, dictId, dictTitle }
             );
         }
 
