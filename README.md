@@ -26,13 +26,9 @@ WordWiz 是一个基于 C++ 和 WinUI 3 开发的现代 Windows 桌面应用，�
 
 #### 环境要求
 
-- **操作系统**：Windows 11（必须，因使用 Mica 特性且编译依赖 Win11 环境）
+- **操作系统**：Windows 11
 - **开发环境**：Visual Studio 2022（建议使用最新版）
-- **组件要求**：
-  - 使用C++的桌面开发
-  - 通用 Windows 平台开发
-  - Windows 10 SDK（建议 10.0.22000.0 及以上）
-  - Windows App SDK（WinUI 3，NuGet 自动还原）
+- **组件要求**：首次打开时Visual Studio会自动安装。记得点 还原NuGet包 安装所需要的第三方库
 
 #### 编译步骤
 
@@ -46,7 +42,7 @@ WordWiz 是一个基于 C++ 和 WinUI 3 开发的现代 Windows 桌面应用，�
 
 #### 注意事项
 
-- **系统必须为 Windows 11**
+- **系统须为 Windows 11**
 - 若缺少依赖或遇到编译报错，请检查 Windows App SDK 及相关 UWP 组件是否完整。
 - 数据库文件缺失将导致应用无法正常使用。
 - 刚打开项目一堆错误是正常的，在已经还原NuGet包后尝试全部重新构建，因为该框架依赖于XAML编译器自动生成的C++代码，所以如果项目没有编译过IntelliCode会找不到那些文件。
