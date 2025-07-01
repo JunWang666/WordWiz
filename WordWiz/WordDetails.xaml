@@ -27,13 +27,30 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 
-			<TextBlock x:Name="WordTextBlock"
-			           Grid.Row="0"
-			           Text="{x:Bind ItemToDisplay.Word, Mode=OneWay, FallbackValue='单词'}"
-			           Style="{ThemeResource TitleTextBlockStyle}"
-			           Margin="0,0,0,8" />
 
-			<SelectorBar Grid.Row="1" x:Name="DictionarySelectorBar"
+            <Grid Grid.Row="0" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="WordTextBlock"
+               Grid.Column="0"
+               Text="{x:Bind ItemToDisplay.Word, Mode=OneWay, FallbackValue='单词'}"
+               Style="{ThemeResource TitleTextBlockStyle}"
+               Margin="12,12,0,0" />
+
+                <Button x:Name="favoriteButton" 
+                        Click="Favorite_Click"
+                        HorizontalAlignment="Right"
+                        Margin="0,12,12,0">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" 
+                              Glyph="{x:Bind GetFavoriteIconGlyph(ItemToDisplay.Word), Mode=OneWay}"
+                              FontSize="18"
+                              Foreground="#FFFBD40B"/>
+                </Button>
+            </Grid>
+
+            <SelectorBar Grid.Row="1" x:Name="DictionarySelectorBar"
 			             SelectionChanged="DictionarySelectorBar_SelectionChanged">
 			</SelectorBar>
 

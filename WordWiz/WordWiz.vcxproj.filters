@@ -81,6 +81,9 @@
     <ClCompile Include="CombineData.cpp">
       <Filter>services\Database</Filter>
     </ClCompile>
+    <ClCompile Include="WordFavorite.cpp">
+      <Filter>modules\WordFavorite</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -113,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="CombineData.h">
       <Filter>services\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="WordFavorite.h">
+      <Filter>modules\WordFavorite</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -351,6 +357,9 @@
     </Filter>
     <Filter Include="modules\AI">
       <UniqueIdentifier>{9d1c8ce1-edc3-4cfd-a37b-ff8d8bf7ecc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\WordFavorite">
+      <UniqueIdentifier>{95096496-357a-49ff-96e6-2397570c9361}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -299,8 +299,7 @@ namespace winrt::WordWiz::implementation
 						pos += replaceStr.length();
 					}
 
-					WordWizServices::Log::LogMessage(L"CSS replacement applied: " +
-						winrt::to_hstring(old_css) + L" -> " + winrt::to_hstring(new_css));
+					//WordWizServices::Log::LogMessage(L"CSS replacement applied: " + winrt::to_hstring(old_css) + L" -> " + winrt::to_hstring(new_css));
 				}
 			}
 			catch (...)
@@ -321,4 +320,6 @@ namespace winrt::WordWiz::implementation
 			return L"<p>Unknown error retrieving definition</p>";
 		}
 	}
+
+
 }
