@@ -264,21 +264,7 @@ namespace winrt::WordWiz::implementation
 				WordWizModules::WordFavorite::switchWordFavorite(currentWord);
 			}
 		}
-		bool isNowFavorite = WordWizModules::WordFavorite::isWordFavorite(ItemToDisplay().Word());
-
-		// 3. 获取按钮里的 FontIcon 对象
-		if (auto icon = favoriteButton().Content().try_as<FontIcon>())
-		{
-			// 4. 直接修改它的 Glyph 属性
-			if (isNowFavorite)
-			{
-				icon.Glyph(L"\uE735"); // 设置为实心
-			}
-			else
-			{
-				icon.Glyph(L"\uE734"); // 设置为空心
-			}
-		}
+		favoriteButton().Content().try_as<FontIcon>().Glyph(GetFavoriteIconGlyph(ItemToDisplay().Word()));
 	}
 
 	winrt::hstring WordDetails::GetFavoriteIconGlyph(hstring const& item)
