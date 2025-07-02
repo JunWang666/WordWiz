@@ -258,11 +258,8 @@ namespace winrt::WordWiz::implementation
 		// 确保当前有一个单词被选中
 		if (ItemToDisplay())
 		{
-			if (ItemToDisplay())
-			{
-				winrt::hstring currentWord = ItemToDisplay().Word();
-				WordWizModules::WordFavorite::switchWordFavorite(currentWord);
-			}
+			winrt::hstring currentWord = ItemToDisplay().Word();
+			WordWizModules::WordFavorite::switchWordFavorite(currentWord);
 		}
 		favoriteButton().Content().try_as<FontIcon>().Glyph(GetFavoriteIconGlyph(ItemToDisplay().Word()));
 	}
