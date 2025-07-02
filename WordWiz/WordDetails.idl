@@ -1,5 +1,5 @@
-// WordDetails.idl
-import "WordItem.idl"; // È·±£ WordItem.idl ¿É±»ÕÒµ½
+ï»¿// WordDetails.idl
+import "WordItem.idl";
 
 namespace WordWiz
 {
@@ -8,8 +8,9 @@ namespace WordWiz
     {
         WordDetails();
 
-    // ÒÀÀµÊôĞÔ£¬ÓÃÓÚ½ÓÊÕÒªÏÔÊ¾µÄ WordItem
+    // ä¾èµ–å±æ€§ï¼Œç”¨äºæ¥æ”¶è¦æ˜¾ç¤ºçš„ WordItem
     WordWiz.WordItem ItemToDisplay;
     static Microsoft.UI.Xaml.DependencyProperty ItemToDisplayProperty{ get; };
-}
+    String GetFavoriteIconGlyph(String item);
+    }
 }

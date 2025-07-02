@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "logger.h"
 #include <windows.h>
 #include <iostream>
@@ -7,10 +7,20 @@
 
 namespace WordWizServices::Log
 {
-	// Ö÷ÊµÏÖ£¬ËùÓĞÖØÔØ¶¼×ª·¢µ½ÕâÀï
+	// ä¸»å®ç°ï¼Œæ‰€æœ‰é‡è½½éƒ½è½¬å‘åˆ°è¿™é‡Œ
 	void LogMessage(const std::wstring& message)
 	{
-		std::clog << message.c_str() << std::endl;
-		OutputDebugStringW((message + L"\n").c_str());
+#ifdef _DEBUG
+		std::wstring truncatedMessage;
+		if (message.length() > MAX_LOG_LENGTH)
+		{
+			 truncatedMessage = message.substr(0, MAX_LOG_LENGTH) + L"... [truncated]";
+		}
+		else {
+			 truncatedMessage = message;
+		}
+		std::clog << truncatedMessage.c_str() << std::endl;
+		OutputDebugStringW((truncatedMessage + L"\n").c_str());
+#endif // DEBUG
 	}
 }

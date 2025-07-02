@@ -1,8 +1,10 @@
-#pragma once
+﻿#pragma once
 #include <string>
 
 namespace WordWizServices::Log
 {
+	static constexpr size_t MAX_LOG_LENGTH = 128;
+
 	void LogMessage(const std::wstring& message);
 
 	inline void LogMessage(const std::string& message)

@@ -3,8 +3,9 @@
 #include "WordDetails.xaml.h"
 #include "WordDetails.g.cpp"
 #include "WordItem.h"
-#include "DictionaryItemInWordDetail.h" // 引入字典项定义
-#include "NavigationService.h" // 新增：引入NavigationService实现
+#include "DictionaryItemInWordDetail.h"
+#include "NavigationService.h"
+#include "WordFavorite.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -249,6 +250,31 @@ namespace winrt::WordWiz::implementation
 		{
 			DetalPanel().Visibility(Visibility::Collapsed);
 			PlaceholderPanel().Visibility(Visibility::Visible);
+		}
+	}
+
+	void WordDetails::Favorite_Click(IInspectable const& sender, RoutedEventArgs const& e)
+	{
+		// 确保当前有一个单词被选中
+		if (ItemToDisplay())
+		{
+			winrt::hstring currentWord = ItemToDisplay().Word();
+			WordWizModules::WordFavorite::switchWordFavorite(currentWord);
+		}
+		favoriteButton().Content().try_as<FontIcon>().Glyph(GetFavoriteIconGlyph(ItemToDisplay().Word()));
+	}
+
+	winrt::hstring WordDetails::GetFavoriteIconGlyph(hstring const& item)
+	{
+		try{
+			bool isFavorite = WordWizModules::WordFavorite::isWordFavorite(item);
+			//WordWizServices::Log::LogMessage(L"单词" + item + L"的收藏状态为：" + winrt::to_hstring(isFavorite));
+			// isFavorite 为 true 时返回实心星星 (E735)
+			// isFavorite 为 false 时返回空心星星 (E734)
+			return isFavorite ? L"\uE735" : L"\uE734";
+		}
+		catch(...){// 默认情况下返回空心星星
+			return L"\uE734";
 		}
 	}
 }

@@ -1,9 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include "WordDetails.g.h"
 #include "WordItem.h"
-#include "WordSearch.h" // ÒıÈë WordSearch ·şÎñ
-#include "DictionaryItemInWordDetail.g.h" // Ö» include g.h
-#include "NavigationService.h" // ĞÂÔö£ºÒıÈëNavigationServiceÍ·ÎÄ¼ş
+#include "WordSearch.h" // å¼•å…¥ WordSearch æœåŠ¡
+#include "DictionaryItemInWordDetail.g.h" // åª include g.h
+#include "NavigationService.h" // æ–°å¢ï¼šå¼•å…¥NavigationServiceå¤´æ–‡ä»¶
+#include "WordFavorite.h"
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -16,37 +17,39 @@ namespace winrt::WordWiz::implementation
 	{
 		WordDetails();
 
-		// ItemToDisplay (ÒÑ´æÔÚ)
 		WordWiz::WordItem ItemToDisplay();
 		void ItemToDisplay(WordWiz::WordItem const& value);
 		static DependencyProperty ItemToDisplayProperty() { return m_itemToDisplayProperty; }
 
-		// ¸üĞÂ£º×ÖµäÏîÁĞ±í (ÓÃÓÚ SelectorBar)
+		// æ›´æ–°ï¼šå­—å…¸é¡¹åˆ—è¡¨ (ç”¨äº SelectorBar)
 		IObservableVector<WordWiz::DictionaryItemInWordDetail> DictionaryItems();
 		static DependencyProperty DictionaryItemsProperty() { return m_dictionaryItemsProperty; }
 
-		// µ±Ç°Ñ¡ÖĞ×ÖµäµÄHTMLÄÚÈİ (ÓÃÓÚ WebView2)
-		// ×¢Òâ£ºÕâ¸öÊôĞÔµÄ¸ü¸Ä½«Í¨¹ıÆä»Øµ÷º¯ÊıÀ´´¥·¢ WebView2 µÄ NavigateToString
+		// å½“å‰é€‰ä¸­å­—å…¸çš„HTMLå†…å®¹ (ç”¨äº WebView2)
+		// æ³¨æ„ï¼šè¿™ä¸ªå±æ€§çš„æ›´æ”¹å°†é€šè¿‡å…¶å›è°ƒå‡½æ•°æ¥è§¦å‘ WebView2 çš„ NavigateToString
 		winrt::hstring SelectedDictionaryHtml();
 		void SelectedDictionaryHtml(winrt::hstring const& value);
 		static DependencyProperty SelectedDictionaryHtmlProperty() { return m_selectedDictionaryHtmlProperty; }
 
-		// SelectorBar µÄÊÂ¼ş´¦Àí
+		// SelectorBar çš„äº‹ä»¶å¤„ç†
 		void DictionarySelectorBar_SelectionChanged(SelectorBar const& sender,
 		                                            SelectorBarSelectionChangedEventArgs const& args);
 
 		void UpdateDetailVisibility();
 
 		void OnLoaded(IInspectable const& sender, RoutedEventArgs const& args);
-		winrt::fire_and_forget InitializeWebView2Async(); // Òì²½³õÊ¼»¯ WebView2
+		winrt::fire_and_forget InitializeWebView2Async(); // å¼‚æ­¥åˆå§‹åŒ– WebView2
 
-		// ItemToDisplay ÊôĞÔ¸ü¸Ä»Øµ÷
+		// ItemToDisplay å±æ€§æ›´æ”¹å›è°ƒ
 		static void OnItemToDisplayChanged(DependencyObject const& d, DependencyPropertyChangedEventArgs const& e);
-		// SelectedDictionaryHtml ÊôĞÔ¸ü¸Ä»Øµ÷
+		// SelectedDictionaryHtml å±æ€§æ›´æ”¹å›è°ƒ
 		static void OnSelectedDictionaryHtmlChanged(DependencyObject const& d,
 		                                            DependencyPropertyChangedEventArgs const& e);
 
-		// ÉèÖÃFrameµÄ·½·¨£¨Íâ²¿Ò³Ãæ³õÊ¼»¯WordDetailsºóÓ¦µ÷ÓÃ£©
+		void Favorite_Click(IInspectable const& sender, RoutedEventArgs const& e);
+		winrt::hstring GetFavoriteIconGlyph(hstring const& item);
+
+		// è®¾ç½®Frameçš„æ–¹æ³•ï¼ˆå¤–éƒ¨é¡µé¢åˆå§‹åŒ–WordDetailsååº”è°ƒç”¨ï¼‰
 		void SetHostFrame(Frame const& frame) { m_hostFrame = frame; }
 
 	private:
@@ -54,11 +57,10 @@ namespace winrt::WordWiz::implementation
 		static DependencyProperty m_dictionaryItemsProperty;
 		static DependencyProperty m_selectedDictionaryHtmlProperty;
 
-
 		bool m_isCoreWebView2Initialized{false};
 		winrt::hstring m_pendingHtmlToNavigate{L""};
 
-		// ÓÃÓÚ¼ÇÂ¼FrameµÄÈõÒıÓÃ£¨ĞèÔÚ¹¹Ôì»ò³õÊ¼»¯Ê±¸³Öµ£©
+		// ç”¨äºè®°å½•Frameçš„å¼±å¼•ç”¨ï¼ˆéœ€åœ¨æ„é€ æˆ–åˆå§‹åŒ–æ—¶èµ‹å€¼ï¼‰
 		Frame m_hostFrame{nullptr};
 	};
 }

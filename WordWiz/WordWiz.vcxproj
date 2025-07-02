@@ -84,7 +84,7 @@
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Auto</AppxBundle>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -167,6 +167,7 @@
       <DependentUpon>WordDetails.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="WordFavorite.h" />
     <ClInclude Include="WordItem.h" />
     <ClInclude Include="WordSearch.h" />
     <ClInclude Include="WordSearchResultList.xaml.h">
@@ -257,6 +258,7 @@
       <DependentUpon>WordDetails.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="WordFavorite.cpp" />
     <ClCompile Include="WordItem.cpp" />
     <ClCompile Include="WordSearch.cpp" />
     <ClCompile Include="WordSearchResultList.xaml.cpp">
