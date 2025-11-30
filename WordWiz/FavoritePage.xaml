@@ -7,9 +7,176 @@
 	xmlns:local="using:WordWiz"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	mc:Ignorable="d">
+	mc:Ignorable="d"
+	Loaded="Page_Loaded">
 
-	<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-		<Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-	</StackPanel>
+	<Grid Padding="16" RowSpacing="12">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<!-- Search and Filter Controls -->
+		<Grid Grid.Row="0" ColumnSpacing="12">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<TextBox x:Name="SearchTextBox"
+			         Grid.Column="0"
+			         PlaceholderText="搜索收藏的单词..."
+			         TextChanged="SearchTextBox_TextChanged" />
+
+			<ComboBox x:Name="TagFilterComboBox"
+			          Grid.Column="1"
+			          Width="150"
+			          PlaceholderText="按标签筛选"
+			          SelectionChanged="TagFilterComboBox_SelectionChanged">
+				<ComboBoxItem Content="全部标签" Tag="" IsSelected="True" />
+			</ComboBox>
+
+			<ComboBox x:Name="ImportanceFilterComboBox"
+			          Grid.Column="2"
+			          Width="150"
+			          PlaceholderText="按重要度筛选"
+			          SelectionChanged="ImportanceFilterComboBox_SelectionChanged">
+				<ComboBoxItem Content="全部重要度" Tag="0" IsSelected="True" />
+				<ComboBoxItem Content="★ 及以上" Tag="1" />
+				<ComboBoxItem Content="★★ 及以上" Tag="2" />
+				<ComboBoxItem Content="★★★ 及以上" Tag="3" />
+				<ComboBoxItem Content="★★★★ 及以上" Tag="4" />
+				<ComboBoxItem Content="★★★★★" Tag="5" />
+			</ComboBox>
+		</Grid>
+
+		<!-- Results Count -->
+		<TextBlock Grid.Row="1" 
+		           x:Name="ResultCountTextBlock" 
+		           Text="共 0 个收藏单词"
+		           Style="{ThemeResource CaptionTextBlockStyle}"
+		           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+		<!-- Favorites List -->
+		<Grid Grid.Row="2">
+			<ListView x:Name="FavoritesListView"
+			          ItemsSource="{x:Bind FavoriteItems, Mode=OneWay}"
+			          SelectionMode="Single"
+			          SelectionChanged="FavoritesListView_SelectionChanged">
+
+				<ListView.ItemTemplate>
+					<DataTemplate x:DataType="local:FavoriteWordItem">
+						<Grid Padding="8,12" ColumnSpacing="12">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+
+							<!-- Word -->
+							<StackPanel Grid.Column="0" VerticalAlignment="Center">
+								<TextBlock Text="{x:Bind Word}"
+								           Style="{ThemeResource SubtitleTextBlockStyle}"
+								           FontWeight="SemiBold" />
+								<TextBlock Text="{x:Bind Time}"
+								           Style="{ThemeResource CaptionTextBlockStyle}"
+								           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+							</StackPanel>
+
+							<!-- Tag -->
+							<Border Grid.Column="1" 
+							        Background="{ThemeResource AccentFillColorDefaultBrush}"
+							        CornerRadius="4"
+							        Padding="8,4"
+							        VerticalAlignment="Center"
+							        Visibility="{x:Bind local:FavoritePage.GetTagVisibility(Tag)}">
+								<TextBlock Text="{x:Bind Tag}"
+								           Style="{ThemeResource CaptionTextBlockStyle}"
+								           Foreground="White" />
+							</Border>
+
+							<!-- Importance Stars -->
+							<TextBlock Grid.Column="2"
+							           Text="{x:Bind local:FavoritePage.GetImportanceStars(Importance)}"
+							           VerticalAlignment="Center"
+							           Foreground="#FFD700"
+							           FontSize="16" />
+
+							<!-- Edit Button -->
+							<Button Grid.Column="3"
+							        Style="{ThemeResource SubtleButtonStyle}"
+							        Click="EditButton_Click"
+							        Tag="{x:Bind Word}"
+							        VerticalAlignment="Center">
+								<FontIcon Glyph="&#xE70F;" FontSize="14" />
+							</Button>
+						</Grid>
+					</DataTemplate>
+				</ListView.ItemTemplate>
+			</ListView>
+
+			<!-- Empty State -->
+			<StackPanel x:Name="EmptyStatePanel"
+			            HorizontalAlignment="Center"
+			            VerticalAlignment="Center"
+			            Visibility="Collapsed">
+				<FontIcon Glyph="&#xE735;" FontSize="48" Margin="0,0,0,16"
+				          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+				<TextBlock Text="暂无收藏的单词"
+				           HorizontalAlignment="Center"
+				           Style="{ThemeResource SubtitleTextBlockStyle}"
+				           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+				<TextBlock Text="在单词详情页点击星星图标即可收藏"
+				           HorizontalAlignment="Center"
+				           Style="{ThemeResource CaptionTextBlockStyle}"
+				           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+				           Margin="0,8,0,0" />
+			</StackPanel>
+		</Grid>
+
+		<!-- Edit Dialog -->
+		<ContentDialog x:Name="EditFavoriteDialog"
+		               Title="编辑收藏"
+		               PrimaryButtonText="保存"
+		               CloseButtonText="取消"
+		               DefaultButton="Primary"
+		               PrimaryButtonClick="EditFavoriteDialog_PrimaryButtonClick">
+			<StackPanel Spacing="16" MinWidth="300">
+				<TextBlock x:Name="EditDialogWordText"
+				           Style="{ThemeResource SubtitleTextBlockStyle}"
+				           FontWeight="Bold" />
+
+				<StackPanel Spacing="8">
+					<TextBlock Text="标签" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+					<TextBox x:Name="EditTagTextBox"
+					         PlaceholderText="输入标签（如：GRE, 托福, 日常等）" />
+				</StackPanel>
+
+				<StackPanel Spacing="8">
+					<TextBlock Text="重要度" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+					<Slider x:Name="EditImportanceSlider"
+					        Minimum="1"
+					        Maximum="5"
+					        Value="3"
+					        TickFrequency="1"
+					        TickPlacement="Outside"
+					        SnapsTo="Ticks" />
+					<TextBlock x:Name="ImportancePreviewText"
+					           Text="★★★"
+					           HorizontalAlignment="Center"
+					           Foreground="#FFD700"
+					           FontSize="20" />
+				</StackPanel>
+
+				<Button Content="删除收藏"
+				        HorizontalAlignment="Stretch"
+				        Style="{ThemeResource AccentButtonStyle}"
+				        Background="#C42B1C"
+				        Click="DeleteFavoriteButton_Click" />
+			</StackPanel>
+		</ContentDialog>
+	</Grid>
 </Page>

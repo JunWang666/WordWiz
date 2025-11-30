@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "WordFavorite.h"
 #include "database.h"         // 引用我们强大的数据库管理器
 #include "FilePathProvider.h"   // 用于获取 LocalState 路径
@@ -6,6 +6,7 @@
 #include <chrono>               // 用于获取当前时间
 #include <iomanip>              // 用于格式化时间
 #include <sstream>              // 用于格式化时间
+#include <algorithm>            // 用于字符串转换
 
 // 使用 using 来简化代码
 using namespace WordWizServices::Database;
@@ -37,12 +38,23 @@ namespace
             try
             {
                 // 使用 "IF NOT EXISTS" 确保只有在表不存在时才创建
+                // Updated schema: added tag column
                 dbManager.executeQuery(
                     "CREATE TABLE IF NOT EXISTS FavoriteWords ("
                     "word TEXT PRIMARY KEY, "
-                    "level INTEGER, "
+                    "level INTEGER DEFAULT 1, "
+                    "tag TEXT DEFAULT '', "
                     "time TEXT);"
                 );
+                
+                // Try to add tag column if it doesn't exist (for migration)
+                try {
+                    dbManager.executeQuery("ALTER TABLE FavoriteWords ADD COLUMN tag TEXT DEFAULT ''");
+                }
+                catch (...) {
+                    // Column might already exist, ignore error
+                }
+                
                 table_created = true;
             }
             catch (const std::exception& e)
@@ -89,16 +101,16 @@ namespace WordWizModules::WordFavorite {
 
             WordWizServices::Log::LogMessage(L"设置词汇" + winrt::to_hstring(word) + L"为" + winrt::to_hstring(target));
 
-            if (target) // 如果目标是“收藏”
+            if (target) // 如果目标是"收藏"
             {
                 // 使用 INSERT OR REPLACE 来插入或更新记录
                 // 如果单词已存在，会更新它的时间和等级
                 db.executeQuery(
-                    "INSERT OR REPLACE INTO FavoriteWords (word, level, time) VALUES (?, ?, ?)",
-                    { sWord, "1", getCurrentTimestamp() } // level 统一为 1，时间为当前时间
+                    "INSERT OR REPLACE INTO FavoriteWords (word, level, tag, time) VALUES (?, ?, ?, ?)",
+                    { sWord, "1", "", getCurrentTimestamp() } // level 统一为 1，tag为空，时间为当前时间
                 );
             }
-            else // 如果目标是“取消收藏”
+            else // 如果目标是"取消收藏"
             {
                 db.executeQuery("DELETE FROM FavoriteWords WHERE word = ?", { sWord });
             }
@@ -109,11 +121,207 @@ namespace WordWizModules::WordFavorite {
         }
     }
 
+    void setWordFavoriteWithDetails(winrt::hstring const& word, int importance, winrt::hstring const& tag)
+    {
+        try
+        {
+            auto& db = getDb();
+            std::string sWord = winrt::to_string(word);
+            std::string sTag = winrt::to_string(tag);
+            std::string sImportance = std::to_string(importance);
+
+            WordWizServices::Log::LogMessage(L"设置词汇详情: " + word + L", 重要度: " + winrt::to_hstring(importance) + L", 标签: " + tag);
+
+            db.executeQuery(
+                "INSERT OR REPLACE INTO FavoriteWords (word, level, tag, time) VALUES (?, ?, ?, ?)",
+                { sWord, sImportance, sTag, getCurrentTimestamp() }
+            );
+        }
+        catch (const std::exception& e)
+        {
+            WordWizServices::Log::LogMessage(L"setWordFavoriteWithDetails failed: " + winrt::to_hstring(e.what()));
+        }
+    }
+
     void switchWordFavorite(winrt::hstring const& word)
     {
         // 这个函数逻辑很简单：先检查当前状态，然后设置为相反的状态
         bool currentState = isWordFavorite(word);
         setWordFavorite(word, !currentState);
+    }
+
+    FavoriteWordData getFavoriteWordDetails(winrt::hstring const& word)
+    {
+        FavoriteWordData data;
+        data.word = word.c_str();
+        data.importance = 1;
+        data.tag = L"";
+        data.time = L"";
+
+        try
+        {
+            auto& db = getDb();
+            std::string sWord = winrt::to_string(word);
+
+            auto rs = db.executeQuery(
+                "SELECT word, level, tag, time FROM FavoriteWords WHERE word = ?",
+                { sWord }
+            );
+
+            if (rs.rowCount() > 0 && rs.moveFirst())
+            {
+                data.word = winrt::to_hstring(rs[0].convert<std::string>()).c_str();
+                data.importance = rs[1].convert<int>();
+                
+                // Handle potential null tag
+                try {
+                    if (!rs[2].isEmpty()) {
+                        data.tag = winrt::to_hstring(rs[2].convert<std::string>()).c_str();
+                    }
+                } catch (...) {
+                    data.tag = L"";
+                }
+                
+                data.time = winrt::to_hstring(rs[3].convert<std::string>()).c_str();
+            }
+        }
+        catch (const std::exception& e)
+        {
+            WordWizServices::Log::LogMessage(L"getFavoriteWordDetails failed: " + winrt::to_hstring(e.what()));
+        }
+
+        return data;
+    }
+
+    void updateFavoriteWordDetails(winrt::hstring const& word, int importance, winrt::hstring const& tag)
+    {
+        try
+        {
+            auto& db = getDb();
+            std::string sWord = winrt::to_string(word);
+            std::string sTag = winrt::to_string(tag);
+            std::string sImportance = std::to_string(importance);
+
+            db.executeQuery(
+                "UPDATE FavoriteWords SET level = ?, tag = ? WHERE word = ?",
+                { sImportance, sTag, sWord }
+            );
+
+            WordWizServices::Log::LogMessage(L"更新词汇详情: " + word + L", 重要度: " + winrt::to_hstring(importance) + L", 标签: " + tag);
+        }
+        catch (const std::exception& e)
+        {
+            WordWizServices::Log::LogMessage(L"updateFavoriteWordDetails failed: " + winrt::to_hstring(e.what()));
+        }
+    }
+
+    std::vector<FavoriteWordData> getAllFavoriteWords()
+    {
+        std::vector<FavoriteWordData> results;
+
+        try
+        {
+            auto& db = getDb();
+            auto rs = db.executeQuery("SELECT word, level, tag, time FROM FavoriteWords ORDER BY time DESC");
+
+            if (rs.rowCount() > 0)
+            {
+                rs.moveFirst();
+                do
+                {
+                    FavoriteWordData data;
+                    data.word = winrt::to_hstring(rs[0].convert<std::string>()).c_str();
+                    data.importance = rs[1].convert<int>();
+                    
+                    try {
+                        if (!rs[2].isEmpty()) {
+                            data.tag = winrt::to_hstring(rs[2].convert<std::string>()).c_str();
+                        } else {
+                            data.tag = L"";
+                        }
+                    } catch (...) {
+                        data.tag = L"";
+                    }
+                    
+                    data.time = winrt::to_hstring(rs[3].convert<std::string>()).c_str();
+                    results.push_back(data);
+                } while (rs.moveNext());
+            }
+        }
+        catch (const std::exception& e)
+        {
+            WordWizServices::Log::LogMessage(L"getAllFavoriteWords failed: " + winrt::to_hstring(e.what()));
+        }
+
+        return results;
+    }
+
+    std::vector<FavoriteWordData> searchFavoriteWords(winrt::hstring const& searchQuery,
+        winrt::hstring const& tagFilter, int minImportance)
+    {
+        std::vector<FavoriteWordData> results;
+
+        try
+        {
+            auto& db = getDb();
+            std::string query = "SELECT word, level, tag, time FROM FavoriteWords WHERE 1=1";
+            std::vector<std::string> params;
+
+            // Add search query filter
+            if (!searchQuery.empty())
+            {
+                query += " AND word LIKE ?";
+                params.push_back("%" + winrt::to_string(searchQuery) + "%");
+            }
+
+            // Add tag filter
+            if (!tagFilter.empty())
+            {
+                query += " AND tag = ?";
+                params.push_back(winrt::to_string(tagFilter));
+            }
+
+            // Add importance filter
+            if (minImportance > 0)
+            {
+                query += " AND level >= ?";
+                params.push_back(std::to_string(minImportance));
+            }
+
+            query += " ORDER BY time DESC";
+
+            auto rs = db.executeQuery(query, params);
+
+            if (rs.rowCount() > 0)
+            {
+                rs.moveFirst();
+                do
+                {
+                    FavoriteWordData data;
+                    data.word = winrt::to_hstring(rs[0].convert<std::string>()).c_str();
+                    data.importance = rs[1].convert<int>();
+                    
+                    try {
+                        if (!rs[2].isEmpty()) {
+                            data.tag = winrt::to_hstring(rs[2].convert<std::string>()).c_str();
+                        } else {
+                            data.tag = L"";
+                        }
+                    } catch (...) {
+                        data.tag = L"";
+                    }
+                    
+                    data.time = winrt::to_hstring(rs[3].convert<std::string>()).c_str();
+                    results.push_back(data);
+                } while (rs.moveNext());
+            }
+        }
+        catch (const std::exception& e)
+        {
+            WordWizServices::Log::LogMessage(L"searchFavoriteWords failed: " + winrt::to_hstring(e.what()));
+        }
+
+        return results;
     }
 
 }

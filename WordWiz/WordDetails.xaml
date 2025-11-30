@@ -43,6 +43,41 @@
                         Click="Favorite_Click"
                         HorizontalAlignment="Right"
                         Margin="0,12,12,0">
+                    <Button.ContextFlyout>
+                        <Flyout x:Name="FavoriteDetailsFlyout">
+                            <StackPanel Spacing="12" MinWidth="250">
+                                <TextBlock Text="收藏设置" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="标签" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                    <TextBox x:Name="FavoriteTagTextBox"
+                                             PlaceholderText="输入标签（如：GRE, 托福, 日常等）" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="重要度" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                    <Slider x:Name="FavoriteImportanceSlider"
+                                            Minimum="1"
+                                            Maximum="5"
+                                            Value="3"
+                                            TickFrequency="1"
+                                            TickPlacement="Outside"
+                                            SnapsTo="Ticks"
+                                            ValueChanged="FavoriteImportanceSlider_ValueChanged" />
+                                    <TextBlock x:Name="ImportancePreviewText"
+                                               Text="★★★"
+                                               HorizontalAlignment="Center"
+                                               Foreground="#FFD700"
+                                               FontSize="18" />
+                                </StackPanel>
+
+                                <Button Content="保存收藏"
+                                        HorizontalAlignment="Stretch"
+                                        Style="{ThemeResource AccentButtonStyle}"
+                                        Click="SaveFavoriteDetails_Click" />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.ContextFlyout>
                     <FontIcon FontFamily="Segoe MDL2 Assets" 
                               Glyph="{x:Bind GetFavoriteIconGlyph(ItemToDisplay.Word), Mode=OneWay}"
                               FontSize="18"

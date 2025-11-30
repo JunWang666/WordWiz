@@ -1,9 +1,19 @@
 namespace WordWiz
 {
     [default_interface]
+    runtimeclass FavoriteWordItem
+    {
+        FavoriteWordItem(String word, Int32 importance, String tag, String time);
+        String Word { get; };
+        Int32 Importance { get; };
+        String Tag { get; };
+        String Time { get; };
+    }
+
+    [default_interface]
     runtimeclass FavoritePage : Microsoft.UI.Xaml.Controls.Page
     {
         FavoritePage();
-        Int32 MyProperty;
+        Windows.Foundation.Collections.IObservableVector<FavoriteWordItem> FavoriteItems { get; };
     }
 }
