@@ -306,12 +306,21 @@ namespace winrt::WordWiz::implementation
 
 	winrt::hstring WordDetails::GetImportanceStars(int importance)
 	{
-		winrt::hstring stars;
-		for (int i = 0; i < importance; i++)
+		// Pre-defined star strings for efficiency (avoiding loop concatenation)
+		static const wchar_t* starStrings[] = {
+			L"",
+			L"★",
+			L"★★",
+			L"★★★",
+			L"★★★★",
+			L"★★★★★"
+		};
+		
+		if (importance >= 1 && importance <= 5)
 		{
-			stars = stars + L"★";
+			return winrt::hstring(starStrings[importance]);
 		}
-		return stars;
+		return winrt::hstring(starStrings[0]);
 	}
 
 	winrt::hstring WordDetails::GetFavoriteIconGlyph(hstring const& item)

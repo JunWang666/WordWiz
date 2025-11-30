@@ -7,6 +7,7 @@
 #include <iomanip>              // 用于格式化时间
 #include <sstream>              // 用于格式化时间
 #include <algorithm>            // 用于字符串转换
+#include "Poco/Exception.h"     // For specific exception handling
 
 // 使用 using 来简化代码
 using namespace WordWizServices::Database;
@@ -22,6 +23,21 @@ namespace
         std::stringstream ss;
         ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %H:%M:%S");
         return ss.str();
+    }
+
+    // Helper function to safely extract tag from record set column
+    std::wstring safeExtractTag(Poco::Data::RecordSet& rs, size_t columnIndex)
+    {
+        try {
+            if (!rs[columnIndex].isEmpty()) {
+                return winrt::to_hstring(rs[columnIndex].convert<std::string>()).c_str();
+            }
+        } catch (const Poco::Exception& e) {
+            WordWizServices::Log::LogMessage(L"Tag extraction warning: " + winrt::to_hstring(e.displayText()));
+        } catch (const std::exception& e) {
+            WordWizServices::Log::LogMessage(L"Tag extraction warning: " + winrt::to_hstring(e.what()));
+        }
+        return L"";
     }
 
     // 使用静态局部变量来维护一个单例的数据库连接
@@ -51,8 +67,12 @@ namespace
                 try {
                     dbManager.executeQuery("ALTER TABLE FavoriteWords ADD COLUMN tag TEXT DEFAULT ''");
                 }
-                catch (...) {
-                    // Column might already exist, ignore error
+                catch (const Poco::Exception& e) {
+                    // Column already exists, this is expected - log for debugging
+                    WordWizServices::Log::LogMessage(L"Note: tag column migration skipped (may already exist): " + winrt::to_hstring(e.displayText()));
+                }
+                catch (const std::exception& e) {
+                    WordWizServices::Log::LogMessage(L"Note: tag column migration error: " + winrt::to_hstring(e.what()));
                 }
                 
                 table_created = true;
@@ -172,16 +192,7 @@ namespace WordWizModules::WordFavorite {
             {
                 data.word = winrt::to_hstring(rs[0].convert<std::string>()).c_str();
                 data.importance = rs[1].convert<int>();
-                
-                // Handle potential null tag
-                try {
-                    if (!rs[2].isEmpty()) {
-                        data.tag = winrt::to_hstring(rs[2].convert<std::string>()).c_str();
-                    }
-                } catch (...) {
-                    data.tag = L"";
-                }
-                
+                data.tag = safeExtractTag(rs, 2);
                 data.time = winrt::to_hstring(rs[3].convert<std::string>()).c_str();
             }
         }
@@ -232,17 +243,7 @@ namespace WordWizModules::WordFavorite {
                     FavoriteWordData data;
                     data.word = winrt::to_hstring(rs[0].convert<std::string>()).c_str();
                     data.importance = rs[1].convert<int>();
-                    
-                    try {
-                        if (!rs[2].isEmpty()) {
-                            data.tag = winrt::to_hstring(rs[2].convert<std::string>()).c_str();
-                        } else {
-                            data.tag = L"";
-                        }
-                    } catch (...) {
-                        data.tag = L"";
-                    }
-                    
+                    data.tag = safeExtractTag(rs, 2);
                     data.time = winrt::to_hstring(rs[3].convert<std::string>()).c_str();
                     results.push_back(data);
                 } while (rs.moveNext());
@@ -300,17 +301,7 @@ namespace WordWizModules::WordFavorite {
                     FavoriteWordData data;
                     data.word = winrt::to_hstring(rs[0].convert<std::string>()).c_str();
                     data.importance = rs[1].convert<int>();
-                    
-                    try {
-                        if (!rs[2].isEmpty()) {
-                            data.tag = winrt::to_hstring(rs[2].convert<std::string>()).c_str();
-                        } else {
-                            data.tag = L"";
-                        }
-                    } catch (...) {
-                        data.tag = L"";
-                    }
-                    
+                    data.tag = safeExtractTag(rs, 2);
                     data.time = winrt::to_hstring(rs[3].convert<std::string>()).c_str();
                     results.push_back(data);
                 } while (rs.moveNext());
