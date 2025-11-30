@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 *.db
 *.SQL
-*.sqlite
+*.sqlite_codeql_detected_source_root
