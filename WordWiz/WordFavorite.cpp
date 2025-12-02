@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "WordFavorite.h"
 #include "database.h"         // 引用我们强大的数据库管理器
 #include "FilePathProvider.h"   // 用于获取 LocalState 路径

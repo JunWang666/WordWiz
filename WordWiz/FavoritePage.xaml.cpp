@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "FavoritePage.xaml.h"
 #if __has_include("FavoritePage.g.cpp")
 #include "FavoritePage.g.cpp"
@@ -137,13 +137,14 @@ namespace winrt::WordWiz::implementation
 	hstring FavoritePage::GetImportanceStars(int32_t importance)
 	{
 		// Pre-defined star strings for efficiency (avoiding loop concatenation)
+		// Using Unicode escape sequence \u2605 for BLACK STAR character
 		static const wchar_t* starStrings[] = {
 			L"",
-			L"★",
-			L"★★",
-			L"★★★",
-			L"★★★★",
-			L"★★★★★"
+			L"\u2605",
+			L"\u2605\u2605",
+			L"\u2605\u2605\u2605",
+			L"\u2605\u2605\u2605\u2605",
+			L"\u2605\u2605\u2605\u2605\u2605"
 		};
 		
 		if (importance >= 1 && importance <= 5)
@@ -170,7 +171,7 @@ namespace winrt::WordWiz::implementation
 		}
 
 		UpdateEmptyState();
-		ResultCountTextBlock().Text(L"共 " + winrt::to_hstring(m_favoriteItems.Size()) + L" 个收藏单词");
+		ResultCountTextBlock().Text(winrt::to_hstring(m_favoriteItems.Size()) + L" favorites");
 	}
 
 	void FavoritePage::RefreshFavorites()
@@ -218,7 +219,7 @@ namespace winrt::WordWiz::implementation
 		}
 
 		UpdateEmptyState();
-		ResultCountTextBlock().Text(L"共 " + winrt::to_hstring(m_favoriteItems.Size()) + L" 个收藏单词");
+		ResultCountTextBlock().Text(winrt::to_hstring(m_favoriteItems.Size()) + L" favorites");
 	}
 
 	void FavoritePage::UpdateTagFilter()

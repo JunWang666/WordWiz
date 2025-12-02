@@ -307,13 +307,14 @@ namespace winrt::WordWiz::implementation
 	winrt::hstring WordDetails::GetImportanceStars(int importance)
 	{
 		// Pre-defined star strings for efficiency (avoiding loop concatenation)
+		// Using Unicode escape sequence \u2605 for BLACK STAR character
 		static const wchar_t* starStrings[] = {
 			L"",
-			L"★",
-			L"★★",
-			L"★★★",
-			L"★★★★",
-			L"★★★★★"
+			L"\u2605",
+			L"\u2605\u2605",
+			L"\u2605\u2605\u2605",
+			L"\u2605\u2605\u2605\u2605",
+			L"\u2605\u2605\u2605\u2605\u2605"
 		};
 		
 		if (importance >= 1 && importance <= 5)
