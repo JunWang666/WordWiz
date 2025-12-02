@@ -49,6 +49,10 @@ namespace winrt::WordWiz::implementation
 		void Favorite_Click(IInspectable const& sender, RoutedEventArgs const& e);
 		winrt::hstring GetFavoriteIconGlyph(hstring const& item);
 
+		// New event handlers for favorite details
+		void FavoriteImportanceSlider_ValueChanged(IInspectable const& sender, Microsoft::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& e);
+		void SaveFavoriteDetails_Click(IInspectable const& sender, RoutedEventArgs const& e);
+
 		// 设置Frame的方法（外部页面初始化WordDetails后应调用）
 		void SetHostFrame(Frame const& frame) { m_hostFrame = frame; }
 
@@ -59,6 +63,9 @@ namespace winrt::WordWiz::implementation
 
 		bool m_isCoreWebView2Initialized{false};
 		winrt::hstring m_pendingHtmlToNavigate{L""};
+
+		// Helper function for importance stars
+		winrt::hstring GetImportanceStars(int importance);
 
 		// 用于记录Frame的弱引用（需在构造或初始化时赋值）
 		Frame m_hostFrame{nullptr};

@@ -259,9 +259,69 @@ namespace winrt::WordWiz::implementation
 		if (ItemToDisplay())
 		{
 			winrt::hstring currentWord = ItemToDisplay().Word();
-			WordWizModules::WordFavorite::switchWordFavorite(currentWord);
+			bool isFavorite = WordWizModules::WordFavorite::isWordFavorite(currentWord);
+
+			if (isFavorite)
+			{
+				// If already favorite, just toggle off
+				WordWizModules::WordFavorite::setWordFavorite(currentWord, false);
+				favoriteButton().Content().try_as<FontIcon>().Glyph(GetFavoriteIconGlyph(currentWord));
+			}
+			else
+			{
+				// If not favorite, show flyout to set details
+				auto details = WordWizModules::WordFavorite::getFavoriteWordDetails(currentWord);
+				FavoriteTagTextBox().Text(winrt::hstring(details.tag));
+				FavoriteImportanceSlider().Value(static_cast<double>(details.importance > 0 ? details.importance : 3));
+				ImportancePreviewText().Text(GetImportanceStars(static_cast<int>(FavoriteImportanceSlider().Value())));
+				
+				FavoriteDetailsFlyout().ShowAt(favoriteButton());
+			}
 		}
-		favoriteButton().Content().try_as<FontIcon>().Glyph(GetFavoriteIconGlyph(ItemToDisplay().Word()));
+	}
+
+	void WordDetails::FavoriteImportanceSlider_ValueChanged(IInspectable const&, Microsoft::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&)
+	{
+		int importance = static_cast<int>(FavoriteImportanceSlider().Value());
+		ImportancePreviewText().Text(GetImportanceStars(importance));
+	}
+
+	void WordDetails::SaveFavoriteDetails_Click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (ItemToDisplay())
+		{
+			winrt::hstring currentWord = ItemToDisplay().Word();
+			winrt::hstring tag = FavoriteTagTextBox().Text();
+			int importance = static_cast<int>(FavoriteImportanceSlider().Value());
+
+			WordWizModules::WordFavorite::setWordFavoriteWithDetails(currentWord, importance, tag);
+			
+			// Update the button icon
+			favoriteButton().Content().try_as<FontIcon>().Glyph(GetFavoriteIconGlyph(currentWord));
+			
+			// Close the flyout
+			FavoriteDetailsFlyout().Hide();
+		}
+	}
+
+	winrt::hstring WordDetails::GetImportanceStars(int importance)
+	{
+		// Pre-defined star strings for efficiency (avoiding loop concatenation)
+		// Using Unicode escape sequence \u2605 for BLACK STAR character
+		static const wchar_t* starStrings[] = {
+			L"",
+			L"\u2605",
+			L"\u2605\u2605",
+			L"\u2605\u2605\u2605",
+			L"\u2605\u2605\u2605\u2605",
+			L"\u2605\u2605\u2605\u2605\u2605"
+		};
+		
+		if (importance >= 1 && importance <= 5)
+		{
+			return winrt::hstring(starStrings[importance]);
+		}
+		return winrt::hstring(starStrings[0]);
 	}
 
 	winrt::hstring WordDetails::GetFavoriteIconGlyph(hstring const& item)
