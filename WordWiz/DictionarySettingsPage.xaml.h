@@ -19,6 +19,10 @@ namespace winrt::WordWiz::implementation
 		                                     winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
 		void OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender,
 		                                        winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
+		void RefreshDictionaryListButton_Click(winrt::Windows::Foundation::IInspectable const& sender,
+		                                       winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
+		void DictionarySortComboBox_SelectionChanged(winrt::Windows::Foundation::IInspectable const& sender,
+		                                             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& e);
 
 	private:
 		std::unique_ptr<WordWizServices::Dictionary::DictionaryImporter> m_dictionaryImporter;
@@ -37,6 +41,7 @@ namespace winrt::WordWiz::implementation
 		winrt::fire_and_forget ImportFilesAsync(std::vector<std::string> filePaths);
 		void OpenFolderInExplorer(const std::string& folderPath);
 		HWND GetCurrentWindowHandle();
+		void RefreshDictionaryList();
 	};
 }
 

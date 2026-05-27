@@ -28,9 +28,12 @@ namespace winrt::WordWiz::implementation
 
 	private:
 		winrt::Microsoft::UI::Windowing::AppWindow GetAppWindowForCurrentWindow();
-		static winrt::Microsoft::UI::Xaml::Controls::Frame mainFrame;
+		winrt::Microsoft::UI::Xaml::Controls::Frame m_mainFrame{ nullptr };
 		winrt::Microsoft::UI::Windowing::AppWindow m_mainAppWindow{nullptr};
 		hstring m_windowTitle = L"WinUI Desktop C++ Sample App";
+		winrt::event_token m_navToken{};
+		bool m_hasNavListener{ false };
+		HWND m_windowHandle{ nullptr };
 
 		// 窗口最小尺寸处理
 		static LRESULT CALLBACK WindowSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
@@ -39,6 +42,7 @@ namespace winrt::WordWiz::implementation
 	public:
 		void BackButton_RightTapped(winrt::Windows::Foundation::IInspectable const& sender,
 		                            winrt::Microsoft::UI::Xaml::Input::RightTappedRoutedEventArgs const& e);
+		~MainWindow();
 	};
 }
 

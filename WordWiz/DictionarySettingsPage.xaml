@@ -211,6 +211,35 @@
 						</Grid>
 					</StackPanel>
 				</Border>
+
+				<Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+				        CornerRadius="8"
+				        Padding="20"
+				        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+				        BorderThickness="1">
+					<StackPanel Spacing="12">
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<FontIcon Glyph="&#xE8B7;" FontSize="20" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+							<TextBlock Text="已导入词典管理"
+							           Style="{ThemeResource SubtitleTextBlockStyle}"
+							           FontWeight="SemiBold" />
+						</StackPanel>
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<ComboBox x:Name="DictionarySortComboBox" Width="220" SelectedIndex="0" SelectionChanged="DictionarySortComboBox_SelectionChanged">
+								<ComboBoxItem Content="按名称排序（A→Z）" />
+								<ComboBoxItem Content="按名称排序（Z→A）" />
+								<ComboBoxItem Content="按修改时间（新→旧）" />
+								<ComboBoxItem Content="按文件大小（大→小）" />
+							</ComboBox>
+							<Button Content="刷新列表" Click="RefreshDictionaryListButton_Click" />
+						</StackPanel>
+						<TextBlock x:Name="DictionaryListStatusText"
+						           Text="正在加载词典列表..."
+						           Style="{ThemeResource CaptionTextBlockStyle}"
+						           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+						<ListView x:Name="DictionaryListView" MaxHeight="280" SelectionMode="None" />
+					</StackPanel>
+				</Border>
 			</StackPanel>
 		</StackPanel>
 	</ScrollViewer>

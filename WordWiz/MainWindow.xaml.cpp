@@ -27,8 +27,6 @@ using namespace Microsoft::UI::Xaml::Media::Animation;
 
 namespace winrt::WordWiz::implementation
 {
-	winrt::Microsoft::UI::Xaml::Controls::Frame MainWindow::mainFrame{nullptr};
-
 	MainWindow::MainWindow()
 	{
 		// ��ȡ AppWindow ����
@@ -52,6 +50,27 @@ namespace winrt::WordWiz::implementation
 				// ���磬��������Զ�����������ݣ���ϵͳ��ʾĬ�ϱ�����
 				AppTitleBar().Visibility(Visibility::Collapsed);
 			}
+		}
+	}
+
+	MainWindow::~MainWindow()
+	{
+		if (m_hasNavListener)
+		{
+			WordWizServices::NavigationService::RemoveNavigationListener(m_navToken);
+			m_hasNavListener = false;
+		}
+
+		if (m_mainFrame)
+		{
+			WordWizServices::NavigationService::Uninitialize(m_mainFrame);
+			m_mainFrame = nullptr;
+		}
+
+		if (m_windowHandle)
+		{
+			RemoveWindowSubclass(m_windowHandle, WindowSubclassProc, 0);
+			m_windowHandle = nullptr;
 		}
 	}
 
@@ -135,10 +154,10 @@ namespace winrt::WordWiz::implementation
 
 		if (!tag_to_navigate.empty())
 		{
-			if (mainFrame) // ȷ����� Frame ʵ����Ч
+			if (m_mainFrame)
 			{
 				WordWizServices::NavigationService::NavigateFromTag(
-					mainFrame,
+					m_mainFrame,
 					tag_to_navigate,
 					nullptr, // �������� (�����Ҫ�Ļ�)
 					args.RecommendedNavigationTransitionInfo()
@@ -160,9 +179,9 @@ namespace winrt::WordWiz::implementation
 
 	void MainWindow::BackButton_Click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (mainFrame && WordWizServices::NavigationService::CanGoBack(mainFrame))
+		if (m_mainFrame && WordWizServices::NavigationService::CanGoBack(m_mainFrame))
 		{
-			WordWizServices::NavigationService::GoBack(mainFrame, EntranceNavigationTransitionInfo());
+			WordWizServices::NavigationService::GoBack(m_mainFrame, EntranceNavigationTransitionInfo());
 		}
 	}
 
@@ -194,7 +213,14 @@ namespace winrt::WordWiz::implementation
 
 	winrt::Microsoft::UI::Xaml::Controls::Frame MainWindow::GetMainFrame()
 	{
-		return mainFrame;
+		if (auto window = Application::Current().try_as<winrt::WordWiz::MainWindow>())
+		{
+			if (auto impl = winrt::get_self<winrt::WordWiz::implementation::MainWindow>(window))
+			{
+				return impl->m_mainFrame;
+			}
+		}
+		return nullptr;
 	}
 
 	// 窗口子类化处理函数，用于设置最小窗口尺寸
@@ -231,6 +257,7 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
 			{
 				// 设置窗口子类化来处理WM_GETMINMAXINFO消息
 				SetWindowSubclass(hwnd, WindowSubclassProc, 0, 0);
+				m_windowHandle = hwnd;
 			}
 		}
 	}
@@ -243,9 +270,9 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
 	// 此时主窗体应该已经完全创建，可以安全访问 Frame
 	try
 	{
-		mainFrame = contentFrame();
+		m_mainFrame = contentFrame();
 		// 初始化NavigationService，传入contentFrame和NavigationView
-		WordWizServices::NavigationService::Initialize(contentFrame(), SideNavigationView());
+		WordWizServices::NavigationService::Initialize(m_mainFrame, SideNavigationView());
 	}
 	catch (winrt::hresult_error const& ex)
 	{
@@ -261,26 +288,27 @@ void winrt::WordWiz::implementation::MainWindow::OnWindowLoaded(
 	WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::FavoritePage>();
 	WordWizServices::NavigationService::RegisterPageTypeForNavViewGlobal<WordWiz::HistoryPage>();
 
-	WordWizServices::NavigationService::NavigateTo<WordWiz::HomePage>(MainWindow::GetMainFrame());
+	WordWizServices::NavigationService::NavigateTo<WordWiz::HomePage>(m_mainFrame);
 
 	// Update back button enabled state on navigation
 	auto updateBackButtonEnabled = [this]()
 	{
-		if (mainFrame && BackButton())
+		if (m_mainFrame && BackButton())
 		{
 			BackButton().IsEnabled(
-				WordWizServices::NavigationService::CanGoBack(mainFrame)
+				WordWizServices::NavigationService::CanGoBack(m_mainFrame)
 			);
 		}
 	};
 
 	// Register navigation listener to update back button
-	static auto navToken = WordWizServices::NavigationService::AddNavigationListener(
+	m_navToken = WordWizServices::NavigationService::AddNavigationListener(
 		[updateBackButtonEnabled](auto&&...)
 		{
 			updateBackButtonEnabled();
 		}
 	);
+	m_hasNavListener = true;
 
 	updateBackButtonEnabled(); // Initial state
 }
