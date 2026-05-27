@@ -58,6 +58,8 @@ namespace WordWizServices::Database
 		std::string executeScalarQuery(const std::string& sql, const std::vector<std::string>& params = {});
 
 	private:
+		bool isInitializedLocked() const;
+
 		std::unique_ptr<Poco::Data::Session> _pSession;
 		std::string _dbPath;
 		mutable Poco::FastMutex _mutex;

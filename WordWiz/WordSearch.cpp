@@ -13,6 +13,30 @@ using namespace Windows::Foundation::Collections;
 
 namespace winrt::WordWiz::implementation
 {
+	namespace
+	{
+		std::vector<std::string> BuildSearchParams(const std::string& query)
+		{
+			return { "%" + query + "%", query, query + "%", "%" + query };
+		}
+
+		std::vector<std::string> SplitCsvIds(const std::string& source)
+		{
+			std::vector<std::string> result;
+			std::string dictId;
+			std::istringstream stream(source);
+			while (std::getline(stream, dictId, ','))
+			{
+				dictId.erase(std::remove_if(dictId.begin(), dictId.end(), ::isspace), dictId.end());
+				if (!dictId.empty())
+				{
+					result.push_back(dictId);
+				}
+			}
+			return result;
+		}
+	}
+
 	WordSearch::WordSearch()
 	{
 	}
@@ -34,41 +58,13 @@ namespace winrt::WordWiz::implementation
 		auto main_db = WordWizServices::Database::DatabaseManager(
 			WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\words.sqlite");
 
-		std::string processedContainsQuery = "%" + sQuery + "%";
-		std::string exactMatch = sQuery;
-		std::string startsWith = sQuery + "%";
-		std::string endsWith = "%" + sQuery;
-
-
-		// 2. 直接将参数值嵌入到 SQL 字符串中 (!!! 注意 SQL 注入风险 !!!)
-		//     如果字符串包含单引号，需要进行额外的转义 (用两个单引号代替一个)
-		//     例如：SQLite 的字符串字面量是单引号包围的，如果参数本身有单引号，则需要 ' -> ''
-		auto escapeSingleQuotes = [](const std::string& s)
-		{
-			std::string result;
-			result.reserve(s.length() * 2); // 预留空间
-			for (char c : s)
-			{
-				if (c == '\'')
-				{
-					result += "''"; // 双引号转义
-				}
-				else
-				{
-					result += c;
-				}
-			}
-			return result;
-		};
-
 		std::string sqlQuery =
 			"SELECT keyword, definition_html FROM word "
-			"WHERE keyword LIKE '" + escapeSingleQuotes(processedContainsQuery) + "' ESCAPE '" + "'\'" + "' "
-			// 主查询的模糊匹配
+			"WHERE keyword LIKE ? ESCAPE '\' "
 			"ORDER BY CASE "
-			"    WHEN keyword = '" + escapeSingleQuotes(exactMatch) + "' THEN 0 " // 精确匹配
-			"    WHEN keyword LIKE '" + escapeSingleQuotes(startsWith) + "' ESCAPE '" + "'\'" + "' THEN 1 " // 以...开头
-			"    WHEN keyword LIKE '" + escapeSingleQuotes(endsWith) + "' ESCAPE '" + "'\'" + "' THEN 2 " // 以...结尾
+			"    WHEN keyword = ? THEN 0 "
+			"    WHEN keyword LIKE ? ESCAPE '\' THEN 1 "
+			"    WHEN keyword LIKE ? ESCAPE '\' THEN 2 "
 			"    ELSE 3 "
 			"END, "
 			"LENGTH(keyword) ASC, "
@@ -78,7 +74,7 @@ namespace winrt::WordWiz::implementation
 		// 3. 调用没有 bind 的 executeQuery 版本
 		try
 		{
-			auto rs = main_db.executeQuery(sqlQuery); // 直接传入完整的 SQL 字符串
+			auto rs = main_db.executeQuery(sqlQuery, BuildSearchParams(sQuery));
 
 			if (rs.rowCount() == 0)
 			{
@@ -152,49 +148,44 @@ namespace winrt::WordWiz::implementation
 			auto main_db = WordWizServices::Database::DatabaseManager(
 				WordWizServices::Data::FilePathProvider::GetAppLocalFolderPath() + "\\main.db");
 
-			auto source_dicts = main_db.executeScalarQuery("SELECT source_dicts FROM words Where keyword = '" + winrt::to_string(word) + "'");
-			// 解析逗号分隔的字典ID列表
-			std::string dict_id;
-			std::istringstream dict_stream(source_dicts);
+			auto source_dicts = main_db.executeScalarQuery(
+				"SELECT source_dicts FROM words Where keyword = ?",
+				{ sWord });
 
-			// 对每个字典ID进行处理
-			while (std::getline(dict_stream, dict_id, ','))
+			for (const auto& dict_id : SplitCsvIds(source_dicts))
 			{
-				// 去除可能的空格
-				dict_id.erase(std::remove_if(dict_id.begin(), dict_id.end(), ::isspace), dict_id.end());
-
-				if (!dict_id.empty())
+				try
 				{
-					try
-					{
-						// 查询该字典的详细信息
-						auto long_id = main_db.executeScalarQuery(
-							"SELECT long_id FROM dict_info WHERE short_id = '" + dict_id + "'");
-						auto title = main_db.executeScalarQuery(
-							"SELECT title FROM dict_info WHERE short_id = '" + dict_id + "'");
-						auto DisplayName = main_db.executeScalarQuery(
-							"SELECT Title FROM dict_info WHERE short_id = '" + dict_id + "'");
+					// 查询该字典的详细信息
+					auto long_id = main_db.executeScalarQuery(
+						"SELECT long_id FROM dict_info WHERE short_id = ?",
+						{ dict_id });
+					auto title = main_db.executeScalarQuery(
+						"SELECT title FROM dict_info WHERE short_id = ?",
+						{ dict_id });
+					auto DisplayName = main_db.executeScalarQuery(
+						"SELECT Title FROM dict_info WHERE short_id = ?",
+						{ dict_id });
 
-						// 如果description为空，使用title
-						if (DisplayName.empty()) {
-							DisplayName = title;
-						}
-
-						// 添加到结果列表
-						dictionaries.Append(WordWiz::DictionaryItemInWordDetail{
-							winrt::to_hstring(long_id),
-							winrt::to_hstring(title),
-							winrt::to_hstring(DisplayName)
-							});
-
-						WordWizServices::Log::LogMessage(L"Added dictionary: " + winrt::to_hstring(dict_id) +
-							L" - " + winrt::to_hstring(title));
+					// 如果description为空，使用title
+					if (DisplayName.empty()) {
+						DisplayName = title;
 					}
-					catch (const std::exception& e)
-					{
-						WordWizServices::Log::LogMessage(L"Error processing dictionary " +
-							winrt::to_hstring(dict_id) + L": " + winrt::to_hstring(e.what()));
-					}
+
+					// 添加到结果列表
+					dictionaries.Append(WordWiz::DictionaryItemInWordDetail{
+						winrt::to_hstring(long_id),
+						winrt::to_hstring(title),
+						winrt::to_hstring(DisplayName)
+						});
+
+					WordWizServices::Log::LogMessage(L"Added dictionary: " + winrt::to_hstring(dict_id) +
+						L" - " + winrt::to_hstring(title));
+				}
+				catch (const std::exception& e)
+				{
+					WordWizServices::Log::LogMessage(L"Error processing dictionary " +
+						winrt::to_hstring(dict_id) + L": " + winrt::to_hstring(e.what()));
 				}
 			}
 		}

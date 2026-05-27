@@ -13,6 +13,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 #include "CombineData.h" 
 
 using namespace winrt;
@@ -27,6 +28,7 @@ namespace winrt::WordWiz::implementation
 	DictionarySettingsPage::DictionarySettingsPage()
     {
         m_dictionaryImporter = std::make_unique<WordWizServices::Dictionary::DictionaryImporter>();
+		RefreshDictionaryList();
     }
 	
     void DictionarySettingsPage::ImportSingleFileButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
@@ -214,7 +216,7 @@ namespace winrt::WordWiz::implementation
         }
     }    
       
-      void DictionarySettingsPage::OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+    void DictionarySettingsPage::OpenDictionariesFolderButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
     {
         try {
             ShowOpenFolderFlyout(L"正在打开词典文件夹...");
@@ -245,6 +247,18 @@ namespace winrt::WordWiz::implementation
             ShowOpenFolderFlyout(L"打开词典文件夹失败", false);
             WordWizServices::Log::LogMessage(L"打开词典文件夹失败");
         }
+    }
+
+    void DictionarySettingsPage::RefreshDictionaryListButton_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&)
+    {
+        RefreshDictionaryList();
+    }
+
+    void DictionarySettingsPage::DictionarySortComboBox_SelectionChanged(
+        winrt::Windows::Foundation::IInspectable const&,
+        winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const&)
+    {
+        RefreshDictionaryList();
     }
 
     void DictionarySettingsPage::ShowImportStatus(const winrt::hstring& message, bool isVisible)
@@ -348,6 +362,7 @@ namespace winrt::WordWiz::implementation
                     } else {
                         strongThis->ShowMultipleFilesFlyout(statusMessage, detailMessage, false, isSuccess);
                     }
+                    strongThis->RefreshDictionaryList();
                     
                     strongThis->ShowImportStatus(statusMessage + L" " + detailMessage);
                     
@@ -503,5 +518,61 @@ namespace winrt::WordWiz::implementation
             WordWizServices::Log::LogMessage(L"关闭Flyout失败");
         }
     }
-}
 
+    void DictionarySettingsPage::RefreshDictionaryList()
+    {
+        auto items = winrt::single_threaded_observable_vector<winrt::IInspectable>();
+        try
+        {
+            const auto folder = m_dictionaryImporter->GetDictionariesFolderPath();
+            m_dictionaryImporter->EnsureDictionariesFolderExists();
+
+            struct FileInfo
+            {
+                std::string name;
+                std::uintmax_t size{ 0 };
+                std::filesystem::file_time_type modified;
+            };
+
+            std::vector<FileInfo> files;
+            for (const auto& entry : std::filesystem::directory_iterator(folder))
+            {
+                if (!entry.is_regular_file()) continue;
+                auto ext = entry.path().extension().string();
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                if (ext == ".db" || ext == ".sqlite")
+                {
+                    files.push_back({ entry.path().filename().string(), entry.file_size(), entry.last_write_time() });
+                }
+            }
+
+            const int sortMode = DictionarySortComboBox() ? DictionarySortComboBox().SelectedIndex() : 0;
+            std::sort(files.begin(), files.end(), [sortMode](const FileInfo& a, const FileInfo& b)
+            {
+                switch (sortMode)
+                {
+                case 1: return a.name > b.name;
+                case 2: return a.modified > b.modified;
+                case 3: return a.size > b.size;
+                default: return a.name < b.name;
+                }
+            });
+
+            for (const auto& f : files)
+            {
+                std::wstringstream ss;
+                ss << winrt::to_hstring(f.name).c_str() << L"    (" << (f.size / 1024) << L" KB)";
+                items.Append(winrt::box_value(winrt::hstring(ss.str())));
+            }
+
+            DictionaryListView().ItemsSource(items);
+            DictionaryListStatusText().Text(L"共 " + winrt::to_hstring(files.size()) + L" 个词典文件");
+        }
+        catch (const std::exception& ex)
+        {
+            WordWizServices::Log::LogMessage(L"刷新词典列表失败: " + winrt::to_hstring(ex.what()));
+            DictionaryListView().ItemsSource(items);
+            DictionaryListStatusText().Text(L"刷新词典列表失败");
+        }
+    }
+}

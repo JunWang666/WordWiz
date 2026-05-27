@@ -96,6 +96,11 @@ namespace WordWizServices::Database
 	bool DatabaseManager::isInitialized()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+		return isInitializedLocked();
+	}
+
+	bool DatabaseManager::isInitializedLocked() const
+	{
 		return _isInitialized && _pSession && _pSession->isConnected();
 	}
 
@@ -104,7 +109,7 @@ namespace WordWizServices::Database
 	                                                    std::function<void(Poco::Data::Statement&)> binder)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		if (!isInitialized())
+		if (!isInitializedLocked())
 		{
 			throw std::runtime_error("Database not initialized");
 		}
@@ -133,7 +138,7 @@ namespace WordWizServices::Database
 	Poco::Data::RecordSet DatabaseManager::executeQuery(const std::string& sql)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		if (!isInitialized())
+		if (!isInitializedLocked())
 		{
 			throw std::runtime_error("Database not initialized");
 		}
@@ -157,7 +162,7 @@ namespace WordWizServices::Database
 	Poco::Data::RecordSet DatabaseManager::executeQuery(const std::string& sql, const std::vector<std::string>& params)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		if (!isInitialized())
+		if (!isInitializedLocked())
 		{
 			throw std::runtime_error("Database not initialized");
 		}

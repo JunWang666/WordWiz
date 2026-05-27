@@ -116,4 +116,32 @@ namespace WordWizModules::WordFavorite {
         setWordFavorite(word, !currentState);
     }
 
+    std::vector<winrt::hstring> getFavoriteWords(bool newestFirst)
+    {
+        std::vector<winrt::hstring> result;
+        try
+        {
+            auto& db = getDb();
+            const std::string orderBy = newestFirst ? "DESC" : "ASC";
+            auto rs = db.executeQuery("SELECT word FROM FavoriteWords ORDER BY time " + orderBy + ", word ASC");
+            if (rs.rowCount() == 0 || !rs.moveFirst())
+            {
+                return result;
+            }
+
+            do
+            {
+                if (!rs["word"].isEmpty())
+                {
+                    result.emplace_back(winrt::to_hstring(rs["word"].convert<std::string>()));
+                }
+            } while (rs.moveNext());
+        }
+        catch (const std::exception& e)
+        {
+            WordWizServices::Log::LogMessage(L"getFavoriteWords failed: " + winrt::to_hstring(e.what()));
+        }
+        return result;
+    }
+
 }
